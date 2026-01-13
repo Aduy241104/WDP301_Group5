@@ -1,0 +1,47 @@
+# =========================
+# Backend (Node.js)
+# =========================
+/backend/node_modules/
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+dist/
+backend/.env
+coverage/
+tmp/
+temp/
+backend/data/        # nếu dùng MongoDB local
+
+# =========================
+# Frontend (React.js)
+# =========================
+/frontend/node_modules/
+frontend/build/
+frontend/.cache/
+frontend/.vite/
+frontend/.next/
+frontend/public/static/
+frontend/*.local
+frontend/.env         # nếu có env file cho frontend
+
+# =========================
+# Media / Uploads
+# =========================
+uploads/
+temp/
+
+# =========================
+# IDE / OS
+# =========================
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.iml
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
