@@ -29,9 +29,6 @@ connectMongose();
 
 app.use(morgan("combined"));
 
-
-
-
 app.get("/test", async (req, res) => { res.json("hello") });
 
 ;
