@@ -1,6 +1,27 @@
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
+import { User } from "./models/User.js";
+import { SellerRequest } from "./models/SellerRequest.js";
+import { Shop } from "./models/Shop.js";
+import { ShopFollower } from "./models/ShopFollower.js";
+import { Brand } from "./models/Brand.js";
+import { CategorySchema } from "./models/CategorySchema.js";
+import { ShopCategory } from "./models/ShopCategory.js";
+import { Product } from "./models/Product.js";
+import { Variant } from "./models/Variant.js";
+import { Inventory } from "./models/Inventory.js";
+import { Cart } from "./models/Cart.js";
+import { Order } from "./models/Order.js";
+import { Review } from "./models/Review.js";
+import { Notification } from "./models/Notification.js";
+import { Voucher } from "./models/Voucher.js";
+import { VoucherUsage } from "./models/VoucherUsage.js";
+import { Banner } from "./models/Banner.js";
+import { Report } from "./models/Report.js";
+import { OtpCode } from "./models/OtpCode.js";
+import { OrderAddressSnapshot } from "./models/OrderAddressSnapshot.js";
+
 
 import morgan from "morgan";
 import connectMongose from "./config/db.js";
