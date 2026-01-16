@@ -27,6 +27,16 @@ frontend/public/static/
 frontend/*.local
 frontend/.env         # nếu có env file cho frontend
 
+
+/adminfrontend/node_modules/
+adminfrontend/build/
+adminfrontend/.cache/
+adminfrontend/.vite/
+adminfrontend/.next/
+adminfrontend/public/static/
+adminfrontend/*.local
+adminfrontend/.env         # nếu có env file cho frontend
+
 # =========================
 # Media / Uploads
 # =========================

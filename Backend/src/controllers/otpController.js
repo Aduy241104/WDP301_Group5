@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { OtpCode } from "../models/OtpCode.js";
-import { sendOtpEmail } from "../config/mailer.js";
+import { sendOtpEmail } from "../utils/mailer.js";
 import { StatusCodes } from "http-status-codes";
+import { User } from "../models/User.js";
 
 const OTP_LEN = 6;
 
@@ -22,8 +23,13 @@ const generateOtp = () =>
 export const requestRegisterOtp = async (req, res) => {
     try {
         const email = String(req.body.email ?? "").trim().toLowerCase();
-        if (!email) return res.status(400).json({ message: "Email is required." });
-       
+
+        const checkExistsUser = await User.exists({ email });
+
+        if (checkExistsUser) {
+            return res.status(StatusCodes.CONFLICT).json({ message: "Account already exists" });
+        }
+
         // cooldown theo email + type
         const lastOtp = await OtpCode.findOne({ target: email, type: "register" })
             .sort({ createdAt: -1 })
@@ -45,7 +51,7 @@ export const requestRegisterOtp = async (req, res) => {
         const expiredAtMs = Date.now() + TTL_MIN * 60 * 1000;
         const expiredAt = new Date(expiredAtMs);
 
-        // guard chống Invalid Date (phòng hờ)
+        // guard chống Invalid Date
         if (Number.isNaN(expiredAt.getTime())) {
             return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server OTP configuration error." });
         }
