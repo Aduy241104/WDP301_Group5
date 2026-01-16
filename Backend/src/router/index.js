@@ -1,0 +1,11 @@
+import userRoute from "./user.routes.js";
+import otpCodeRoute from "./otpCode.routes.js";
+import authenticationRoute from "./authentication.routes.js";
+
+function route(app) {
+    app.use("/api/auth", authenticationRoute);
+    app.use("/api/user", userRoute);
+    app.use("/api/otp", otpCodeRoute);
+}
+
+export default route;

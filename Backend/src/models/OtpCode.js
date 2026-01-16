@@ -15,5 +15,7 @@ const OtpCodeSchema = new Schema(
 
 // Optional: tránh spam OTP quá nhanh theo cùng target+type+code
 OtpCodeSchema.index({ target: 1, type: 1, code: 1 });
+OtpCodeSchema.index({ expiredAt: 1 }, { expireAfterSeconds: 0 });
+
 
 export const OtpCode = model("OtpCode", OtpCodeSchema);
