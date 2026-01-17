@@ -6,7 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import { sendResetPasswordLinkEmail } from "../utils/mailer.js";
 import { buildResetLink } from "../utils/buildForgotPasswordLink.js";
 import { generateOtp } from "../utils/generateOtp.js";
-    ;
+;
 
 const TTL_MIN = Number(process.env.OTP_TTL_MINUTES ?? 5);
 const COOLDOWN = Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60);
@@ -20,6 +20,55 @@ export const login = async (req, res) => {
 
         //Find user
         const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                message: "Invalid email or password.",
+            });
+        }
+
+        //Check status
+        if (user.status === "blocked") {
+            return res.status(StatusCodes.BAD_GATEWAY).json({
+                message: "Your account is blocked.",
+            });
+        }
+
+        //Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                message: "Invalid email or password.",
+            });
+        }
+
+        //Create token
+        const accessToken = createAccessToken(user);
+
+        return res.status(StatusCodes.OK).json({
+            message: "Login successfully.",
+            accessToken,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullName: user.fullName,
+                role: user.role,
+                avatar: user.avatar,
+            },
+        });
+    } catch (error) {
+        console.error("LOGIN_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error.",
+        });
+    }
+}
+
+export const loginAdmin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        //Find user
+        const user = await User.findOne({ email, role: "admin" });
         if (!user) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 message: "Invalid email or password.",
@@ -159,5 +208,6 @@ export const forgotPasswordRequest = async (req, res) => {
 export default {
     login,
     registerWithOtp,
-    forgotPasswordRequest
+    forgotPasswordRequest,
+    loginAdmin
 }

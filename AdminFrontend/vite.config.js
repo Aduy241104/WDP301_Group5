@@ -10,6 +10,11 @@ export default defineConfig({
     },
   },
 
+  server: {
+    port: 3001,     // port bạn muốn
+    strictPort: true, // nếu port bận thì báo lỗi, không tự nhảy port khác
+  },
+
   optimizeDeps: {
     exclude: [
       'autoprefixer',

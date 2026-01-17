@@ -2,7 +2,7 @@ import axiosInstance from "../axios/axiosConfig";
 
 
 export const loginAPI = async ({ email, password }) => {
-    const res = await axiosInstance.post(`/api/auth/login`, { email, password });
+    const res = await axiosInstance.post(`/api/auth/login-admin`, { email, password });
     return res.data;
 }
 

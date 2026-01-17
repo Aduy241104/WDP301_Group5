@@ -11,26 +11,25 @@ import NotFound from "../pages/NotFound";
 export default function AppRoutes() {
     return (
         <Routes>
-            {/* Public pages */ }
-            <Route path="/" element={ <HomePage /> } />
-
-            {/* Public-only (đã login thì không vào /login) */ }
+            {/* Public-only: chỉ /login */ }
             <Route element={ <PublicRoute /> }>
                 <Route path="/login" element={ <LoginPage /> } />
             </Route>
 
-            {/* Private routes */ }
+            {/* ALL PRIVATE: mọi thứ còn lại */ }
             <Route element={ <PrivateRoute /> }>
+                <Route path="/" element={ <HomePage /> } />
                 <Route path="/profile" element={ <ProfilePage /> } />
-            </Route>
 
-            {/* Seller routes */ }
-            <Route element={ <SellerRoute /> }>
-                <Route path="/seller" element={ <SellerDashboard /> } />
-            </Route>
+                {/* Seller (vẫn nằm trong private) */ }
+                <Route element={ <SellerRoute /> }>
+                    <Route path="/seller" element={ <SellerDashboard /> } />
+                </Route>
 
-            {/* 404 */ }
-            <Route path="*" element={ <NotFound /> } />
+                {/* 404 (private luôn) */ }
+                <Route path="*" element={ <NotFound /> } />
+            </Route>
         </Routes>
+
     );
 }
