@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../schemas/auth.schema";
@@ -30,12 +30,10 @@ export default function LoginPage() {
             await login({ email: values.email.trim(), password: values.password });
             // nếu bạn dùng react-router: navigate("/")
         } catch (err) {
-            const message =
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                err?.message ||
+            const mes = err?.response?.data?.message ?
+                "Tài khoản hoặc mật khẩu không đúng" :
                 "Đăng nhập thất bại. Vui lòng thử lại.";
-            setServerError(message);
+            setServerError(mes);
         }
     };
 
@@ -144,17 +142,6 @@ export default function LoginPage() {
                                         Đăng ký
                                     </a>
                                 </div>
-
-                                <button
-                                    type="button"
-                                    onClick={ () => {
-                                        setValue("email", "buyer@unitrade.dev", { shouldTouch: true });
-                                        setValue("password", "mysecret123", { shouldTouch: true });
-                                    } }
-                                    className="w-full text-sm rounded-xl py-2 border border-slate-200 hover:bg-slate-50"
-                                >
-                                    Điền sẵn tài khoản test
-                                </button>
                             </form>
                         ) }
                     </div>

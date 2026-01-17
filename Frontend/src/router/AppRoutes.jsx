@@ -7,16 +7,21 @@ import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
+import RegisterPage from "../pages/RegisterPage";
+import MainLayoutRoute from "./MainLayoutRoute";
 
 export default function AppRoutes() {
     return (
         <Routes>
             {/* Public pages */ }
-            <Route path="/" element={ <HomePage /> } />
+            <Route element={ <MainLayoutRoute /> }>
+                <Route path="/" element={ <HomePage /> } />
+            </Route>
 
             {/* Public-only (đã login thì không vào /login) */ }
             <Route element={ <PublicRoute /> }>
                 <Route path="/login" element={ <LoginPage /> } />
+                <Route path="/register" element={ <RegisterPage /> } />
             </Route>
 
             {/* Private routes */ }

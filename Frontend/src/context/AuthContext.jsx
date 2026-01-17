@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { AUTH_LOGOUT_EVENT } from "../utils/authEvents";
 import { loginAPI } from "../services/authServices";
 
@@ -28,11 +28,11 @@ export function AuthProvider({ children }) {
         localStorage.removeItem(LS_KEY);
     };
 
-    // ✅ nghe signal từ axios và logout
+    // nghe signal từ axios và logout
     useEffect(() => {
         const handler = () => {
             logout();
-            // đá về login cho chắc chắn (đơn giản nhất)
+            // đá về login cho chắc chắn 
             window.location.href = "/login";
         };
 
