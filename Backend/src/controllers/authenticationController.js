@@ -205,6 +205,40 @@ export const forgotPasswordRequest = async (req, res) => {
 };
 
 
+// POST /api/auth/reset-password
+export const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        // verify OTP one-time + not expired (ATOMIC)
+        const otpDoc = await OtpCode.findOneAndDelete({
+            target: email,
+            type: "reset_password",
+            code: otp,
+            expiredAt: { $gt: new Date() },
+        });
+
+        if (!otpDoc) {
+            return res.status(400).json({ message: "OTP is invalid or expired." });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            // vẫn xoá OTP rồi, nhưng user không tồn tại thì báo chung
+            return res.status(400).json({ message: "Invalid request." });
+        }
+
+        user.password = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        await user.save();
+
+        return res.status(200).json({ message: "Password reset successfully." });
+    } catch (err) {
+        console.error("RESET_PASSWORD_ERROR:", err);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+
 export default {
     login,
     registerWithOtp,
