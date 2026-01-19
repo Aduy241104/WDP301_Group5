@@ -201,6 +201,7 @@ const ProductSchema = new Schema(
         defaultPrice: { type: Number, required: true, min: 0 },
 
         ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
+        totalSale: { type: Number, default: 0 },
 
         status: { type: String, enum: ["pending", "approved", "rejected", "inactive"], default: "pending", index: true },
         rejectReason: { type: String, default: "" },
@@ -724,6 +725,7 @@ async function seed() {
         ]),
         defaultPrice: 99000,
         ratingAvg: 4.8,
+        totalSale: 12,
         status: "approved",
         publishedAt: now(),
     });
