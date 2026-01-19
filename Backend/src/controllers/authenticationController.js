@@ -243,5 +243,6 @@ export default {
     login,
     registerWithOtp,
     forgotPasswordRequest,
-    loginAdmin
+    loginAdmin,
+    resetPassword
 }
