@@ -4,16 +4,6 @@ import React from 'react';
 function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-700">Seller Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            {/* Avatar, thông báo, tên người dùng... */}
-            <span className="text-gray-700">Xin chào, Tran Hoang Nha</span>
-          </div>
-        </div>
-      </header>
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

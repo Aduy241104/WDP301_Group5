@@ -5,10 +5,11 @@ import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
-import SellerDashboard from "../pages/SellerDashboard";
+import SellerDashboard from "../pages/Seller/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
+import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 
 export default function AppRoutes() {
     return (
@@ -32,6 +33,7 @@ export default function AppRoutes() {
 
             {/* Seller routes */ }
             <Route element={ <SellerRoute /> }>
+                <Route path="/seller-center" element={ <SellerLayout><SellerDashboard /></SellerLayout> } />
                 
             </Route>
 
