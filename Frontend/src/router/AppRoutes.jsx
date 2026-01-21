@@ -22,6 +22,7 @@ export default function AppRoutes() {
             <Route element={ <PublicRoute /> }>
                 <Route path="/login" element={ <LoginPage /> } />
                 <Route path="/register" element={ <RegisterPage /> } />
+                <Route path="/seller" element={ <SellerDashboard /> } />
             </Route>
 
             {/* Private routes */ }
@@ -31,7 +32,7 @@ export default function AppRoutes() {
 
             {/* Seller routes */ }
             <Route element={ <SellerRoute /> }>
-                <Route path="/seller" element={ <SellerDashboard /> } />
+                
             </Route>
 
             {/* 404 */ }
