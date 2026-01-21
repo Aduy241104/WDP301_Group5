@@ -1,8 +1,10 @@
 import { User } from "../models/User.js";
+import { RefreshToken } from "../models/RefreshToken.js";
 import { OtpCode } from "../models/OtpCode.js";
 import bcrypt from "bcrypt";
-import { createAccessToken } from "../utils/tokenUtils.js";
+import { createAccessToken, getRefreshExpireDate, createRefreshToken } from "../utils/tokenUtils.js";
 import { StatusCodes } from "http-status-codes";
+import crypto from "crypto";
 import { sendResetPasswordLinkEmail } from "../utils/mailer.js";
 import { buildResetLink } from "../utils/buildForgotPasswordLink.js";
 import { generateOtp } from "../utils/generateOtp.js";
@@ -11,7 +13,7 @@ import { generateOtp } from "../utils/generateOtp.js";
 const TTL_MIN = Number(process.env.OTP_TTL_MINUTES ?? 5);
 const COOLDOWN = Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60);
 const SALT_ROUNDS = 10;
-
+const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
 
 
 export const login = async (req, res) => {
@@ -44,6 +46,24 @@ export const login = async (req, res) => {
         //Create token
         const accessToken = createAccessToken(user);
 
+        const refreshToken = createRefreshToken();           // token thật trả về cookie
+        const tokenHash = hashToken(refreshToken);           // lưu hash vào DB
+        const expiresAt = getRefreshExpireDate();
+
+        await RefreshToken.findOneAndUpdate(
+            { userId: user._id },
+            { userId: user._id, tokenHash, expiresAt },
+            { upsert: true, new: true }
+        );
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // prod bật HTTPS
+            sameSite: "lax",
+            expires: expiresAt,
+        });
+
+
         return res.status(StatusCodes.OK).json({
             message: "Login successfully.",
             accessToken,
@@ -56,12 +76,63 @@ export const login = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error("LOGIN_ERROR:", err);
+        console.error("LOGIN_ERROR:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: "Internal server error.",
         });
     }
 }
+
+
+export const refreshAccessToken = async (req, res) => {
+    try {
+        //Lấy refresh token từ cookie
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) {
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ message: "Refresh token missing" });
+        }
+
+        // Hash token để so DB
+        const tokenHash = hashToken(refreshToken);
+
+        // 3. Tìm refresh token record
+        const tokenDoc = await RefreshToken.findOne({ tokenHash });
+        if (!tokenDoc) {
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ message: "Invalid refresh token" });
+        }
+
+        // Check hết hạn
+        if (tokenDoc.expiresAt < new Date()) {
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ message: "Refresh token expired" });
+        }
+
+        // Lấy user
+        const user = await User.findById(tokenDoc.userId);
+        if (!user || user.status === "blocked") {
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ message: "User not allowed" });
+        }
+
+        // Cấp access token mới
+        const accessToken = createAccessToken(user);
+
+        return res.status(StatusCodes.OK).json({
+            accessToken,
+        });
+    } catch (err) {
+        console.error("REFRESH_TOKEN_ERROR:", err);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: "Internal server error" });
+    }
+};
 
 export const loginAdmin = async (req, res) => {
     try {
@@ -205,7 +276,6 @@ export const forgotPasswordRequest = async (req, res) => {
 };
 
 
-// POST /api/auth/reset-password
 export const resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
