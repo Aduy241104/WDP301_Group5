@@ -14,6 +14,7 @@ const ShopAddressSchema = new Schema(
 );
 
 const ShopPickupAddressSchema = new Schema(
+    
     {
         province: { type: String, required: true },
         district: { type: String, required: true },

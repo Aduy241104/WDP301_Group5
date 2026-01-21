@@ -5,11 +5,12 @@ import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
-import SellerDashboard from "../pages/Seller/SellerDashboard";
+import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
-import SellerLayout from "../layouts/sellerLayout/SellerLayout";
+import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
 
 export default function AppRoutes() {
     return (
@@ -23,7 +24,8 @@ export default function AppRoutes() {
             <Route element={ <PublicRoute /> }>
                 <Route path="/login" element={ <LoginPage /> } />
                 <Route path="/register" element={ <RegisterPage /> } />
-                <Route path="/seller" element={ <SellerDashboard /> } />
+                <Route path="/forgot-password" element={ <ForgotPasswordPage /> } />
+                <Route path="/reset-password" element={ <ResetPasswordPage /> } />
             </Route>
 
             {/* Private routes */ }
@@ -33,8 +35,7 @@ export default function AppRoutes() {
 
             {/* Seller routes */ }
             <Route element={ <SellerRoute /> }>
-                <Route path="/seller-center" element={ <SellerLayout><SellerDashboard /></SellerLayout> } />
-                
+                <Route path="/seller" element={ <SellerDashboard /> } />
             </Route>
 
             {/* 404 */ }
