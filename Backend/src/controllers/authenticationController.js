@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { sendResetPasswordLinkEmail } from "../utils/mailer.js";
 import { buildResetLink } from "../utils/buildForgotPasswordLink.js";
 import { generateOtp } from "../utils/generateOtp.js";
-;
+
 
 const TTL_MIN = Number(process.env.OTP_TTL_MINUTES ?? 5);
 const COOLDOWN = Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60);
@@ -58,7 +58,7 @@ export const login = async (req, res) => {
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // prod bật HTTPS
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             expires: expiresAt,
         });
