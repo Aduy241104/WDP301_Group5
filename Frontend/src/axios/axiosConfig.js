@@ -42,7 +42,7 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ===== Response: auto refresh =====
+//auto refresh 
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -59,17 +59,21 @@ axiosInstance.interceptors.response.use(
         const token = getToken();
 
         // Nếu chính refresh endpoint fail => logout luôn (tránh loop)
-        if (originalRequest?.url?.includes("/auth/refresh-token")) {
-            emitLogout("refresh_failed");
+        if (originalRequest?.url?.includes("/api/auth/refresh-token")) {
+             emitLogout("refresh_failed");
             return Promise.reject(error);
         }
 
-        if (!token) {
-            emitLogout("no_access_token");
+
+        // chổ này gặp vấn đề 
+        const isAuthRequest = !!originalRequest?.headers?.Authorization;
+        
+        // Public request (không gắn Authorization) => bỏ qua auto logout/refresh
+        if (!isAuthRequest) {
             return Promise.reject(error);
         }
 
-        if ((status === 401 || status === 403) && !originalRequest._retry) {
+        if ((status === 403) && !originalRequest._retry) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({
@@ -101,8 +105,9 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
             } catch (err) {
+                console.log("HEHEHEH");
                 processQueue(err, null);
-                emitLogout("refresh_failed");
+                // emitLogout("refresh_failed");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
