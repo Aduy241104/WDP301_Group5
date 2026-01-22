@@ -5,7 +5,7 @@ import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
-import SellerDashboard from "../pages/SellerDashboard";
+// import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
@@ -34,9 +34,9 @@ export default function AppRoutes() {
             </Route>
 
             {/* Seller routes */ }
-            <Route element={ <SellerRoute /> }>
+            {/* <Route element={ <SellerRoute /> }>
                 <Route path="/seller" element={ <SellerDashboard /> } />
-            </Route>
+            </Route> */}
 
             {/* 404 */ }
             <Route path="*" element={ <NotFound /> } />
