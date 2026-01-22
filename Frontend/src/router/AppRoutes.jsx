@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 
-import HomePage from "../pages/HomePage";
+import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import SellerDashboard from "../pages/SellerDashboard";

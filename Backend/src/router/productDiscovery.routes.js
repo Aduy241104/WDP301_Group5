@@ -1,7 +1,13 @@
 import express from "express";
-import { getTopSaleProducts, getProductDetailById } from "../controllers/productDiscoveryController.js";
+import {
+    getTopSaleProducts,
+    getProductDetailById,
+    getProductDiscovery
+} from "../controllers/productDiscoveryController.js";
 
 const router = express.Router();
+
+router.get("/", getProductDiscovery);
 
 router.get("/top-sale", getTopSaleProducts);
 
