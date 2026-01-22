@@ -13,6 +13,7 @@ import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
 import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
+import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 
 export default function AppRoutes() {
   return (
@@ -37,9 +38,15 @@ export default function AppRoutes() {
 
       {/* Seller routes */}
       <Route element={<SellerRoute />}>
-        <Route path="/seller" element={<SellerDashboard />} />
-        <Route path="/seller/orders" element={<OrderList />} />
-         <Route path="/seller/orders/:id" element={<OrderDetail />} />
+        <Route path="/seller" element={<SellerLayout />}>
+          {/* ROUTE MẶC ĐỊNH */}
+          <Route index element={<SellerDashboard />} />
+
+          {/* ROUTE RÕ RÀNG */}
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+        </Route>
       </Route>
 
       {/* 404 */}

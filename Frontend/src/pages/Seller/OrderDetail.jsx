@@ -13,26 +13,24 @@ export default function OrderDetail() {
   const [trackingCode, setTrackingCode] = useState("");
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const data = await getSellerOrderDetailAPI(id);
-        setOrder(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrder();
   }, [id]);
 
-  const handleUpdateStatus = async (status) => {
-  try {
-    setUpdating(true);
+  const fetchOrder = async () => {
+    try {
+      const data = await getSellerOrderDetailAPI(id);
+      setOrder(data);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const updateStatus = async (status) => {
+    setUpdating(true);
     await updateSellerOrderStatusAPI({
       id,
       status,
+      trackingCode: status === "shipped" ? trackingCode : undefined,
     });
 
     setOrder((prev) => ({
@@ -40,121 +38,107 @@ export default function OrderDetail() {
       orderStatus: status,
       statusHistory: [
         ...prev.statusHistory,
-        {
-          status,
-          changedAt: new Date().toISOString(),
-        },
+        { status, changedAt: new Date().toISOString() },
       ],
     }));
-  } catch (err) {
-    console.error(err);
-  } finally {
     setUpdating(false);
-  }
-};
+  };
 
-
-  if (loading) return <p className="p-6">Loading order...</p>;
-  if (!order) return <p className="p-6">Order not found</p>;
+  if (loading) return <p>Loading...</p>;
+  if (!order) return <p>Order not found</p>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <Link to="/seller/orders" className="text-blue-600 underline">
         ← Back to orders
       </Link>
 
-      {/* ORDER INFO */}
-      <div className="border rounded p-4">
-        <h2 className="text-xl font-semibold mb-3">
+      {/* INFO */}
+      <div className="bg-white rounded-xl p-6 shadow">
+        <h2 className="text-xl font-semibold mb-4">
           Order {order.orderCode}
         </h2>
 
-        <div><b>Status:</b> {order.orderStatus}</div>
-        <div><b>Payment:</b> {order.paymentStatus}</div>
-        <div><b>Total:</b> {order.totalAmount.toLocaleString()}đ</div>
-        <div>
-          <b>Created:</b>{" "}
-          {new Date(order.createdAt).toLocaleString()}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div><b>Status:</b> {order.orderStatus}</div>
+          <div><b>Payment:</b> {order.paymentStatus}</div>
+          <div><b>Total:</b> {order.totalAmount.toLocaleString()}đ</div>
+          <div>
+            <b>Created:</b>{" "}
+            {new Date(order.createdAt).toLocaleString()}
+          </div>
         </div>
       </div>
 
       {/* ITEMS */}
-      <div className="border rounded p-4">
+      <div className="bg-white rounded-xl p-6 shadow">
         <h3 className="font-semibold mb-3">Items</h3>
 
-        {order.items.map((item, index) => (
-          <div
-            key={index}
-            className="flex justify-between border-b py-2"
-          >
+        {order.items.map((item, i) => (
+          <div key={i} className="flex justify-between py-2 border-b">
             <div>
               <div>{item.productName}</div>
-              <div className="text-sm text-slate-500">
+              <div className="text-xs text-slate-500">
                 {item.variantLabel} × {item.quantity}
               </div>
             </div>
-            <div>
+            <div className="font-medium">
               {(item.price * item.quantity).toLocaleString()}đ
             </div>
           </div>
         ))}
       </div>
 
-      {/* STATUS ACTION */}
-      <div className="border rounded p-4">
-        <h3 className="font-semibold mb-3">Update Status</h3>
+      {/* ACTIONS */}
+      <div className="bg-white rounded-xl p-6 shadow space-y-3">
+        <h3 className="font-semibold">Update Status</h3>
 
-        <div className="flex gap-2 items-center">
-          {order.orderStatus === "created" && (
+        {order.orderStatus === "created" && (
+          <button
+            onClick={() => updateStatus("confirmed")}
+            disabled={updating}
+            className="btn-primary"
+          >
+            Confirm Order
+          </button>
+        )}
+
+        {order.orderStatus === "confirmed" && (
+          <div className="flex gap-2">
+            <input
+              className="input"
+              placeholder="Tracking code"
+              value={trackingCode}
+              onChange={(e) => setTrackingCode(e.target.value)}
+            />
             <button
-              disabled={updating}
-              onClick={() => handleUpdateStatus("confirmed")}
-              className="px-4 py-2 bg-blue-600 text-white rounded"
+              onClick={() => updateStatus("shipped")}
+              disabled={!trackingCode || updating}
+              className="btn-warning"
             >
-              Confirm
+              Ship
             </button>
-          )}
+          </div>
+        )}
 
-          {order.orderStatus === "confirmed" && (
-            <>
-              <input
-                type="text"
-                placeholder="Tracking code"
-                className="border px-3 py-2 rounded"
-                value={trackingCode}
-                onChange={(e) => setTrackingCode(e.target.value)}
-              />
-              <button
-                disabled={updating}
-                onClick={() => handleUpdateStatus("shipped")}
-                className="px-4 py-2 bg-orange-600 text-white rounded"
-              >
-                Ship
-              </button>
-            </>
-          )}
-
-          {order.orderStatus === "shipped" && (
-            <button
-              disabled={updating}
-              onClick={() => handleUpdateStatus("delivered")}
-              className="px-4 py-2 bg-green-600 text-white rounded"
-            >
-              Deliver
-            </button>
-          )}
-        </div>
+        {order.orderStatus === "shipped" && (
+          <button
+            onClick={() => updateStatus("delivered")}
+            disabled={updating}
+            className="btn-success"
+          >
+            Mark as Delivered
+          </button>
+        )}
       </div>
 
-      {/* STATUS HISTORY */}
-      <div className="border rounded p-4">
+      {/* HISTORY */}
+      <div className="bg-white rounded-xl p-6 shadow">
         <h3 className="font-semibold mb-3">Status History</h3>
-
         <ul className="text-sm space-y-1">
-          {order.statusHistory.map((h, idx) => (
-            <li key={idx}>
-              • {h.status} –{" "}
-              {new Date(h.changedAt).toLocaleString()}
+          {order.statusHistory.map((h, i) => (
+            <li key={i}>
+              • {h.status} – {new Date(h.changedAt).toLocaleString()}
             </li>
           ))}
         </ul>
