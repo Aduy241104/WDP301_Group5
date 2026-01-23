@@ -9,6 +9,7 @@ const formatVND = (value) => {
 export default function ProductCard({ product }) {
     if (!product) return null;
 
+    const id = product._id;
     const img = product?.images?.[0] || "https://via.placeholder.com/400x400?text=No+Image";
     const name = product?.name || "Unnamed";
     const slug = product?.slug || product?._id; // fallback
@@ -21,7 +22,7 @@ export default function ProductCard({ product }) {
 
     return (
         <Link
-            to={ `/products/${slug}` }
+            to={ `/products-detail/${id}` }
             className="group block rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-lg transition overflow-hidden"
         >
             {/* Image */ }
