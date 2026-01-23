@@ -11,6 +11,7 @@ import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
 import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
 
 export default function AppRoutes() {
     return (
@@ -18,6 +19,7 @@ export default function AppRoutes() {
             {/* Public pages */ }
             <Route element={ <MainLayoutRoute /> }>
                 <Route path="/" element={ <HomePage /> } />
+                <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
             </Route>
 
             {/* Public-only (đã login thì không vào /login) */ }

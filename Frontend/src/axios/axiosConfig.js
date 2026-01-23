@@ -64,13 +64,13 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        const isAuthRequest = !!originalRequest?.headers?.Authorization;
+        // const isAuthRequest = !!originalRequest?.headers?.Authorization;
 
-        // Public request (không gắn Authorization) => bỏ qua auto logout/refresh
-        if (!isAuthRequest) {
-            emitLogout("refresh_failed");
-            return Promise.reject(error);
-        }
+        // // Public request (không gắn Authorization) => bỏ qua auto logout/refresh
+        // if (!isAuthRequest) {
+        //     // emitLogout("refresh_failed");
+        //     return Promise.reject(error);
+        // }
 
         if ((status === 403) && !originalRequest._retry) {
             if (isRefreshing) {
