@@ -2,44 +2,58 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 
-import HomePage from "../pages/HomePage";
+import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
-// import SellerDashboard from "../pages/SellerDashboard";
+import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
 import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
+import OrderList from "../pages/Seller/OrderList";
+import OrderDetail from "../pages/Seller/OrderDetail";
+import SellerLayout from "../layouts/sellerLayout/SellerLayout";
+import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
 
 export default function AppRoutes() {
-    return (
-        <Routes>
-            {/* Public pages */ }
-            <Route element={ <MainLayoutRoute /> }>
-                <Route path="/" element={ <HomePage /> } />
-            </Route>
+  return (
+    <Routes>
+      {/* Public pages */}
+      <Route element={<MainLayoutRoute />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
 
-            {/* Public-only (đã login thì không vào /login) */ }
-            <Route element={ <PublicRoute /> }>
-                <Route path="/login" element={ <LoginPage /> } />
-                <Route path="/register" element={ <RegisterPage /> } />
-                <Route path="/forgot-password" element={ <ForgotPasswordPage /> } />
-                <Route path="/reset-password" element={ <ResetPasswordPage /> } />
-            </Route>
+      {/* Public-only (đã login thì không vào /login) */}
+      <Route element={<PublicRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+      </Route>
 
-            {/* Private routes */ }
-            <Route element={ <PrivateRoute /> }>
-                <Route path="/profile" element={ <ProfilePage /> } />
-            </Route>
+      {/* Private routes */}
+      <Route element={<PrivateRoute />}>
+        <Route path="/profile" element={<ProfilePage />} />
+      </Route>
 
-            {/* Seller routes */ }
-            {/* <Route element={ <SellerRoute /> }>
-                <Route path="/seller" element={ <SellerDashboard /> } />
-            </Route> */}
 
-            {/* 404 */ }
-            <Route path="*" element={ <NotFound /> } />
-        </Routes>
-    );
+      {/* Seller routes */}
+      <Route element={<SellerRoute />}>
+        <Route path="/seller" element={<SellerLayout />}>
+          {/* ROUTE MẶC ĐỊNH */}
+          <Route index element={<SellerDashboard />} />
+
+          {/* ROUTE RÕ RÀNG */}
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="store" element={<SellerManageStore />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+        </Route>
+      </Route>
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
