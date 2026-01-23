@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { AUTH_LOGOUT_EVENT } from "../utils/authEvents";
-import { loginAPI } from "../services/authServices";
+import { loginAPI, logoutAPI } from "../services/authServices";
 
 const AuthContext = createContext(null);
 const LS_KEY = "e-commerce";
@@ -23,9 +23,16 @@ export function AuthProvider({ children }) {
         localStorage.setItem(LS_KEY, JSON.stringify(auth));
     }, [auth]);
 
-    const logout = () => {
-        setAuth({ isAuthenticated: false, token: null, user: null });
-        localStorage.removeItem(LS_KEY);
+    const logout = async () => {
+        try {
+            await logoutAPI();
+            setAuth({ isAuthenticated: false, token: null, user: null });
+            localStorage.removeItem(LS_KEY);
+        } catch (error) {
+            console.log("ERROR WHEN LOGOUT", error.message);
+            setAuth({ isAuthenticated: false, token: null, user: null });
+            localStorage.removeItem(LS_KEY);
+        }
     };
 
     // nghe signal từ axios và logout

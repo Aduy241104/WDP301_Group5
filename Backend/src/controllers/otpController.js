@@ -76,7 +76,6 @@ export const requestRegisterOtp = async (req, res) => {
             expiredInSeconds: TTL_MIN * 60,
         });
     } catch (err) {
-        console.error("REQUEST_REGISTER_OTP_ERROR:", err);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };

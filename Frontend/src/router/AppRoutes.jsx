@@ -15,6 +15,7 @@ import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
 import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function AppRoutes() {
       {/* Public pages */}
       <Route element={<MainLayoutRoute />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */}

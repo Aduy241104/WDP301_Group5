@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { sendResetPasswordLinkEmail } from "../utils/mailer.js";
 import { buildResetLink } from "../utils/buildForgotPasswordLink.js";
 import { generateOtp } from "../utils/generateOtp.js";
-;
+
 
 const TTL_MIN = Number(process.env.OTP_TTL_MINUTES ?? 5);
 const COOLDOWN = Number(process.env.OTP_RESEND_COOLDOWN_SECONDS ?? 60);
@@ -58,7 +58,7 @@ export const login = async (req, res) => {
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // prod bật HTTPS
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             expires: expiresAt,
         });
@@ -82,6 +82,46 @@ export const login = async (req, res) => {
         });
     }
 }
+
+export const logout = async (req, res) => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+
+        // Luôn clear cookie để client sạch (kể cả cookie không tồn tại)
+        const clear = () => {
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+            });
+        };
+
+        if (!refreshToken) {
+            clear();
+            return res.status(StatusCodes.OK).json({ message: "Logged out." });
+        }
+
+        const tokenHash = hashToken(refreshToken);
+
+        await RefreshToken.findOneAndDelete({ tokenHash });
+
+        clear();
+        return res.status(StatusCodes.OK).json({ message: "Logged out." });
+    } catch (error) {
+        console.error("LOGOUT_ERROR:", error);
+
+        // Dù lỗi vẫn cố clear cookie để tránh kẹt session ở client
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+        });
+
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error.",
+        });
+    }
+};
 
 
 export const refreshAccessToken = async (req, res) => {

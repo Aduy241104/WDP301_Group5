@@ -4,6 +4,7 @@ import authenticationRoute from "./authentication.routes.js";
 import productDiscoveryRoute from "./productDiscovery.routes.js";
 import sellerManageShopRoutes from "./sellerManageShopRoutes.js";
 import sellerOrderRouter from "./sellerOrder.route.js";
+import uploadImageRoute from "./uploadImage.routes.js";
 
 
 function route(app) {
@@ -13,6 +14,7 @@ function route(app) {
     app.use("/api/discovery", productDiscoveryRoute);
     app.use("/api/seller/shop", sellerManageShopRoutes);
     app.use("/api/seller/orders", sellerOrderRouter);
+    app.use("/api/upload", uploadImageRoute);
 }
 
 export default route;

@@ -5,7 +5,8 @@ import {
     forgotPasswordRequest,
     loginAdmin,
     resetPassword,
-    refreshAccessToken
+    refreshAccessToken,
+    logout
 } from "../controllers/authenticationController.js";
 import { validateRegister } from "../middlewares/validateRegister.js";
 import { validateForgotPasswordRequest, validateResetPassword } from "../middlewares/validateForgotPassword.js";
@@ -13,6 +14,8 @@ import { validateForgotPasswordRequest, validateResetPassword } from "../middlew
 const router = express.Router();
 
 router.post("/login", login);
+
+router.post("/logout", logout);
 
 router.post("/login-admin", loginAdmin);
 
