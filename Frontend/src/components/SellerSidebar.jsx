@@ -13,7 +13,8 @@ import {
 
 const menu = [
   { label: "Dashboard", to: "/seller", icon: LayoutDashboard },
-  { label: "Manage Store", to: "/seller/store", icon: Store },
+  { label: "Store Information", to: "/seller/store-information", icon: Store },
+  { label: "Manage Pickup Address", to: "/seller/pickup-addresses", icon: Store },
   { label: "Categories", to: "/seller/categories", icon: Boxes },
   { label: "Products", to: "/seller/products", icon: Package },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
