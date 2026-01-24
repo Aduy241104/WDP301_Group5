@@ -19,7 +19,7 @@ const menuItems = [
     path: "/seller/dashboard",
   },
   {
-    label: "Manage Store",
+    label: "Manage Pickup Address Store",
     icon: Store,
     path: "/seller/store",
   },

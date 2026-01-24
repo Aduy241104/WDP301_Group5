@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
-
 import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
@@ -17,6 +16,7 @@ import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
+import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 
 export default function AppRoutes() {
   return (
@@ -46,6 +46,8 @@ export default function AppRoutes() {
           <Route path="/request-seller" element={ <SellerRegisterPage /> } />
         </Route>
       </Route>
+
+
       {/* Seller routes */ }
       <Route element={ <SellerRoute /> }>
         <Route path="/seller" element={ <SellerLayout /> }>
@@ -57,6 +59,12 @@ export default function AppRoutes() {
           <Route path="store" element={ <SellerManageStore /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
+          {/* ROUTE RÕ RÀNG */}
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="store-information" element={<SellerStoreInformation />} />
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
         </Route>
       </Route>
 
