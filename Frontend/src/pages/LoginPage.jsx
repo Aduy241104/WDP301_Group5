@@ -31,6 +31,10 @@ export default function LoginPage() {
             await login({ email: values.email.trim(), password: values.password });
             // nếu bạn dùng react-router: navigate("/")
         } catch (err) {
+            if (err?.response?.status === 502) {
+                setServerError("Tài khoản của bạn đã bị khóa.");
+                return;
+            }
             const mes = err?.response?.data?.message ?
                 "Tài khoản hoặc mật khẩu không đúng" :
                 "Đăng nhập thất bại. Vui lòng thử lại.";
