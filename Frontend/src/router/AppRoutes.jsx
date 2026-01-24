@@ -16,6 +16,7 @@ import OrderDetail from "../pages/Seller/OrderDetail";
 import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 
 export default function AppRoutes() {
   return (
@@ -48,7 +49,8 @@ export default function AppRoutes() {
 
           {/* ROUTE RÕ RÀNG */}
           <Route path="dashboard" element={<SellerDashboard />} />
-          <Route path="store" element={<SellerManageStore />} />
+          <Route path="store-information" element={<SellerStoreInformation />} />
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
           <Route path="orders" element={<OrderList />} />
           <Route path="orders/:id" element={<OrderDetail />} />
         </Route>
