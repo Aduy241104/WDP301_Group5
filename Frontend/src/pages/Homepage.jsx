@@ -31,7 +31,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex gap-3">
-                <Link className="underline" to="/profile">
+                <Link className="underline" to="/zprofile">
                     Profile (Private)
                 </Link>
                 <Link className="underline" to="/seller">
