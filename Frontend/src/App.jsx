@@ -1,9 +1,16 @@
 import './index.css' // import Tailwind
-import AppRoutes from './router/AppRoutes'
+import AppRoutes from './router/AppRoutes';
+import ScrollToTop from './components/common/ScrollToTop';
 
 function App() {
 
-  return <AppRoutes />;
+  return (
+    <>
+      <ScrollToTop />
+      <AppRoutes />
+    </>
+  );
+
 }
 
 export default App

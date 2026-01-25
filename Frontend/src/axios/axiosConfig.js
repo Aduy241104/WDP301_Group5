@@ -60,18 +60,17 @@ axiosInstance.interceptors.response.use(
 
         // Nếu chính refresh endpoint fail => logout luôn (tránh loop)
         if (originalRequest?.url?.includes("/api/auth/refresh-token")) {
-             emitLogout("refresh_failed");
+            emitLogout("refresh_failed");
             return Promise.reject(error);
         }
 
+        // const isAuthRequest = !!originalRequest?.headers?.Authorization;
 
-        // chổ này gặp vấn đề 
-        const isAuthRequest = !!originalRequest?.headers?.Authorization;
-        
-        // Public request (không gắn Authorization) => bỏ qua auto logout/refresh
-        if (!isAuthRequest) {
-            return Promise.reject(error);
-        }
+        // // Public request (không gắn Authorization) => bỏ qua auto logout/refresh
+        // if (!isAuthRequest) {
+        //     // emitLogout("refresh_failed");
+        //     return Promise.reject(error);
+        // }
 
         if ((status === 403) && !originalRequest._retry) {
             if (isRefreshing) {
@@ -105,9 +104,8 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
             } catch (err) {
-                console.log("HEHEHEH");
                 processQueue(err, null);
-                // emitLogout("refresh_failed");
+                emitLogout("refresh_failed");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
