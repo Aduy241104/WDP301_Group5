@@ -26,6 +26,10 @@ export const resetPasswordAPI = async ({ email, otp, newPassword }) => {
     return res.data;
 }
 
+export const logoutAPI = async () => {
+    const res = await axiosInstance.post(`/api/auth/logout`);
+    return res.data;
+}
 
 
 export const testAPi = async () => {

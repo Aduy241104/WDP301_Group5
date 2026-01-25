@@ -31,6 +31,10 @@ export default function LoginPage() {
             await login({ email: values.email.trim(), password: values.password });
             // nếu bạn dùng react-router: navigate("/")
         } catch (err) {
+            if (err?.response?.status === 502) {
+                setServerError("Tài khoản của bạn đã bị khóa.");
+                return;
+            }
             const mes = err?.response?.data?.message ?
                 "Tài khoản hoặc mật khẩu không đúng" :
                 "Đăng nhập thất bại. Vui lòng thử lại.";
@@ -43,7 +47,7 @@ export default function LoginPage() {
             className="min-h-screen bg-white flex items-center justify-center px-4 py-10 bg-no-repeat bg-cover bg-center relative"
             style={ {
                 backgroundImage:
-                    "url('https://img.freepik.com/free-vector/wavy-elegant-lines-blue-background_78370-3228.jpg?semt=ais_hybrid&w=740&q=80')",
+                    "url('https://res.cloudinary.com/do5o9r18f/image/upload/v1768999689/ChatGPT_Image_19_44_36_21_thg_1_2026_w65ikv.png')",
             } }
         >
             {/* background accent */ }

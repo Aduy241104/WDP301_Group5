@@ -14,6 +14,9 @@ import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
 import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
 import SellerLayout from "../layouts/sellerLayout/SellerLayout";
+import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 
 export default function AppRoutes() {
   return (
@@ -21,6 +24,7 @@ export default function AppRoutes() {
       {/* Public pages */}
       <Route element={<MainLayoutRoute />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */}
@@ -36,6 +40,7 @@ export default function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
+
       {/* Seller routes */}
       <Route element={<SellerRoute />}>
         <Route path="/seller" element={<SellerLayout />}>
@@ -44,6 +49,8 @@ export default function AppRoutes() {
 
           {/* ROUTE RÕ RÀNG */}
           <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="store-information" element={<SellerStoreInformation />} />
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
           <Route path="orders" element={<OrderList />} />
           <Route path="orders/:id" element={<OrderDetail />} />
         </Route>

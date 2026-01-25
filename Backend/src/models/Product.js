@@ -32,9 +32,10 @@ const ProductSchema = new Schema(
         ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
         totalSale: { type: Number, default: 0 },
 
-        status: { type: String, enum: ["pending", "approved", "rejected", "inactive"], default: "pending", index: true },
+        status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending", index: true },
         rejectReason: { type: String, default: "" },
 
+        activeStatus: { type: String, enum: ["active", "inactive"], default: "active" },
         inactiveBy: { type: String, enum: ["admin", "seller"], default: null },
         inactiveReason: { type: String, default: "" },
         inactiveAt: { type: Date },
