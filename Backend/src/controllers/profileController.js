@@ -30,7 +30,14 @@ export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const { fullName, phone, addresses, avatar } = req.body;
+        const {
+            fullName,
+            phone,
+            gender,
+            dateOfBirth,
+            addresses,
+            avatar
+        } = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
@@ -38,6 +45,8 @@ export const updateProfile = async (req, res) => {
                 $set: {
                     fullName,
                     phone,
+                    gender,
+                    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
                     addresses,
                     avatar
                 }

@@ -20,15 +20,33 @@ export default function ProfilePage() {
 
   const reloadProfile = async () => {
     try {
-      const userData = await getProfileAPI();
+      const res = await getProfileAPI();
+      const userData = res.data ?? res;
+
+      const normalizedUser = {
+        ...userData,
+
+        //  CHUẨN HÓA GENDER
+        gender: userData.gender
+          ? userData.gender.toLowerCase()
+          : "",
+
+        // CHUẨN HÓA DATE (YYYY-MM-DD)
+        dateOfBirth: userData.dateOfBirth
+          ? userData.dateOfBirth.slice(0, 10)
+          : "",
+      };
+
       setAuth((prev) => ({
         ...prev,
-        user: userData,
+        user: normalizedUser,
       }));
     } catch (err) {
       console.error("Reload profile failed", err);
     }
   };
+
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,6 +63,11 @@ export default function ProfilePage() {
         email: user.email || "",
         phone: user.phone || "",
         avatar: user.avatar || "",
+        gender: user.gender || "",
+        dateOfBirth: user.dateOfBirth
+          ? user.dateOfBirth.slice(0, 10)
+          : "",
+
       });
 
     }
