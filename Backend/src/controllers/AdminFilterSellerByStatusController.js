@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { SellerRequest } from "../../models/SellerRequest.js";
+import { SellerRequest } from "../models/SellerRequest.js";
 
 // Filter sellers by status (pending, approved, rejected)
 export const AdminFilterSellerByStatusController = async (req, res) => {
@@ -36,4 +36,3 @@ export const AdminFilterSellerByStatusController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
-

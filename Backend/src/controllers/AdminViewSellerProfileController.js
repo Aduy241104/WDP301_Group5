@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { User } from "../../models/User.js";
-import { Shop } from "../../models/Shop.js";
-import { SellerRequest } from "../../models/SellerRequest.js";
+import { User } from "../models/User.js";
+import { Shop } from "../models/Shop.js";
+import { SellerRequest } from "../models/SellerRequest.js";
 
 // View detailed seller profile information.
 export const AdminViewSellerProfileController = async (req, res) => {
@@ -26,4 +26,3 @@ export const AdminViewSellerProfileController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
-

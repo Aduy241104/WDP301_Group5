@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { SellerRequest } from "../../models/SellerRequest.js";
+import { SellerRequest } from "../models/SellerRequest.js";
 
 // Reject seller registration with reason
 export const AdminRejectSellerController = async (req, res) => {
@@ -35,4 +35,3 @@ export const AdminRejectSellerController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
-

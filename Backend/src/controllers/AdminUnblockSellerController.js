@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { User } from "../../models/User.js";
-import { Shop } from "../../models/Shop.js";
+import { User } from "../models/User.js";
+import { Shop } from "../models/Shop.js";
 
 // Unblock a seller account
 export const AdminUnblockSellerController = async (req, res) => {
@@ -28,4 +28,3 @@ export const AdminUnblockSellerController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
-

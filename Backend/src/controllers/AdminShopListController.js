@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { Shop } from "../../models/Shop.js";
+import { Shop } from "../models/Shop.js";
 
 // View the list of shops
 export const AdminShopListController = async (req, res) => {
@@ -31,4 +31,3 @@ export const AdminShopListController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
-

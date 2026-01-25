@@ -1,13 +1,13 @@
 import express from "express";
 import { authenticationMiddleware, adminMiddleware } from "../middlewares/authenticationMiddlewares.js";
-import { AdminSellerRegistrationListController } from "../controllers/admin/AdminSellerRegistrationListController.js";
-import { AdminFilterSellerByStatusController } from "../controllers/admin/AdminFilterSellerByStatusController.js";
-import { AdminViewSellerProfileController } from "../controllers/admin/AdminViewSellerProfileController.js";
-import { AdminApproveSellerController } from "../controllers/admin/AdminApproveSellerController.js";
-import { AdminRejectSellerController } from "../controllers/admin/AdminRejectSellerController.js";
-import { AdminBlockSellerController } from "../controllers/admin/AdminBlockSellerController.js";
-import { AdminUnblockSellerController } from "../controllers/admin/AdminUnblockSellerController.js";
-import { AdminShopListController } from "../controllers/admin/AdminShopListController.js";
+import { AdminSellerRegistrationListController } from "../controllers/AdminSellerRegistrationListController.js";
+import { AdminFilterSellerByStatusController } from "../controllers/AdminFilterSellerByStatusController.js";
+import { AdminViewSellerProfileController } from "../controllers/AdminViewSellerProfileController.js";
+import { AdminApproveSellerController } from "../controllers/AdminApproveSellerController.js";
+import { AdminRejectSellerController } from "../controllers/AdminRejectSellerController.js";
+import { AdminBlockSellerController } from "../controllers/AdminBlockSellerController.js";
+import { AdminUnblockSellerController } from "../controllers/AdminUnblockSellerController.js";
+import { AdminShopListController } from "../controllers/AdminShopListController.js";
 
 const router = express.Router();
 
