@@ -30,13 +30,23 @@ export const updateSellerOrderStatusAPI = async ({
     id,
     status,
     trackingCode,
+    pickupAddressId,
 }) => {
     const res = await axiosInstance.patch(
         `/api/seller/orders/${id}/status`,
         {
             status,
             trackingCode,
+            pickupAddressId, 
         }
     );
     return res.data;
 };
+
+export const getPickupAddressAPI = async () => {
+  const res = await axiosInstance.get(
+    "/api/seller/shop/pickup-address-orders"
+  );
+  return res.data;
+};
+

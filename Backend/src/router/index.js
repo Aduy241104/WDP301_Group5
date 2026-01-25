@@ -7,6 +7,7 @@ import sellerOrderRouter from "./sellerOrder.route.js";
 import uploadImageRoute from "./uploadImage.routes.js";
 import sellerManageInformationRoutes from "./sellerManageInformationRoutes.js";
 import sellerRequestRoute from "./sellerRequest.routes.js";
+import sellerShopRoutes from "./sellerOrderShop.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -18,7 +19,7 @@ function route(app) {
     app.use("/api/seller/orders", sellerOrderRouter);
     app.use("/api/upload", uploadImageRoute);
     app.use("/api/seller-request", sellerRequestRoute);
-
+    app.use("/api/seller/shop-order", sellerShopRoutes);
 }
 
 export default route;

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getSellerOrdersAPI } from "../../services/sellerOrder.service";
+import { getSellerOrdersAPI } from "../../../services/sellerOrder.service";
 
 const STATUS_STYLES = {
-  created: "bg-blue-100 text-blue-700",
-  confirmed: "bg-indigo-100 text-indigo-700",
-  shipped: "bg-orange-100 text-orange-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
+  created: "bg-blue-50 text-blue-700",
+  confirmed: "bg-indigo-50 text-indigo-700",
+  shipped: "bg-orange-50 text-orange-700",
+  delivered: "bg-green-50 text-green-700",
+  cancelled: "bg-red-50 text-red-700",
 };
 
 export default function OrderList() {
@@ -25,32 +25,30 @@ export default function OrderList() {
       setLoading(true);
       const data = await getSellerOrdersAPI({ status, keyword });
       setOrders(data || []);
-    } catch (err) {
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Orders</h2>
-      </div>
+      <h2 className="text-2xl font-extrabold text-slate-900">
+        Orders
+      </h2>
 
       {/* FILTER */}
-      <div className="bg-white rounded-xl shadow p-4 flex flex-wrap gap-3">
+      <div className="rounded-3xl bg-white border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3">
         <input
           type="text"
           placeholder="Search by order code..."
-          className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="rounded-2xl border border-slate-200 px-4 py-3 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-sky-200"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
 
         <select
-          className="border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -69,7 +67,7 @@ export default function OrderList() {
       )}
 
       {!loading && orders.length === 0 && (
-        <div className="bg-white rounded-xl shadow p-6 text-slate-500">
+        <div className="rounded-3xl bg-white border border-slate-100 shadow-sm p-6 text-slate-500">
           No orders found
         </div>
       )}
@@ -79,43 +77,39 @@ export default function OrderList() {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-white rounded-xl shadow p-5 flex justify-between items-center hover:shadow-md transition"
+              className="rounded-3xl bg-white border border-slate-100 shadow-sm p-6 flex justify-between items-center hover:shadow-md transition"
             >
               {/* LEFT */}
               <div className="space-y-2">
-                <div className="font-semibold text-lg">
+                <div className="font-bold text-lg text-slate-900">
                   {order.orderCode}
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
                   <span
-                    className={`px-3 py-1 rounded-full font-medium ${
-                      STATUS_STYLES[order.orderStatus]
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[order.orderStatus]}`}
                   >
                     {order.orderStatus}
                   </span>
-
                   <span className="text-slate-500">
                     {order.paymentStatus}
                   </span>
                 </div>
 
-                <div className="text-sm text-slate-500">
-                  Created:{" "}
-                  {new Date(order.createdAt).toLocaleString()}
+                <div className="text-xs text-slate-500">
+                  Created: {new Date(order.createdAt).toLocaleString()}
                 </div>
               </div>
 
               {/* RIGHT */}
               <div className="text-right space-y-2">
-                <div className="text-lg font-bold">
+                <div className="text-lg font-extrabold text-slate-900">
                   {order.totalAmount.toLocaleString()}đ
                 </div>
 
                 <Link
                   to={`/seller/orders/${order._id}`}
-                  className="inline-block text-sm text-indigo-600 hover:underline"
+                  className="text-sm font-semibold text-indigo-600 hover:underline"
                 >
                   View detail →
                 </Link>
@@ -124,6 +118,6 @@ export default function OrderList() {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
