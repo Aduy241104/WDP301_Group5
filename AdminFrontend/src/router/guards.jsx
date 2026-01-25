@@ -24,11 +24,24 @@ export function SellerRoute() {
 
     if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-    // role có thể nằm ở user.role hoặc user.data.role tuỳ backend, bạn chỉnh 1 chỗ này cho chuẩn
     const role = user?.role ?? user?.data?.role ?? null;
 
     if (role !== "seller") {
         // không đủ quyền -> đá về / (hoặc /403)
+        return <Navigate to="/" replace />;
+    }
+
+    return <Outlet />;
+}
+
+export function AdminRoute() {
+    const { isAuthenticated, user } = useAuth();
+
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+    const role = user?.role ?? user?.data?.role ?? null;
+
+    if (role !== "admin") {
         return <Navigate to="/" replace />;
     }
 

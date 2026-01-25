@@ -1,54 +1,94 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { testAPi } from "../services/authServices";
 
-export default function HomePage() {
-    const { isAuthenticated, user, logout } = useAuth();
-
-    const testHandle = async () => {
-        try {
-            const res = await testAPi();
-
-        } catch (error) {
-            console.log(error);
-        }
-    }
+export default function Homepage() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "admin";
 
     return (
-        <div className="p-6 space-y-3">
-            <h1 className="text-2xl font-semibold">Home (Public)</h1>
-
-            <div className="text-slate-600">
-                { isAuthenticated ? (
-                    <>
-                        <div>Logged in as: { user?.email || "unknown" }</div>
-                        <div>Role: { user?.role || "unknown" }</div>
-                    </>
-                ) : (
-                    <div>Chưa đăng nhập</div>
-                ) }
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+                <p className="text-slate-500 mt-1">
+                    Xin chào, {user?.fullName || user?.email || "bạn"}.
+                </p>
             </div>
 
-            <div className="flex gap-3">
-                <Link className="underline" to="/profile">
-                    Profile (Private)
-                </Link>
-                <Link className="underline" to="/seller">
-                    Seller Dashboard (Seller)
-                </Link>
-                { !isAuthenticated ? (
-                    <Link className="underline" to="/login">
-                        Login
-                    </Link>
-                ) : (
-                    <button className="underline" onClick={ logout }>
-                        Logout
-                    </button>
-                ) }
-            </div>
+            {!isAdmin ? (
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm text-slate-700">
+                    Tài khoản này không có quyền Admin.
+                </div>
+            ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <QuickCard
+                        to="/admin/seller-registrations"
+                        title="Quản lý Người bán"
+                        desc="Tìm kiếm, lọc trạng thái, duyệt/từ chối, khóa/mở khóa."
+                        icon={
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                                <circle
+                                    cx="9"
+                                    cy="7"
+                                    r="4"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                />
+                                <path
+                                    d="M20 8v6M23 11h-6"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        }
+                    />
 
-            <button onClick={ testHandle }>Test</button>
+                    <QuickCard
+                        to="/admin/shops"
+                        title="Danh sách Shop"
+                        desc="Xem và lọc shop theo trạng thái, mở hồ sơ seller."
+                        icon={
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinejoin="round"
+                                />
+                                <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="2" />
+                            </svg>
+                        }
+                    />
+                </div>
+            )}
         </div>
+    );
+}
+
+function QuickCard({ to, title, desc, icon }) {
+    return (
+        <Link
+            to={to}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow hover:border-blue-200 transition group"
+        >
+            <div className="flex items-center gap-3 mb-3">
+                <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition">
+                    {icon}
+                </div>
+                <div>
+                    <h2 className="font-bold text-slate-900">{title}</h2>
+                    <p className="text-xs text-slate-500">Admin</p>
+                </div>
+            </div>
+            <p className="text-sm text-slate-600">{desc}</p>
+        </Link>
     );
 }

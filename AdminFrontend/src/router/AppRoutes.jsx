@@ -1,35 +1,44 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { PublicRoute, PrivateRoute, SellerRoute, AdminRoute } from "./guards";
+import AdminLayoutRoute from "./AdminLayoutRoute";
 
-import HomePage from "../pages/HomePage";
+import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
-import ProfilePage from "../pages/ProfilePage";
 import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
+import AdminSellerRegistrationList from "../pages/AdminSellerRegistrationList";
+import AdminSellerProfile from "../pages/AdminSellerProfile";
+import AdminShopList from "../pages/AdminShopList";
 
 export default function AppRoutes() {
     return (
         <Routes>
-            {/* Public-only: chỉ /login */ }
-            <Route element={ <PublicRoute /> }>
-                <Route path="/login" element={ <LoginPage /> } />
+            <Route element={<PublicRoute />}>
+                <Route path="/login" element={<LoginPage />} />
             </Route>
 
-            {/* ALL PRIVATE: mọi thứ còn lại */ }
-            <Route element={ <PrivateRoute /> }>
-                <Route path="/" element={ <HomePage /> } />
-                <Route path="/profile" element={ <ProfilePage /> } />
-
-                {/* Seller (vẫn nằm trong private) */ }
-                <Route element={ <SellerRoute /> }>
-                    <Route path="/seller" element={ <SellerDashboard /> } />
+            <Route element={<PrivateRoute />}>
+                <Route element={<AdminLayoutRoute />}>
+                    <Route path="/" element={<HomePage />} />
                 </Route>
 
-                {/* 404 (private luôn) */ }
-                <Route path="*" element={ <NotFound /> } />
+                <Route element={<SellerRoute />}>
+                    <Route path="/seller" element={<SellerDashboard />} />
+                </Route>
+
+                {/* Admin: layout + trang Seller Management */}
+                <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminLayoutRoute />}>
+                        <Route index element={<Navigate to="/admin/seller-registrations" replace />} />
+                        <Route path="seller-registrations" element={<AdminSellerRegistrationList />} />
+                        <Route path="sellers/:userId" element={<AdminSellerProfile />} />
+                        <Route path="shops" element={<AdminShopList />} />
+                    </Route>
+                </Route>
+
+                <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>
-
     );
 }
