@@ -1,13 +1,12 @@
 import jwt from "jsonwebtoken";
 
-
 export const authenticationMiddleware = (req, res, next) => {
     const SECRET_KEY = process.env.JWT_SECRET;
     const authHeader = req.headers["authorization"];
 
     const token = authHeader && authHeader.split(" ")[1];
     if (!token) {
-        return res.status(401).json({ message: "Access token is missing" });
+        return res.status(403).json({ message: "Access token is missing" });
     }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {

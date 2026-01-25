@@ -1,8 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
-
-import HomePage from "../pages/HomePage";
+import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import AddressPage from "../pages/AddressPage";
@@ -10,40 +9,71 @@ import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
+import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
+import OrderList from "../pages/Seller/OrderList";
+import OrderDetail from "../pages/Seller/OrderDetail";
+import SellerLayout from "../layouts/sellerLayout/SellerLayout";
+import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
+import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 
 
 
 export default function AppRoutes() {
-    return (
-        <Routes>
-            {/* Public pages */}
-            <Route element={<MainLayoutRoute />}>
-                <Route path="/" element={<HomePage />} />
-            </Route>
+  return (
+    <Routes>
+      {/* Public pages */ }
+      <Route element={ <MainLayoutRoute /> }>
+        <Route path="/" element={ <HomePage /> } />
+        <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
+      </Route>
 
-            {/* Public-only (đã login thì không vào /login) */}
-            <Route element={<PublicRoute />}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-            </Route>
+      {/* Public-only (đã login thì không vào /login) */ }
+      <Route element={ <PublicRoute /> }>
+        <Route path="/login" element={ <LoginPage /> } />
+        <Route path="/register" element={ <RegisterPage /> } />
+        <Route path="/forgot-password" element={ <ForgotPasswordPage /> } />
+        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+      </Route>
 
-            {/* Private routes */}
-            <Route element={<PrivateRoute />}>
-                <Route path="/profile" element={<ProfilePage />} />
-            </Route>
-
-            <Route element={<PrivateRoute />}>
-                <Route path="/addresses" element={<AddressPage />} />
-            </Route>
-
-            {/* Seller routes */}
-            <Route element={<SellerRoute />}>
-                <Route path="/seller" element={<SellerDashboard />} />
-            </Route>
+      {/* Private routes */ }
+      <Route element={ <PrivateRoute /> }>
+        <Route path="/profile" element={ <ProfilePage /> } />
+        <Route path="/addresses" element={<AddressPage />} />
+      </Route>
 
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-        </Routes>
-    );
+      <Route element={ <MainLayoutRoute /> }>
+        <Route element={ <PrivateRoute /> }>
+          <Route path="/request-seller" element={ <SellerRegisterPage /> } />
+        </Route>
+      </Route>
+
+
+      {/* Seller routes */ }
+      <Route element={ <SellerRoute /> }>
+        <Route path="/seller" element={ <SellerLayout /> }>
+          {/* ROUTE MẶC ĐỊNH */ }
+          <Route index element={ <SellerDashboard /> } />
+
+          {/* ROUTE RÕ RÀNG */ }
+          <Route path="dashboard" element={ <SellerDashboard /> } />
+          <Route path="store" element={ <SellerManageStore /> } />
+          <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/:id" element={ <OrderDetail /> } />
+          {/* ROUTE RÕ RÀNG */}
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="store-information" element={<SellerStoreInformation />} />
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+        </Route>
+      </Route>
+
+      {/* 404 */ }
+      <Route path="*" element={ <NotFound /> } />
+    </Routes>
+  );
 }

@@ -21,7 +21,8 @@ export default function LoginPage() {
             password: "",
             remember: true,
         },
-        mode: "onTouched",
+        mode: "onSubmit",
+        reValidateMode: "onChange"
     });
 
     const onSubmit = async (values) => {
@@ -30,6 +31,10 @@ export default function LoginPage() {
             await login({ email: values.email.trim(), password: values.password });
             // nếu bạn dùng react-router: navigate("/")
         } catch (err) {
+            if (err?.response?.status === 502) {
+                setServerError("Tài khoản của bạn đã bị khóa.");
+                return;
+            }
             const mes = err?.response?.data?.message ?
                 "Tài khoản hoặc mật khẩu không đúng" :
                 "Đăng nhập thất bại. Vui lòng thử lại.";
@@ -38,38 +43,68 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div
+            className="min-h-screen bg-white flex items-center justify-center px-4 py-10 bg-no-repeat bg-cover bg-center relative"
+            style={ {
+                backgroundImage:
+                    "url('https://res.cloudinary.com/do5o9r18f/image/upload/v1768999689/ChatGPT_Image_19_44_36_21_thg_1_2026_w65ikv.png')",
+            } }
+        >
+            {/* background accent */ }
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#77E2F2]/35 blur-3xl" />
+                <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#77E2F2]/25 blur-3xl" />
+            </div>
+
             <div className="w-full max-w-md">
-                <div className="bg-white shadow-lg rounded-2xl border border-slate-100">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_rgba(2,6,23,0.08)] overflow-hidden">
+                    {/* top accent bar */ }
+                    <div className="h-1.5 bg-[#77E2F2]" />
+
                     <div className="p-6 sm:p-8">
                         <div className="mb-6">
-                            <h1 className="text-2xl font-semibold text-slate-900">Đăng nhập</h1>
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#77E2F2]/15 px-3 py-1 text-xs font-semibold text-slate-700">
+                                UniTrade
+                                <span className="h-1 w-1 rounded-full bg-[#77E2F2]" />
+                                Sign in
+                            </div>
+
+                            <h1 className="mt-3 text-2xl font-bold text-slate-900">Đăng nhập</h1>
                             <p className="text-slate-500 mt-1">Chào mừng bạn quay lại UniTrade.</p>
                         </div>
 
                         { isAuthenticated ? (
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                                <p className="text-emerald-700 font-medium">Bạn đã đăng nhập.</p>
+                            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                                <p className="text-emerald-700 font-semibold">Bạn đã đăng nhập.</p>
                                 <p className="text-emerald-700/80 text-sm mt-1">
                                     { user?.email ? `Email: ${user.email}` : "Bạn có thể quay lại trang chính." }
                                 </p>
+
+                                <button
+                                    type="button"
+                                    className="mt-4 w-full rounded-xl py-2.5 font-semibold bg-[#77E2F2] text-slate-900 hover:brightness-95 transition"
+                                    onClick={ () => (window.location.href = "/") }
+                                >
+                                    Về trang chủ
+                                </button>
                             </div>
                         ) : (
                             <form onSubmit={ handleSubmit(onSubmit) } className="space-y-4">
                                 { serverError ? (
-                                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
+                                    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
                                         { serverError }
                                     </div>
                                 ) : null }
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700">Email</label>
+                                    <label className="block text-sm font-semibold text-slate-700">Email</label>
                                     <input
                                         placeholder="buyer@unitrade.dev"
                                         autoComplete="email"
                                         className={ [
-                                            "mt-1 w-full rounded-xl border px-3 py-2 outline-none",
-                                            "focus:ring-2 focus:ring-slate-200",
+                                            "mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none",
+                                            "focus:ring-4 focus:ring-[#77E2F2]/25 focus:border-[#77E2F2]",
+                                            "placeholder:text-slate-400",
                                             errors.email ? "border-rose-300" : "border-slate-200",
                                         ].join(" ") }
                                         { ...register("email") }
@@ -80,15 +115,16 @@ export default function LoginPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700">Mật khẩu</label>
+                                    <label className="block text-sm font-semibold text-slate-700">Mật khẩu</label>
                                     <div className="mt-1 relative">
                                         <input
                                             type={ showPassword ? "text" : "password" }
                                             placeholder="••••••••"
                                             autoComplete="current-password"
                                             className={ [
-                                                "w-full rounded-xl border px-3 py-2 pr-12 outline-none",
-                                                "focus:ring-2 focus:ring-slate-200",
+                                                "w-full rounded-xl border bg-white px-3 py-2 pr-12 outline-none",
+                                                "focus:ring-4 focus:ring-[#77E2F2]/25 focus:border-[#77E2F2]",
+                                                "placeholder:text-slate-400",
                                                 errors.password ? "border-rose-300" : "border-slate-200",
                                             ].join(" ") }
                                             { ...register("password") }
@@ -96,7 +132,10 @@ export default function LoginPage() {
                                         <button
                                             type="button"
                                             onClick={ () => setShowPassword((v) => !v) }
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded-lg text-slate-600 hover:bg-slate-100"
+                                            className="
+                                                       absolute right-2 top-1/2 -translate-y-1/2
+                                                       text-xs font-semibold px-2.5 py-1.5 rounded-lg
+                                                       text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
                                         >
                                             { showPassword ? "Ẩn" : "Hiện" }
                                         </button>
@@ -110,7 +149,7 @@ export default function LoginPage() {
                                     <label className="flex items-center gap-2 text-sm text-slate-600 select-none">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-slate-300"
+                                            className="rounded border-slate-300 text-[#77E2F2] focus:ring-[#77E2F2]/30"
                                             { ...register("remember") }
                                         />
                                         Ghi nhớ đăng nhập
@@ -118,7 +157,7 @@ export default function LoginPage() {
 
                                     <a
                                         href="/forgot-password"
-                                        className="text-sm font-medium text-slate-700 hover:underline"
+                                        className="text-sm font-semibold text-slate-700 hover:text-slate-900 underline-offset-4 hover:underline"
                                     >
                                         Quên mật khẩu?
                                     </a>
@@ -128,9 +167,10 @@ export default function LoginPage() {
                                     type="submit"
                                     disabled={ isSubmitting }
                                     className={ [
-                                        "w-full rounded-xl py-2.5 font-semibold",
-                                        "bg-slate-900 text-white hover:bg-slate-800",
-                                        "disabled:opacity-60 disabled:cursor-not-allowed",
+                                        "w-full rounded-xl py-2.5 font-bold",
+                                        "bg-[#77E2F2] text-slate-900 hover:brightness-95 transition",
+                                        "shadow-[0_10px_22px_rgba(119,226,242,0.35)]",
+                                        "disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none",
                                     ].join(" ") }
                                 >
                                     { isSubmitting ? "Đang đăng nhập..." : "Đăng nhập" }
@@ -138,7 +178,7 @@ export default function LoginPage() {
 
                                 <div className="text-sm text-slate-500 text-center">
                                     Chưa có tài khoản?{ " " }
-                                    <a className="font-medium text-slate-700 hover:underline" href="/register">
+                                    <a className="font-semibold text-slate-800 hover:underline" href="/register">
                                         Đăng ký
                                     </a>
                                 </div>
@@ -152,5 +192,6 @@ export default function LoginPage() {
                 </p>
             </div>
         </div>
+
     );
 }

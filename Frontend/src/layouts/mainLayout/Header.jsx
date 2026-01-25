@@ -184,8 +184,20 @@ export default function Header() {
                                 </div>
                             </button>
 
-                            {/* dropdown */}
-                            <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg opacity-0 pointer-events-none translate-y-1 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 transition">
+                            {/* dropdown */ }
+                            <div className="
+                             absolute right-0 mt-1 w-56 rounded-2xl
+                             border border-slate-200 bg-white shadow-lg
+                             opacity-0 pointer-events-none translate-y-1
+                             group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 transition
+                             before:content-['']
+                             before:absolute
+                             before:-top-2
+                             before:left-0
+                             before:w-full
+                             before:h-2
+                             before:bg-transparent
+                            ">
                                 <div className="p-3">
                                     <div className="text-sm font-bold">{user?.fullName || user?.email}</div>
                                     <div className="text-xs text-slate-500 mt-0.5">{role}</div>

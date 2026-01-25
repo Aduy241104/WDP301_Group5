@@ -1,4 +1,3 @@
-import { email } from "zod";
 import axiosInstance from "../axios/axiosConfig";
 
 
@@ -14,6 +13,21 @@ export const requestRegisterOtpAPI = async ({ email }) => {
 
 export const registerAPI = async (data) => {
     const res = await axiosInstance.post(`/api/auth/register`, data);
+    return res.data;
+}
+
+export const requestResetPasswordLinkAPI = async ({ email }) => {
+    const res = await axiosInstance.post(`/api/auth/forgot-password`, { email });
+    return res.data;
+}
+
+export const resetPasswordAPI = async ({ email, otp, newPassword }) => {
+    const res = await axiosInstance.post(`/api/auth/reset-password`, { email, otp, newPassword });
+    return res.data;
+}
+
+export const logoutAPI = async () => {
+    const res = await axiosInstance.post(`/api/auth/logout`);
     return res.data;
 }
 
