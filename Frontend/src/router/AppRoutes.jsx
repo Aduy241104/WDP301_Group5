@@ -4,6 +4,7 @@ import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
+import AddressPage from "../pages/AddressPage";
 import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
@@ -17,6 +18,8 @@ import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageSto
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
+
+
 
 export default function AppRoutes() {
   return (
@@ -38,6 +41,7 @@ export default function AppRoutes() {
       {/* Private routes */ }
       <Route element={ <PrivateRoute /> }>
         <Route path="/profile" element={ <ProfilePage /> } />
+        <Route path="/addresses" element={<AddressPage />} />
       </Route>
 
 
