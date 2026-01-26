@@ -7,7 +7,8 @@ import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import SellerDashboard from "../pages/SellerDashboard";
 import NotFound from "../pages/NotFound";
-import AdminSellerRegistrationList from "../pages/AdminSellerRegistrationList";
+import AdminSellerRequestApproval from "../pages/AdminSellerRequestApproval";
+import AdminSellerList from "../pages/AdminSellerList";
 import AdminSellerProfile from "../pages/AdminSellerProfile";
 import AdminShopList from "../pages/AdminShopList";
 
@@ -30,8 +31,9 @@ export default function AppRoutes() {
                 {/* Admin: layout + trang Seller Management */}
                 <Route element={<AdminRoute />}>
                     <Route path="/admin" element={<AdminLayoutRoute />}>
-                        <Route index element={<Navigate to="/admin/seller-registrations" replace />} />
-                        <Route path="seller-registrations" element={<AdminSellerRegistrationList />} />
+                        <Route index element={<Navigate to="/admin/seller-requests" replace />} />
+                        <Route path="seller-requests" element={<AdminSellerRequestApproval />} />
+                        <Route path="sellers" element={<AdminSellerList />} />
                         <Route path="sellers/:userId" element={<AdminSellerProfile />} />
                         <Route path="shops" element={<AdminShopList />} />
                     </Route>

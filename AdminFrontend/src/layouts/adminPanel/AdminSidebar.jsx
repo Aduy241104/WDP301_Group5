@@ -24,29 +24,6 @@ function NavItem({ to, icon, label, end }) {
     );
 }
 
-function SellerNavItem({ to, icon, label }) {
-    const location = useLocation();
-    const isActive =
-        location.pathname.startsWith("/admin/seller-registrations") ||
-        location.pathname.startsWith("/admin/sellers/");
-
-    return (
-        <NavLink
-            to={to}
-            className={() =>
-                [
-                    navLinkBase,
-                    isActive
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-slate-700 hover:bg-slate-100",
-                ].join(" ")
-            }
-        >
-            <span className="text-slate-500">{icon}</span>
-            <span>{label}</span>
-        </NavLink>
-    );
-}
 
 function NavPlaceholder({ icon, label }) {
     return (
@@ -95,9 +72,44 @@ export default function AdminSidebar() {
                     }
                 />
 
-                <SellerNavItem
-                    to="/admin/seller-registrations"
-                    label="Quản lý Người bán"
+                <NavItem
+                    to="/admin/seller-requests"
+                    label="Duyệt yêu cầu Seller"
+                    icon={
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M9 12l2 2 4-4"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                            <path
+                                d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            />
+                            <path
+                                d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            />
+                            <path
+                                d="M12 3c0 1-1 3-3 3S6 4 6 3s1-3 3-3 3 2 3 3Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            />
+                            <path
+                                d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3Z"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            />
+                        </svg>
+                    }
+                />
+                <NavItem
+                    to="/admin/sellers"
+                    label="Danh sách Seller"
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                             <path

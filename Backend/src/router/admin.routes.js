@@ -1,13 +1,16 @@
 import express from "express";
 import { authenticationMiddleware, adminMiddleware } from "../middlewares/authenticationMiddlewares.js";
-import { AdminSellerRegistrationListController } from "../controllers/AdminSellerRegistrationListController.js";
-import { AdminFilterSellerByStatusController } from "../controllers/AdminFilterSellerByStatusController.js";
-import { AdminViewSellerProfileController } from "../controllers/AdminViewSellerProfileController.js";
-import { AdminApproveSellerController } from "../controllers/AdminApproveSellerController.js";
-import { AdminRejectSellerController } from "../controllers/AdminRejectSellerController.js";
-import { AdminBlockSellerController } from "../controllers/AdminBlockSellerController.js";
-import { AdminUnblockSellerController } from "../controllers/AdminUnblockSellerController.js";
-import { AdminShopListController } from "../controllers/AdminShopListController.js";
+import {
+    AdminSellerRegistrationListController,
+    AdminFilterSellerByStatusController,
+    AdminSellerListController,
+    AdminViewSellerProfileController,
+    AdminApproveSellerController,
+    AdminRejectSellerController,
+    AdminBlockSellerController,
+    AdminUnblockSellerController,
+    AdminShopListController,
+} from "../controllers/AdminSellerController.js";
 
 const router = express.Router();
 
@@ -19,6 +22,9 @@ router.get("/seller-registrations", AdminSellerRegistrationListController);
 
 // Filter seller registrations by status
 router.get("/seller-registrations/by-status", AdminFilterSellerByStatusController);
+
+// View list of sellers (approved sellers)
+router.get("/sellers", AdminSellerListController);
 
 // View detailed seller profile
 router.get("/sellers/:userId/profile", AdminViewSellerProfileController);
