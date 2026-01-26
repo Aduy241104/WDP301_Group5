@@ -24,14 +24,14 @@ export const login = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
-                message: "Invalid email or password.",
+                message: "Tài khoản hoặc mật khẩu không đúng",
             });
         }
 
         //Check status
         if (user.status === "blocked") {
             return res.status(StatusCodes.BAD_GATEWAY).json({
-                message: "Your account is blocked.",
+                message: "Tài khoản của bạn đã bị khóa.",
             });
         }
 
@@ -39,7 +39,7 @@ export const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(StatusCodes.UNAUTHORIZED).json({
-                message: "Invalid email or password.",
+                message: "Tài khoản hoặc mật khẩu không đúng.",
             });
         }
 
