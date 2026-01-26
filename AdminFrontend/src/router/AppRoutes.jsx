@@ -11,6 +11,11 @@ import AdminSellerRequestApproval from "../pages/AdminSellerRequestApproval";
 import AdminSellerList from "../pages/AdminSellerList";
 import AdminSellerProfile from "../pages/AdminSellerProfile";
 import AdminShopList from "../pages/AdminShopList";
+import AdminBannerList from "../pages/AdminBannerList";
+import AdminBannerForm from "../pages/AdminBannerForm";
+import AdminReportList from "../pages/AdminReportList";
+import AdminReportDetail from "../pages/AdminReportDetail";
+
 
 export default function AppRoutes() {
     return (
@@ -36,6 +41,11 @@ export default function AppRoutes() {
                         <Route path="sellers" element={<AdminSellerList />} />
                         <Route path="sellers/:userId" element={<AdminSellerProfile />} />
                         <Route path="shops" element={<AdminShopList />} />
+                        <Route path="banners" element={<AdminBannerList />} />
+                        <Route path="banners/new" element={<AdminBannerForm />} />
+                        <Route path="banners/:bannerId/edit" element={<AdminBannerForm />} />
+                        <Route path="reports" element={<AdminReportList />} />
+                        <Route path="reports/:reportId" element={<AdminReportDetail />} />
                     </Route>
                 </Route>
 

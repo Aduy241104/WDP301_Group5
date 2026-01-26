@@ -17,5 +17,6 @@ router.put("/change-password", authenticationMiddleware, changePassword);
  * ADDRESS
  **/
 router.get("/addresses", authenticationMiddleware, viewAddressList);
-router.post("/addresses", authenticationMiddleware, addAddress); router.put("/addresses/:addressId", authenticationMiddleware, updateAddress);
+router.post("/addresses", authenticationMiddleware, addAddress); 
+router.put("/addresses/:addressId", authenticationMiddleware, updateAddress);
 export default router;

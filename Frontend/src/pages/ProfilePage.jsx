@@ -46,8 +46,6 @@ export default function ProfilePage() {
     }
   };
 
-
-
   useEffect(() => {
     const fetchProfile = async () => {
       const userData = await getProfileAPI();
@@ -76,51 +74,52 @@ export default function ProfilePage() {
   if (!editData) return null;
 
   return (
-    <div className="flex gap-12">
+    <div className="min-h-screen bg-slate-50">
+      <div className="flex gap-3">
 
-      {/* Sidebar bên trái */}
-      <ProfileSidebar
-        activeView={activeView}
-        setActiveView={setActiveView}
-      />
+        {/* Sidebar bên trái */ }
+        <ProfileSidebar
+          activeView={ activeView }
+          setActiveView={ setActiveView }
+        />
 
-      {/* Content bên phải */}
-      <div className="flex w-full max-w-6xl gap-12">
-        {/* MESSAGE */}
-        {message.text && (
-          <div
-            className={`absolute top-6 right-6 z-50 p-4 rounded shadow ${message.type === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-              }`}
-          >
-            {message.text}
-          </div>
-        )}
+        {/* Content bên phải */ }
+        <div className="relative flex w-full max-w-6xl gap-2">
 
+          {/* MESSAGE */ }
+          { message.text && (
+            <div
+              className={ `absolute top-6 right-6 z-50 rounded-xl px-4 py-3 shadow-lg
+                    ${message.type === "success"
+                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                  : "bg-rose-100 text-rose-700 border border-rose-200"
+                }` }
+            >
+              { message.text }
+            </div>
+          ) }
 
-        {activeView === "profile" && (
-          <>
-            <ProfileForm
-              editData={editData}
-              setEditData={setEditData}
-              setMessage={setMessage}
-              reloadProfile={reloadProfile}
-            />
+          { activeView === "profile" && (
+            <>
+              <ProfileForm
+                editData={ editData }
+                setEditData={ setEditData }
+                setMessage={ setMessage }
+                reloadProfile={ reloadProfile }
+              />
 
-            <AvatarBox
-              avatar={editData.avatar}
-              setEditData={setEditData}
-            />
-          </>
-        )}
+              <AvatarBox
+                avatar={ editData.avatar }
+                setEditData={ setEditData }
+              />
+            </>
+          ) }
 
-        {activeView === "password" && (
-          <ChangePasswordForm setMessage={setMessage} />
-        )}
-
+          { activeView === "password" && (
+            <ChangePasswordForm setMessage={ setMessage } />
+          ) }
+        </div>
       </div>
     </div>
-
   );
 }

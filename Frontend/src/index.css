@@ -43,4 +43,17 @@
     font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
       "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
+
+}
+
+/* Admin Banner Section - Banner được admin thêm vào */
+.admin-banner-section {
+  width: 100%;
+  order: -1; /* Đảm bảo banner admin luôn ở trên */
+}
+
+/* Banner hình chữ nhật rộng */
+.admin-banner-section > div {
+  width: 100%;
+
 }

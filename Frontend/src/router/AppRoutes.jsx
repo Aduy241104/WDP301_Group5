@@ -39,9 +39,11 @@ export default function AppRoutes() {
       </Route>
 
       {/* Private routes */ }
-      <Route element={ <PrivateRoute /> }>
-        <Route path="/profile" element={ <ProfilePage /> } />
-        <Route path="/addresses" element={<AddressPage />} />
+      <Route element={ <MainLayoutRoute /> }>
+        <Route element={ <PrivateRoute /> }>
+          <Route path="/profile" element={ <ProfilePage /> } />
+          <Route path="/addresses" element={ <AddressPage /> } />
+        </Route>
       </Route>
 
 
@@ -63,12 +65,12 @@ export default function AppRoutes() {
           <Route path="store" element={ <SellerManageStore /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
-          {/* ROUTE RÕ RÀNG */}
-          <Route path="dashboard" element={<SellerDashboard />} />
-          <Route path="store-information" element={<SellerStoreInformation />} />
-          <Route path="pickup-addresses" element={<SellerManageStore />} />
-          <Route path="orders" element={<OrderList />} />
-          <Route path="orders/:id" element={<OrderDetail />} />
+          {/* ROUTE RÕ RÀNG */ }
+          <Route path="dashboard" element={ <SellerDashboard /> } />
+          <Route path="store-information" element={ <SellerStoreInformation /> } />
+          <Route path="pickup-addresses" element={ <SellerManageStore /> } />
+          <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/:id" element={ <OrderDetail /> } />
         </Route>
       </Route>
 

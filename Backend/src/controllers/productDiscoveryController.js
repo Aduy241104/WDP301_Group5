@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Product } from "../models/Product.js";
+import { Banner } from "../models/Banner.js";
 import { StatusCodes } from "http-status-codes";
 import { getTopSale } from "../services/productDisCoveryService.js";
 
@@ -8,7 +9,30 @@ export const getProductDiscovery = async (req, res) => {
     try {
         const topSaleProductsDoc = await getTopSale(0, 8);
         const topSaleProducts = topSaleProductsDoc.items;
-        const banners = [];
+        // Get active banners for home_top position
+        const now = new Date();
+        const bannerDocs = await Banner.find({
+            position: "home_top",
+            isDeleted: false,
+            startAt: { $lte: now },
+            endAt: { $gte: now },
+        })
+            .select("title imageUrl linkUrl linkType linkTargetId")
+            .sort({ priority: -1, createdAt: -1 })
+            .limit(6)
+            .lean();
+        
+        const banners = bannerDocs.map((b) => ({
+            _id: b._id,
+            title: b.title,
+            image: b.imageUrl,
+            linkUrl: b.linkUrl,
+            linkType: b.linkType,
+            linkTargetId: b.linkTargetId,
+        }));
+        
+        //const banners = [];
+
         const suggestProducts = [];
 
 
