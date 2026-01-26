@@ -12,6 +12,7 @@ import sellerRequestRoute from "./sellerRequest.routes.js";
 import bannerRoute from "./banner.routes.js";
 
 
+
 function route(app) {
     app.use("/api/auth", authenticationRoute);
     app.use("/api/user", userRoute);
@@ -25,6 +26,7 @@ function route(app) {
     app.use("/api/upload", uploadImageRoute);
     app.use("/api/seller-request", sellerRequestRoute);
     app.use("/api/banners", bannerRoute);
+
 
 }
 

@@ -150,6 +150,12 @@ export default function AdminSidebar() {
                     </div>
                 </div> */}
 
+                <div className="pt-3 pb-1">
+                    <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wide">
+                        Khác (demo)
+                    </div>
+                </div>
+
                 <NavPlaceholder
                     label="Quản lý Người dùng"
                     icon={
@@ -199,8 +205,10 @@ export default function AdminSidebar() {
                         </svg>
                     }
                 />
+
                 <NavItem
                     to="/admin/banners"
+
                     label="Quản lý Banner"
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -225,6 +233,7 @@ export default function AdminSidebar() {
                 />
                 <NavItem
                     to="/admin/reports"
+
                     label="Quản lý Khiếu nại"
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

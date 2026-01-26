@@ -29,4 +29,6 @@ const BannerSchema = new Schema(
 
 BannerSchema.index({ position: 1, priority: -1, startAt: 1, endAt: 1 });
 
+
 export const Banner = model("Banner", BannerSchema);
+

@@ -8,16 +8,16 @@ import { AdminRejectSellerController } from "../controllers/admin/AdminRejectSel
 import { AdminBlockSellerController } from "../controllers/admin/AdminBlockSellerController.js";
 import { AdminUnblockSellerController } from "../controllers/admin/AdminUnblockSellerController.js";
 import { AdminShopListController } from "../controllers/admin/AdminShopListController.js";
-import {
-    AdminBannerListController,
-    AdminAddBannerController,
-    AdminUpdateBannerController,
-    AdminDeleteBannerController,
-} from "../controllers/admin/AdminBannerController.js";
-import {
-    AdminReportListController,
-    AdminReportDetailController,
-} from "../controllers/admin/AdminReportController.js";
+// Banner controllers
+import { AdminBannerListController } from "../controllers/admin/AdminBannerController.js";
+import { AdminAddBannerController } from "../controllers/admin/AdminBannerController.js";
+import { AdminUpdateBannerController } from "../controllers/admin/AdminBannerController.js";
+import { AdminDeleteBannerController } from "../controllers/admin/AdminBannerController.js";
+
+// Report controllers
+import { AdminReportListController } from "../controllers/admin/AdminReportController.js";
+import { AdminReportDetailController } from "../controllers/admin/AdminReportController.js";
+
 
 const router = express.Router();
 

@@ -15,6 +15,7 @@ import AdminBannerForm from "../pages/AdminBannerForm";
 import AdminReportList from "../pages/AdminReportList";
 import AdminReportDetail from "../pages/AdminReportDetail";
 
+
 export default function AppRoutes() {
     return (
         <Routes>

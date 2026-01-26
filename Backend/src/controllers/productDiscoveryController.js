@@ -9,7 +9,6 @@ export const getProductDiscovery = async (req, res) => {
     try {
         const topSaleProductsDoc = await getTopSale(0, 8);
         const topSaleProducts = topSaleProductsDoc.items;
-        
         // Get active banners for home_top position
         const now = new Date();
         const bannerDocs = await Banner.find({
@@ -32,6 +31,8 @@ export const getProductDiscovery = async (req, res) => {
             linkTargetId: b.linkTargetId,
         }));
         
+        //const banners = [];
+
         const suggestProducts = [];
 
 
