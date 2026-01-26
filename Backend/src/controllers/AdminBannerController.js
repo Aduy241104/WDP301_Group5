@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import { Banner } from "../../models/Banner.js";
+import { Banner } from "../models/Banner.js";
 
 // View Banner List
 export const AdminBannerListController = async (req, res) => {
@@ -258,3 +258,4 @@ export const AdminDeleteBannerController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
+

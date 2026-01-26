@@ -13,8 +13,11 @@ export default function AdminFooter() {
                         </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
-                        <Link to="/admin/seller-registrations" className="hover:text-slate-900 hover:underline">
-                            Đăng ký Seller
+                        <Link to="/admin/seller-requests" className="hover:text-slate-900 hover:underline">
+                            Duyệt yêu cầu
+                        </Link>
+                        <Link to="/admin/sellers" className="hover:text-slate-900 hover:underline">
+                            Danh sách Seller
                         </Link>
                         <Link to="/admin/shops" className="hover:text-slate-900 hover:underline">
                             Danh sách Shop

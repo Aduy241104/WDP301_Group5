@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const NAV_ITEMS = [
-    { to: "/admin/seller-registrations", label: "Đăng ký Seller" },
+    { to: "/admin/seller-requests", label: "Duyệt yêu cầu" },
+    { to: "/admin/sellers", label: "Danh sách Seller" },
     { to: "/admin/shops", label: "Danh sách Shop" },
 ];
 
@@ -13,8 +14,8 @@ export default function AdminHeader() {
     const isAdmin = user?.role === "admin";
 
     const isActive = (path) => {
-        if (path === "/admin/seller-registrations")
-            return location.pathname.startsWith("/admin/seller-registrations") || location.pathname.startsWith("/admin/sellers/");
+        if (path === "/admin/sellers")
+            return location.pathname.startsWith("/admin/sellers");
         return location.pathname.startsWith(path);
     };
 

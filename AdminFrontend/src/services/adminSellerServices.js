@@ -44,6 +44,12 @@ export const unblockSeller = async (userId) => {
     return res.data;
 };
 
+// View list of sellers (approved sellers)
+export const fetchSellerList = async (params = {}) => {
+    const res = await axiosInstance.get("/api/admin/sellers", { params });
+    return res.data;
+};
+
 // View shop list
 export const fetchShopList = async (params = {}) => {
     const res = await axiosInstance.get("/api/admin/shops", { params });

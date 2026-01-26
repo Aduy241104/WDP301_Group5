@@ -13,7 +13,7 @@ export const viewStoreInformation = async (req, res) => {
             ownerId: sellerId,
             isDeleted: false,
         }).select(
-            "name avatar description status shopAddress createdAt updatedAt"
+            "name avatar description contactPhone status shopAddress createdAt updatedAt"
         );
 
         if (!shop) {
@@ -37,7 +37,7 @@ export const viewStoreInformation = async (req, res) => {
 export const updateStoreInformation = async (req, res) => {
     try {
         const sellerId = req.user.id;
-        const { name, description, avatar, shopAddress } = req.body;
+        const { name, description, avatar, contactPhone, shopAddress } = req.body;
 
         const shop = await Shop.findOne({
             ownerId: sellerId,
@@ -54,6 +54,7 @@ export const updateStoreInformation = async (req, res) => {
         if (name !== undefined) shop.name = name;
         if (description !== undefined) shop.description = description;
         if (avatar !== undefined) shop.avatar = avatar;
+        if (contactPhone !== undefined) shop.contactPhone = contactPhone;
 
         // Update shop address (full replace)
         if (shopAddress) {

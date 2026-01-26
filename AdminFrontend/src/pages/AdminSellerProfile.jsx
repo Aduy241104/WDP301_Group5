@@ -64,6 +64,7 @@ export default function AdminSellerProfile() {
     const user = data?.user;
     const shops = data?.shops ?? [];
     const latestRequest = data?.latestSellerRequest;
+    const cccdImages = data?.cccdImages ?? [];
 
     return (
         <div className="space-y-6">
@@ -154,6 +155,24 @@ export default function AdminSellerProfile() {
                                     <div className="text-slate-700 mt-0.5">{user.phone || "—"}</div>
                                 </div>
                                 <div>
+                                    <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Giới tính</div>
+                                    <div className="text-slate-700 mt-0.5">
+                                        {user.gender === "male"
+                                            ? "Nam"
+                                            : user.gender === "female"
+                                                ? "Nữ"
+                                                : "Khác"}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Ngày sinh</div>
+                                    <div className="text-slate-700 mt-0.5">
+                                        {user.dateOfBirth
+                                            ? new Date(user.dateOfBirth).toLocaleDateString("vi-VN")
+                                            : "—"}
+                                    </div>
+                                </div>
+                                <div>
                                     <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Vai trò</div>
                                     <div className="capitalize text-slate-700 mt-0.5">{user.role}</div>
                                 </div>
@@ -203,6 +222,22 @@ export default function AdminSellerProfile() {
                                             {latestRequest.status === "rejected" && "Từ chối"}
                                         </span>
                                     </div>
+                                    <div>
+                                        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">
+                                            SĐT liên hệ (shop)
+                                        </div>
+                                        <div className="text-slate-700 mt-0.5">
+                                            {latestRequest.contactPhone || "—"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">
+                                            Mã số thuế
+                                        </div>
+                                        <div className="text-slate-700 mt-0.5">
+                                            {latestRequest.taxCode || "—"}
+                                        </div>
+                                    </div>
                                     {latestRequest.rejectReason && (
                                         <div className="sm:col-span-2">
                                             <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Lý do từ chối</div>
@@ -212,9 +247,60 @@ export default function AdminSellerProfile() {
                                         </div>
                                     )}
                                     <div className="sm:col-span-2">
+                                        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">
+                                            Địa chỉ shop
+                                        </div>
+                                        <div className="text-slate-700 mt-0.5">
+                                            {latestRequest.shopAddress?.fullAddress || "—"}
+                                        </div>
+                                    </div>
+                                    <div className="sm:col-span-2">
                                         <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Mô tả</div>
                                         <div className="text-slate-700 mt-0.5">{latestRequest.description || "—"}</div>
                                     </div>
+                                    <div>
+                                        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">
+                                            Ngày gửi
+                                        </div>
+                                        <div className="text-slate-700 mt-0.5">
+                                            {latestRequest.createdAt
+                                                ? new Date(latestRequest.createdAt).toLocaleString("vi-VN")
+                                                : "—"}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wide">
+                                            Cập nhật
+                                        </div>
+                                        <div className="text-slate-700 mt-0.5">
+                                            {latestRequest.updatedAt
+                                                ? new Date(latestRequest.updatedAt).toLocaleString("vi-VN")
+                                                : "—"}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Card: CCCD Images */}
+                    {cccdImages.length > 0 && (
+                        <div className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden">
+                            <div className="h-1.5 bg-[rgb(119,226,242)]" />
+                            <div className="p-5 sm:p-6">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4">Ảnh CCCD</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {cccdImages.map((imageUrl, index) => (
+                                        <div key={index} className="relative group">
+                                            <img
+                                                src={imageUrl}
+                                                alt={`CCCD ${index + 1}`}
+                                                className="w-full h-auto rounded-xl border border-slate-200 object-cover cursor-pointer hover:shadow-lg transition"
+                                                onClick={() => window.open(imageUrl, "_blank")}
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-xl transition pointer-events-none" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -254,6 +340,11 @@ export default function AdminSellerProfile() {
                                             <div className="text-xs text-slate-600 line-clamp-2">
                                                 {shop.description || "Không có mô tả"}
                                             </div>
+                                            {shop.contactPhone && (
+                                                <div className="text-xs text-slate-500">
+                                                    SĐT liên hệ: {shop.contactPhone}
+                                                </div>
+                                            )}
                                             {shop.shopAddress?.fullAddress && (
                                                 <div className="text-xs text-slate-500">
                                                     Địa chỉ: {shop.shopAddress.fullAddress}

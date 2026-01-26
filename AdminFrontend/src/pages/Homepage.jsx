@@ -21,7 +21,79 @@ export default function Homepage() {
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                   
+                    <QuickCard
+                        to="/admin/seller-requests"
+                        title="Duyệt yêu cầu Seller"
+                        desc="Xem và duyệt các yêu cầu đăng ký seller đang chờ xử lý."
+                        icon={
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M9 12l2 2 4-4"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                                <path
+                                    d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3Z"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                />
+                                <path
+                                    d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3Z"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                />
+                            </svg>
+                        }
+                    />
+
+                    <QuickCard
+                        to="/admin/sellers"
+                        title="Danh sách Seller"
+                        desc="Quản lý danh sách seller đã được duyệt, khóa/mở khóa tài khoản."
+                        icon={
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                                <circle
+                                    cx="9"
+                                    cy="7"
+                                    r="4"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                />
+                                <path
+                                    d="M20 8v6M23 11h-6"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        }
+                    />
+
+                    <QuickCard
+                        to="/admin/shops"
+                        title="Danh sách Shop"
+                        desc="Xem và lọc shop theo trạng thái, mở hồ sơ seller."
+                        icon={
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinejoin="round"
+                                />
+                                <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="2" />
+                            </svg>
+                        }
+                    />
                 </div>
             )}
         </div>
