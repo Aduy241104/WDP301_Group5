@@ -21,18 +21,27 @@ const ChangePasswordForm = ({ setMessage }) => {
             confirmPassword: "",
         };
 
+        
         if (!passwordData.currentPassword.trim()) {
             newErrors.currentPassword = "Vui lòng nhập mật khẩu hiện tại";
         }
 
-        if (passwordData.newPassword.length < 6) {
-            newErrors.newPassword = "Mật khẩu mới phải có ít nhất 6 ký tự";
+        
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}$/;
+
+        if (!passwordData.newPassword) {
+            newErrors.newPassword = "Vui lòng nhập mật khẩu mới";
+        } else if (!passwordRegex.test(passwordData.newPassword)) {
+            newErrors.newPassword =
+                "Mật khẩu phải ≥ 6 ký tự, có chữ in hoa và ký tự đặc biệt";
         }
 
+        
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
         }
 
+        
         if (
             newErrors.currentPassword ||
             newErrors.newPassword ||
@@ -42,6 +51,7 @@ const ChangePasswordForm = ({ setMessage }) => {
             return;
         }
 
+       
         try {
             await changePasswordAPI(passwordData);
 
@@ -61,17 +71,23 @@ const ChangePasswordForm = ({ setMessage }) => {
                 text: "Đổi mật khẩu thành công",
                 type: "success",
             });
-        } catch {
-            setMessage({
-                text: "Mật khẩu hiện tại không đúng",
-                type: "error",
-            });
+
+            setTimeout(() => {
+                setMessage({ text: "", type: "" });
+            }, 3000);
+
+        } catch (err) {
+            setErrors((prev) => ({
+                ...prev,
+                currentPassword: "Mật khẩu hiện tại không đúng",
+            }));
         }
     };
 
+
     return (
         <div className="w-[420px] rounded-2xl border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            {/* Header */ }
+            {/* Header */}
             <div className="border-b border-slate-100 p-6">
                 <h3 className="text-lg font-semibold text-slate-900">Đổi mật khẩu</h3>
                 <p className="mt-1 text-sm text-slate-500">
@@ -79,111 +95,111 @@ const ChangePasswordForm = ({ setMessage }) => {
                 </p>
             </div>
 
-            {/* Form */ }
+            {/* Form */}
             <div className="p-6 space-y-5">
-                {/* CURRENT PASSWORD */ }
+                {/* CURRENT PASSWORD */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">
                         Mật khẩu hiện tại
                     </label>
                     <input
                         type="password"
-                        className={ [
+                        className={[
                             "w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400",
                             "outline-none transition",
                             errors.currentPassword
                                 ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                 : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                        ].join(" ") }
+                        ].join(" ")}
                         placeholder="Nhập mật khẩu hiện tại"
-                        value={ passwordData.currentPassword }
-                        onChange={ (e) => {
+                        value={passwordData.currentPassword}
+                        onChange={(e) => {
                             setPasswordData({
                                 ...passwordData,
                                 currentPassword: e.target.value,
                             });
                             setErrors((prev) => ({ ...prev, currentPassword: "" }));
-                        } }
+                        }}
                     />
-                    { errors.currentPassword && (
+                    {errors.currentPassword && (
                         <p className="text-sm text-rose-600">
-                            { errors.currentPassword }
+                            {errors.currentPassword}
                         </p>
-                    ) }
+                    )}
                 </div>
 
-                {/* NEW PASSWORD */ }
+                {/* NEW PASSWORD */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">
                         Mật khẩu mới
                     </label>
                     <input
                         type="password"
-                        className={ [
+                        className={[
                             "w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400",
                             "outline-none transition",
                             errors.newPassword
                                 ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                 : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                        ].join(" ") }
+                        ].join(" ")}
                         placeholder="Nhập mật khẩu mới"
-                        value={ passwordData.newPassword }
-                        onChange={ (e) => {
+                        value={passwordData.newPassword}
+                        onChange={(e) => {
                             setPasswordData({
                                 ...passwordData,
                                 newPassword: e.target.value,
                             });
                             setErrors((prev) => ({ ...prev, newPassword: "" }));
-                        } }
+                        }}
                     />
-                    { errors.newPassword && (
+                    {errors.newPassword && (
                         <p className="text-sm text-rose-600">
-                            { errors.newPassword }
+                            {errors.newPassword}
                         </p>
-                    ) }
+                    )}
                 </div>
 
-                {/* CONFIRM PASSWORD */ }
+                {/* CONFIRM PASSWORD */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">
                         Xác nhận mật khẩu
                     </label>
                     <input
                         type="password"
-                        className={ [
+                        className={[
                             "w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400",
                             "outline-none transition",
                             errors.confirmPassword
                                 ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                 : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                        ].join(" ") }
+                        ].join(" ")}
                         placeholder="Nhập lại mật khẩu mới"
-                        value={ passwordData.confirmPassword }
-                        onChange={ (e) => {
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => {
                             setPasswordData({
                                 ...passwordData,
                                 confirmPassword: e.target.value,
                             });
                             setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                        } }
+                        }}
                     />
-                    { errors.confirmPassword && (
+                    {errors.confirmPassword && (
                         <p className="text-sm text-rose-600">
-                            { errors.confirmPassword }
+                            {errors.confirmPassword}
                         </p>
-                    ) }
+                    )}
                 </div>
 
-                {/* ACTION */ }
+                {/* ACTION */}
                 <button
-                    onClick={ handleChangePassword }
-                    className={ [
+                    onClick={handleChangePassword}
+                    className={[
                         "w-full rounded-xl px-4 py-3 font-semibold text-white",
                         "bg-[rgb(119,226,242)] shadow-sm",
                         "hover:brightness-95 active:brightness-90",
                         "focus:outline-none focus:ring-4 focus:ring-[rgba(119,226,242,0.35)]",
                         "transition",
-                    ].join(" ") }
+                    ].join(" ")}
                 >
                     Đổi mật khẩu
                 </button>
