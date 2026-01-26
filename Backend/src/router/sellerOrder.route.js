@@ -11,7 +11,6 @@ const router = express.Router();
 
 router.get("/", getOrders);
 router.get("/:id", getOrderDetail);
-router.get("/:id", getOrderDetail);
 
 router.patch("/:id/confirm", confirmOrder);
 router.patch("/:id/cancel", cancelOrder);
