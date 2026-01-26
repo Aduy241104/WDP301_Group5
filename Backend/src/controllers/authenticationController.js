@@ -87,7 +87,7 @@ export const logout = async (req, res) => {
     try {
         const refreshToken = req.cookies?.refreshToken;
 
-        // Luôn clear cookie để client sạch (kể cả cookie không tồn tại)
+        // Luôn clear cookie
         const clear = () => {
             res.clearCookie("refreshToken", {
                 httpOnly: true,
@@ -137,7 +137,7 @@ export const refreshAccessToken = async (req, res) => {
         // Hash token để so DB
         const tokenHash = hashToken(refreshToken);
 
-        // 3. Tìm refresh token record
+        //Tìm refresh token record
         const tokenDoc = await RefreshToken.findOne({ tokenHash });
         if (!tokenDoc) {
             return res
