@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
 
         window.addEventListener(AUTH_LOGOUT_EVENT, handler);
         return () => window.removeEventListener(AUTH_LOGOUT_EVENT, handler);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, []);
 
     const login = async ({ email, password }) => {
