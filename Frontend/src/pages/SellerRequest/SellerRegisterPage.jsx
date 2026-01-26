@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useSellerRegisterForm from "./components/useSellerRegisterForm";
 import CccdUploadSection from "./components/CccdUploadSection";
 import ShopInfoSection from "./components/ShopInfoSection";
 import ShopAddressSection from "./components/ShopAddressSection";
 import { uploadImagesAPI, uploadSingleImageAPI } from "../../services/uploadService";
-import { createSellerRequestAPI } from "../../services/requestSellerService";
+import { createSellerRequestAPI, checkSellerRequestAPI } from "../../services/requestSellerService";
+import PendingPage from "./components/PendingPage";
+
 
 export default function SellerRegisterPage() {
     const {
@@ -23,13 +25,14 @@ export default function SellerRegisterPage() {
     } = useSellerRegisterForm();
 
     const [serverError, setServerError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [success, setSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [isRequested, setIsRequested] = useState({});
 
     const onSubmit = async (e) => {
         e.preventDefault();
         setServerError("");
-        setSuccess("");
+        setSuccess(false);
 
         const { ok, cleaned } = validate();
         if (!ok) {
@@ -56,7 +59,7 @@ export default function SellerRegisterPage() {
             const payload = { ...cleaned, cccdImages: cccdUrls };
             const data = await createSellerRequestAPI(payload);
 
-            setSuccess(data?.message || "Gửi yêu cầu đăng ký seller thành công!");
+            setSuccess(true);
             reset();
         } catch (err) {
             setServerError(err?.response?.data?.message || err?.message || "Gửi yêu cầu thất bại.");
@@ -64,6 +67,27 @@ export default function SellerRegisterPage() {
             setSubmitting(false);
         }
     };
+
+    useEffect(() => {
+        const checkSellerRequest = async () => {
+            try {
+                const response = await checkSellerRequestAPI();
+                setIsRequested(response);
+
+            } catch (error) {
+                console.log("ERROR: ", error);
+            }
+        }
+
+        checkSellerRequest();
+    }, []);
+
+
+    if (isRequested.requestStatus == "approved" || isRequested.requestStatus == "pending" || success) {
+        return (
+            <PendingPage status={ isRequested.requestStatus } />
+        )
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 px-4 py-10">
@@ -91,12 +115,6 @@ export default function SellerRegisterPage() {
                 { serverError ? (
                     <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
                         { serverError }
-                    </div>
-                ) : null }
-
-                { success ? (
-                    <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
-                        { success }
                     </div>
                 ) : null }
 
