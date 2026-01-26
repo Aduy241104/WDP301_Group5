@@ -18,12 +18,12 @@ import {
     AdminAddBannerController,
     AdminUpdateBannerController,
     AdminDeleteBannerController,
-} from "../controllers/admin/AdminBannerController.js";
+} from "../controllers/AdminBannerController.js";
 
 import {
     AdminReportListController,
     AdminReportDetailController,
-} from "../controllers/admin/AdminReportController.js";
+} from "../controllers/AdminReportController.js";
 
 const router = express.Router();
 

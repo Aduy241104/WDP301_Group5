@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { Report } from "../../models/Report.js";
+import { Report } from "../models/Report.js";
 
 // View Report List
 export const AdminReportListController = async (req, res) => {
@@ -60,3 +60,4 @@ export const AdminReportDetailController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
+
