@@ -1,5 +1,5 @@
 import express from "express";
-import { createSellerRequest } from "../controllers/sellerRequestController.js";
+import { createSellerRequest, checkSellerRequestExists } from "../controllers/sellerRequestController.js";
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { validateBody } from "../middlewares/joiMiddlleware/joiMiddleware.js";
 import { createSellerRequestSchema } from "../middlewares/joiMiddlleware/sellerRequestValidator.js";
@@ -11,6 +11,8 @@ router.post(
     authenticationMiddleware,
     validateBody(createSellerRequestSchema),
     createSellerRequest
-)
+);
+
+router.get("/check", authenticationMiddleware, checkSellerRequestExists);
 
 export default router;

@@ -670,6 +670,7 @@ async function seed() {
         name: req.shopName,
         avatar: "https://example.com/shop-avatar.jpg",
         description: "Shop bán đồ sinh viên",
+        contactPhone: req.contactPhone,
         status: "approved",
         isBlockedByAdmin: false,
         shopAddress: req.shopAddress,

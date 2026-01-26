@@ -61,3 +61,37 @@ export const createSellerRequest = async (req, res) => {
         });
     }
 };
+
+export const checkSellerRequestExists = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+
+        const latestRequest = await SellerRequest
+            .findOne({
+                userId,
+                isDeleted: false,
+            })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Chưa từng gửi request
+        if (!latestRequest) {
+            return res.status(StatusCodes.OK).json({
+                hasRequest: false,
+                message: "User has no seller request yet.",
+            });
+        }
+
+        res.status(StatusCodes.OK).json({
+            hasRequest: true,
+            requestStatus: latestRequest.status,
+            message: "User has seller request",
+        })
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Server error",
+            error: err?.message,
+        });
+    }
+}

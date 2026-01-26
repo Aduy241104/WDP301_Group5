@@ -27,7 +27,7 @@ export const requestRegisterOtp = async (req, res) => {
         const checkExistsUser = await User.exists({ email });
 
         if (checkExistsUser) {
-            return res.status(StatusCodes.CONFLICT).json({ message: "Account already exists" });
+            return res.status(StatusCodes.CONFLICT).json({ message: "Email đã được đăng ký" });
         }
 
         // cooldown theo email + type

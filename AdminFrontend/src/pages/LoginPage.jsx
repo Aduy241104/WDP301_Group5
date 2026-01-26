@@ -40,126 +40,135 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-white flex items-center justify-center px-4 py-10">
             <div className="w-full max-w-md">
-                <div className="bg-white shadow-lg rounded-2xl border border-slate-100">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_rgba(2,6,23,0.08)] overflow-hidden">
+                    <div className="h-1.5 bg-[rgb(119,226,242)]" />
                     <div className="p-6 sm:p-8">
                         <div className="mb-6">
-                            <h1 className="text-2xl font-semibold text-slate-900">Đăng nhập</h1>
-                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại UniTrade.</p>
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[rgb(119,226,242)]/15 px-3 py-1 text-xs font-semibold text-slate-700">
+                                UniTrade Admin
+                                <span className="h-1 w-1 rounded-full bg-[rgb(119,226,242)]" />
+                                Đăng nhập
+                            </div>
+                            <h1 className="mt-3 text-2xl font-bold text-slate-900">Đăng nhập</h1>
+                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại UniTrade Admin.</p>
                         </div>
 
-                        { isAuthenticated ? (
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                                <p className="text-emerald-700 font-medium">Bạn đã đăng nhập.</p>
+                        {isAuthenticated ? (
+                            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                                <p className="text-emerald-700 font-semibold">Bạn đã đăng nhập.</p>
                                 <p className="text-emerald-700/80 text-sm mt-1">
-                                    { user?.email ? `Email: ${user.email}` : "Bạn có thể quay lại trang chính." }
+                                    {user?.email ? `Email: ${user.email}` : "Bạn có thể quay lại trang chính."}
                                 </p>
+                                <a
+                                    href="/"
+                                    className="mt-4 inline-block w-full rounded-xl py-2.5 font-semibold bg-[rgb(119,226,242)] text-slate-900 hover:brightness-95 transition text-center"
+                                >
+                                    Về trang chủ
+                                </a>
                             </div>
                         ) : (
-                            <form onSubmit={ handleSubmit(onSubmit) } className="space-y-4">
-                                { serverError ? (
-                                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
-                                        { serverError }
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                {serverError && (
+                                    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
+                                        {serverError}
                                     </div>
-                                ) : null }
+                                )}
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700">Email</label>
+                                    <label className="block text-sm font-semibold text-slate-700">Email</label>
                                     <input
-                                        placeholder="buyer@unitrade.dev"
+                                        placeholder="admin@unitrade.dev"
                                         autoComplete="email"
-                                        className={ [
-                                            "mt-1 w-full rounded-xl border px-3 py-2 outline-none",
-                                            "focus:ring-2 focus:ring-slate-200",
+                                        className={[
+                                            "mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none",
+                                            "focus:ring-2 focus:ring-[rgb(119,226,242)]/25 focus:border-[rgb(119,226,242)]",
+                                            "placeholder:text-slate-400",
                                             errors.email ? "border-rose-300" : "border-slate-200",
-                                        ].join(" ") }
-                                        { ...register("email") }
+                                        ].join(" ")}
+                                        {...register("email")}
                                     />
-                                    { errors.email ? (
-                                        <p className="mt-1 text-sm text-rose-600">{ errors.email.message }</p>
-                                    ) : null }
+                                    {errors.email && (
+                                        <p className="mt-1 text-sm text-rose-600">{errors.email.message}</p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700">Mật khẩu</label>
+                                    <label className="block text-sm font-semibold text-slate-700">Mật khẩu</label>
                                     <div className="mt-1 relative">
                                         <input
-                                            type={ showPassword ? "text" : "password" }
+                                            type={showPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             autoComplete="current-password"
-                                            className={ [
-                                                "w-full rounded-xl border px-3 py-2 pr-12 outline-none",
-                                                "focus:ring-2 focus:ring-slate-200",
+                                            className={[
+                                                "w-full rounded-xl border bg-white px-3 py-2 pr-12 outline-none",
+                                                "focus:ring-2 focus:ring-[rgb(119,226,242)]/25 focus:border-[rgb(119,226,242)]",
+                                                "placeholder:text-slate-400",
                                                 errors.password ? "border-rose-300" : "border-slate-200",
-                                            ].join(" ") }
-                                            { ...register("password") }
+                                            ].join(" ")}
+                                            {...register("password")}
                                         />
                                         <button
                                             type="button"
-                                            onClick={ () => setShowPassword((v) => !v) }
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded-lg text-slate-600 hover:bg-slate-100"
+                                            onClick={() => setShowPassword((v) => !v)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold px-2.5 py-1.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
                                         >
-                                            { showPassword ? "Ẩn" : "Hiện" }
+                                            {showPassword ? "Ẩn" : "Hiện"}
                                         </button>
                                     </div>
-                                    { errors.password ? (
-                                        <p className="mt-1 text-sm text-rose-600">{ errors.password.message }</p>
-                                    ) : null }
+                                    {errors.password && (
+                                        <p className="mt-1 text-sm text-rose-600">{errors.password.message}</p>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between">
                                     <label className="flex items-center gap-2 text-sm text-slate-600 select-none">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-slate-300"
-                                            { ...register("remember") }
+                                            className="rounded border-slate-300 text-[rgb(119,226,242)] focus:ring-[rgb(119,226,242)]/30"
+                                            {...register("remember")}
                                         />
                                         Ghi nhớ đăng nhập
                                     </label>
-
-                                    <a
-                                        href="/forgot-password"
-                                        className="text-sm font-medium text-slate-700 hover:underline"
-                                    >
+                                    <a href="/forgot-password" className="text-sm font-semibold text-slate-700 hover:underline">
                                         Quên mật khẩu?
                                     </a>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    disabled={ isSubmitting }
-                                    className={ [
-                                        "w-full rounded-xl py-2.5 font-semibold",
-                                        "bg-slate-900 text-white hover:bg-slate-800",
+                                    disabled={isSubmitting}
+                                    className={[
+                                        "w-full rounded-xl py-2.5 font-bold",
+                                        "bg-[rgb(119,226,242)] text-slate-900 hover:brightness-95 transition",
                                         "disabled:opacity-60 disabled:cursor-not-allowed",
-                                    ].join(" ") }
+                                    ].join(" ")}
                                 >
-                                    { isSubmitting ? "Đang đăng nhập..." : "Đăng nhập" }
+                                    {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
                                 </button>
 
                                 <div className="text-sm text-slate-500 text-center">
-                                    Chưa có tài khoản?{ " " }
-                                    <a className="font-medium text-slate-700 hover:underline" href="/register">
+                                    Chưa có tài khoản?{" "}
+                                    <a className="font-semibold text-slate-800 hover:underline" href="/register">
                                         Đăng ký
                                     </a>
                                 </div>
 
                                 <button
                                     type="button"
-                                    onClick={ () => {
+                                    onClick={() => {
                                         setValue("email", "buyer@unitrade.dev", { shouldTouch: true });
                                         setValue("password", "mysecret123", { shouldTouch: true });
-                                    } }
-                                    className="w-full text-sm rounded-xl py-2 border border-slate-200 hover:bg-slate-50"
+                                    }}
+                                    className="w-full text-sm rounded-xl py-2 border border-slate-200 hover:bg-slate-50 font-medium text-slate-700"
                                 >
                                     Điền sẵn tài khoản test
                                 </button>
                             </form>
-                        ) }
+                        )}
                     </div>
                 </div>
-
                 <p className="text-xs text-slate-400 mt-4 text-center">
                     Bằng việc đăng nhập, bạn đồng ý với điều khoản sử dụng.
                 </p>

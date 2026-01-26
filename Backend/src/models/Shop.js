@@ -37,6 +37,7 @@ const ShopSchema = new Schema(
         name: { type: String, required: true, trim: true },
         avatar: { type: String, default: "" },
         description: { type: String, default: "" },
+        contactPhone: { type: String, default: "", trim: true },
 
         status: { type: String, enum: ["pending", "approved", "blocked"], default: "pending", index: true },
         isBlockedByAdmin: { type: Boolean, default: false },

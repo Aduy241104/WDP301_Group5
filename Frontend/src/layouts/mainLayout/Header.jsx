@@ -244,6 +244,7 @@ export default function Header() {
                              before:w-full
                              before:h-2
                              before:bg-transparent
+<<<<<<< HEAD
                             "
               >
                 <div className="p-3">
@@ -256,10 +257,27 @@ export default function Header() {
                 <div className="h-px bg-slate-100" />
 
                 <div className="p-2">
+                  {/* Common menu */}
                   <MenuItem label="Tài khoản" onClick={() => go("/profile")} />
                   <MenuItem label="Đơn hàng" onClick={() => go("/orders")} />
                   <MenuItem label="Yêu thích" onClick={() => go("/wishlist")} />
+                  <MenuItem
+                    label="Địa chỉ giao hàng"
+                    onClick={() => go("/addresses")}
+                  />
 
+                  {/* USER */}
+                  {role === "user" && (
+                    <>
+                      <div className="h-px bg-slate-100 my-2" />
+                      <MenuItem
+                        label="Đăng ký người bán"
+                        onClick={() => go("/request-seller")}
+                      />
+                    </>
+                  )}
+
+                  {/* SELLER */}
                   {role === "seller" && (
                     <>
                       <div className="h-px bg-slate-100 my-2" />
@@ -279,6 +297,7 @@ export default function Header() {
                   )}
 
                   <div className="h-px bg-slate-100 my-2" />
+
                   <button
                     onClick={logout}
                     className="w-full text-left rounded-xl px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
