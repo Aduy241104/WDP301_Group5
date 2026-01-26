@@ -75,7 +75,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="flex gap-12 px-6 py-8">
+      <div className="flex gap-3">
 
         {/* Sidebar bên trái */ }
         <ProfileSidebar
@@ -84,7 +84,7 @@ export default function ProfilePage() {
         />
 
         {/* Content bên phải */ }
-        <div className="relative flex w-full max-w-6xl gap-12">
+        <div className="relative flex w-full max-w-6xl gap-2">
 
           {/* MESSAGE */ }
           { message.text && (

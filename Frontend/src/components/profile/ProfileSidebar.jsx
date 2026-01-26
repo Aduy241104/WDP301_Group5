@@ -5,7 +5,7 @@ const ProfileSidebar = ({ activeView, setActiveView }) => {
 
   return (
     <div className="w-60 shrink-0 border-r border-slate-100 bg-white">
-      <div className="p-4 space-y-2">
+      <div className="px-3 space-y-1">
 
         {/* SECTION: ACCOUNT */ }
         <div className="mb-3">
