@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Socket Test</h2>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+      const socket = io("http://localhost:8080", {
+        auth: {
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MWZjZjgzMjE5NWQwM2U1YmZjYWEyNSIsImVtYWlsIjoibmV3dXNlckBnbWFpbC5jb20iLCJpYXQiOjE3NjM3ODA4NDYsImV4cCI6MTc2Mzc4NDQ0Nn0.J4Zt83pFByME4xzp0oAvFE7atZ_wD8qRYgyRs8uG0NE"
+        }
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected!", socket.id);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected");
+      });
+
+    //   socket.on("onlineUsers", data => {
+    //     console.log("Online list:", data);
+    //   });
+    </script>
+  </body>
+</html>
