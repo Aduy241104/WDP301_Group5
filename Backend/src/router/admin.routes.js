@@ -1,13 +1,23 @@
 import express from "express";
 import { authenticationMiddleware, adminMiddleware } from "../middlewares/authenticationMiddlewares.js";
-import { AdminSellerRegistrationListController } from "../controllers/AdminSellerRegistrationListController.js";
-import { AdminFilterSellerByStatusController } from "../controllers/AdminFilterSellerByStatusController.js";
-import { AdminViewSellerProfileController } from "../controllers/AdminViewSellerProfileController.js";
-import { AdminApproveSellerController } from "../controllers/AdminApproveSellerController.js";
-import { AdminRejectSellerController } from "../controllers/AdminRejectSellerController.js";
-import { AdminBlockSellerController } from "../controllers/AdminBlockSellerController.js";
-import { AdminUnblockSellerController } from "../controllers/AdminUnblockSellerController.js";
-import { AdminShopListController } from "../controllers/AdminShopListController.js";
+import { AdminSellerRegistrationListController } from "../controllers/admin/AdminSellerRegistrationListController.js";
+import { AdminFilterSellerByStatusController } from "../controllers/admin/AdminFilterSellerByStatusController.js";
+import { AdminViewSellerProfileController } from "../controllers/admin/AdminViewSellerProfileController.js";
+import { AdminApproveSellerController } from "../controllers/admin/AdminApproveSellerController.js";
+import { AdminRejectSellerController } from "../controllers/admin/AdminRejectSellerController.js";
+import { AdminBlockSellerController } from "../controllers/admin/AdminBlockSellerController.js";
+import { AdminUnblockSellerController } from "../controllers/admin/AdminUnblockSellerController.js";
+import { AdminShopListController } from "../controllers/admin/AdminShopListController.js";
+// Banner controllers
+import { AdminBannerListController } from "../controllers/admin/AdminBannerController.js";
+import { AdminAddBannerController } from "../controllers/admin/AdminBannerController.js";
+import { AdminUpdateBannerController } from "../controllers/admin/AdminBannerController.js";
+import { AdminDeleteBannerController } from "../controllers/admin/AdminBannerController.js";
+
+// Report controllers
+import { AdminReportListController } from "../controllers/admin/AdminReportController.js";
+import { AdminReportDetailController } from "../controllers/admin/AdminReportController.js";
+
 
 const router = express.Router();
 
@@ -33,6 +43,16 @@ router.post("/sellers/:userId/unblock", AdminUnblockSellerController);
 
 // View shop list
 router.get("/shops", AdminShopListController);
+
+// Banner management
+router.get("/banners", AdminBannerListController);
+router.post("/banners", AdminAddBannerController);
+router.put("/banners/:bannerId", AdminUpdateBannerController);
+router.delete("/banners/:bannerId", AdminDeleteBannerController);
+
+// Report management
+router.get("/reports", AdminReportListController);
+router.get("/reports/:reportId", AdminReportDetailController);
 
 export default router;
 
