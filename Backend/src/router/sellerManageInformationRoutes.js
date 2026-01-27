@@ -1,5 +1,6 @@
 import express from "express";
 import { authenticationMiddleware, sellerMiddleware } from "../middlewares/authenticationMiddlewares.js";
+import { checkApprovedShop } from "../middlewares/checkApprovedShope.js";
 import { viewStoreInformation, updateStoreInformation } from "../controllers/sellerManageInformationController.js";
 
 const router = express.Router();
@@ -9,6 +10,7 @@ router.get(
     "/information",
     authenticationMiddleware,
     sellerMiddleware,
+    checkApprovedShop,
     viewStoreInformation
 );
 
@@ -17,6 +19,7 @@ router.put(
     "/information",
     authenticationMiddleware,
     sellerMiddleware,
+    checkApprovedShop,
     updateStoreInformation
 );
 

@@ -57,7 +57,15 @@ export default function SellerManageStore() {
       setAddresses(normalizeListPayload(data));
     } catch (e) {
       console.error(e);
-      setError(e?.response?.data?.message || "Failed to load pickup addresses");
+      const errorMessage = e?.response?.data?.message || "Failed to load pickup addresses";
+      const shopStatus = e?.response?.data?.shopStatus;
+      
+      // Nếu shop đang ở trạng thái pending, hiển thị thông báo đặc biệt
+      if (shopStatus === 'pending' || e?.response?.status === 403) {
+        setError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -207,6 +215,40 @@ export default function SellerManageStore() {
       setSubmitting(false);
     }
   };
+
+  // Nếu có lỗi và shop đang ở trạng thái pending, hiển thị thông báo đặc biệt
+  if (error && (error.includes('chờ duyệt') || error.includes('pending')) && !loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-semibold">Manage Store</h2>
+          <p className="text-sm text-slate-500">
+            Quản lý pickup address (lấy hàng) của shop
+          </p>
+        </div>
+        <div className="p-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                Cửa hàng đang chờ duyệt
+              </h3>
+              <p className="text-yellow-700 mb-2">
+                {error}
+              </p>
+              <p className="text-sm text-yellow-600">
+                Vui lòng đợi quản trị viên phê duyệt cửa hàng của bạn. Sau khi được duyệt, bạn sẽ có thể quản lý pickup address.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
