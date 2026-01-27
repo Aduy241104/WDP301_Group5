@@ -82,10 +82,13 @@ export default function SellerRegisterPage() {
         checkSellerRequest();
     }, []);
 
-
     if (isRequested.requestStatus == "approved" || isRequested.requestStatus == "pending" || success) {
+        const status = isRequested.requestStatus;
+        if (success) {
+            status = "pending";
+        }
         return (
-            <PendingPage status={ isRequested.requestStatus } />
+            <PendingPage status={ status } />
         )
     }
 
