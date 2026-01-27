@@ -57,6 +57,27 @@ const ProfileSidebar = ({ activeView, setActiveView }) => {
             <span>Mật khẩu</span>
           </div>
 
+          <div
+            onClick={ () => setActiveView("address") }
+            className={ [
+              "flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer",
+              "transition-all",
+              activeView === "address"
+                ? "bg-[rgba(119,226,242,0.18)] text-slate-900 font-semibold"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+            ].join(" ") }
+          >
+            <span
+              className={ [
+                "h-2 w-2 rounded-full",
+                activeView === "address"
+                  ? "bg-[rgb(119,226,242)]"
+                  : "bg-slate-300",
+              ].join(" ") }
+            />
+            <span>Quản lý địa chỉ</span>
+          </div>
+
           {/* NOTIFICATION */ }
           <div
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer
@@ -66,6 +87,7 @@ const ProfileSidebar = ({ activeView, setActiveView }) => {
             <span>Thông báo</span>
           </div>
         </div>
+        
 
         <hr className="my-4 border-slate-100" />
 

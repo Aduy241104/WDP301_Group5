@@ -7,6 +7,9 @@ import ProfileSidebar from "../components/profile/ProfileSidebar";
 import ProfileForm from "../components/profile/ProfileForm";
 import AvatarBox from "../components/profile/AvatarBox";
 import ChangePasswordForm from "../components/profile/ChangePasswordForm";
+import AddressForm from "../components/address/AddressForm";
+import AddressList from "../components/address/AddressList";
+import AddressPage from "./AddressPage";
 
 
 export default function ProfilePage() {
@@ -118,6 +121,12 @@ export default function ProfilePage() {
           { activeView === "password" && (
             <ChangePasswordForm setMessage={ setMessage } />
           ) }
+
+          { activeView === "address" && (
+            <AddressPage />
+          ) }
+
+
         </div>
       </div>
     </div>

@@ -5,7 +5,6 @@ import {
     updateAddressAPI,
 } from "../services/addressServices";
 
-import AddressSidebar from "../components/address/AddressSidebar";
 import AddressList from "../components/address/AddressList";
 import AddressForm from "../components/address/AddressForm";
 
@@ -13,7 +12,6 @@ const AddressPage = () => {
     const [addresses, setAddresses] = useState([]);
     const [editingAddress, setEditingAddress] = useState(null);
     const [message, setMessage] = useState("");
-
 
     const loadAddresses = async () => {
         try {
@@ -27,7 +25,6 @@ const AddressPage = () => {
             console.error("Load address failed", err);
         }
     };
-
 
     useEffect(() => {
         loadAddresses();
@@ -47,25 +44,29 @@ const AddressPage = () => {
     };
 
     return (
-        <div className="flex gap-12">
-            <AddressSidebar />
-
-            <div className="flex w-full max-w-6xl gap-12 relative">
-                {message && (
-                    <div className="absolute top-4 right-4 bg-green-100 text-green-700 px-4 py-2 rounded">
-                        {message}
+        <div className="flex justify-center">
+            <div className="relative flex w-full max-w-6xl gap-12 items-start">
+                { message && (
+                    <div className="absolute top-4 right-4 z-10 rounded-xl bg-green-100 px-4 py-2 text-sm text-green-700 shadow">
+                        { message }
                     </div>
-                )}
+                ) }
 
-                <AddressList
-                    addresses={addresses}
-                    onEdit={setEditingAddress}
-                />
+                {/* LEFT – Address List (LỚN) */ }
+                <div className="basis-[68%] grow-0 shrink-0 min-w-[640px]">
+                    <AddressList
+                        addresses={ addresses }
+                        onEdit={ setEditingAddress }
+                    />
+                </div>
 
-                <AddressForm
-                    editingAddress={editingAddress}
-                    onSubmit={handleSubmit}
-                />
+                {/* RIGHT – Address Form (NHỎ) */ }
+                <div className="basis-[32%] grow-0 shrink-0 max-w-[420px]">
+                    <AddressForm
+                        editingAddress={ editingAddress }
+                        onSubmit={ handleSubmit }
+                    />
+                </div>
             </div>
         </div>
     );

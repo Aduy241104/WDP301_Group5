@@ -23,68 +23,66 @@ export default function ProductCard({ product }) {
     return (
         <Link
             to={ `/products-detail/${id}` }
-            className="group block rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-lg transition overflow-hidden"
+            className="group block rounded-lg bg-white border border-slate-100 
+               shadow-sm hover:shadow transition overflow-hidden"
         >
             {/* Image */ }
             <div className="relative aspect-square bg-slate-50 overflow-hidden">
                 <img
                     src={ img }
                     alt={ name }
-                    className="h-full w-full object-cover group-hover:scale-[1.03] transition"
+                    className="h-full w-full object-cover 
+                       transition-transform duration-300 
+                       group-hover:scale-[1.03]"
                     loading="lazy"
                 />
+
                 {/* Badge */ }
-                <div className="absolute top-3 left-3">
-                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-white/90 border border-slate-200">
-                        🔥 Bán chạy
-                    </span>
-                </div>
+                <span className="absolute top-1.5 left-1.5 
+                         text-[10px] font-semibold 
+                         px-1.5 py-0.5 rounded-full 
+                         bg-white/90 border border-slate-200">
+                    🔥 Hot
+                </span>
             </div>
 
             {/* Content */ }
-            <div className="p-4">
-                <div className="min-h-[44px]">
-                    <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">{ name }</h3>
+            <div className="p-2.5">
+                {/* Name */ }
+                <h3 className="text-[12px] font-semibold text-slate-900 
+                       line-clamp-2 min-h-[32px]">
+                    { name }
+                </h3>
+
+                {/* Price */ }
+                <p className="mt-1 text-[13px] font-bold text-slate-900">
+                    { price }
+                </p>
+
+                {/* Rating + sold */ }
+                <div className="mt-0.5 flex items-center gap-2 text-[10px] text-slate-500">
+                    <span className="flex items-center gap-0.5">
+                        ⭐ <span className="font-semibold text-slate-700">{ rating.toFixed(1) }</span>
+                    </span>
+                    <span className="h-2.5 w-px bg-slate-200" />
+                    <span>{ sold } đã bán</span>
                 </div>
 
-                <div className="mt-2 flex items-center justify-between">
-                    <p className="text-base font-bold text-slate-900">{ price }</p>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <span className="inline-flex items-center gap-1">
-                            ⭐ <span className="font-semibold text-slate-700">{ rating.toFixed(1) }</span>
-                        </span>
-                        <span className="h-3 w-px bg-slate-200" />
-                        <span>
-                            Đã bán <span className="font-semibold text-slate-700">{ sold }</span>
-                        </span>
-                    </div>
-                </div>
-
-                {/* Shop */ }
-                <div className="mt-3 flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                        { shopAvatar ? (
-                            <img src={ shopAvatar } alt={ shopName } className="h-full w-full object-cover" />
-                        ) : null }
-                    </div>
-                    <p className="text-xs text-slate-600 line-clamp-1">
-                        { shopName }
-                    </p>
-                </div>
-
-                {/* Categories */ }
-                { Array.isArray(product?.productCategory) && product.productCategory.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                        { product.productCategory.slice(0, 2).map((c) => (
+                {/* Categories (optional) */ }
+                { Array.isArray(product?.productCategory) && product.productCategory.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                        { product.productCategory.slice(0, 1).map((c) => (
                             <span
                                 key={ c?._id || c?.name }
-                                className="text-[11px] px-2 py-1 rounded-full border border-slate-200 text-slate-600 bg-slate-50"
+                                className="text-[9px] px-1.5 py-0.5 
+                                   rounded-full border border-slate-200 
+                                   text-slate-600 bg-slate-50"
                             >
                                 { c?.name }
                             </span>
                         )) }
                     </div>
-                ) : null }
+                ) }
             </div>
         </Link>
     );
