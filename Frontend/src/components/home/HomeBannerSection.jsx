@@ -11,7 +11,7 @@ export default function HomeBannerSection({ banners = [] }) {
                 UniTrade • Discovery
               </p>
               <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900">
-                Mua bán nội bộ sinh viên — nhanh, gọn, an toàn
+                
               </h1>
               <p className="mt-2 text-slate-500 max-w-xl">
                 Khám phá sản phẩm bán chạy, ưu đãi, và gợi ý dành riêng cho bạn.
