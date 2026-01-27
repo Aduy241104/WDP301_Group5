@@ -6,7 +6,7 @@ import { Shop } from "../models/Shop.js";
  */
 export const addPickupAddress = async (req, res) => {
     try {
-        const ownerId = req.user.id; 
+        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
 
         const {
             province,
@@ -20,17 +20,6 @@ export const addPickupAddress = async (req, res) => {
         if (!province || !district || !ward || !streetAddress || !fullAddress) {
             return res.status(400).json({
                 message: "All address fields are required",
-            });
-        }
-
-        const shop = await Shop.findOne({
-            ownerId,
-            isDeleted: false,
-        });
-
-        if (!shop) {
-            return res.status(404).json({
-                message: "Shop not found",
             });
         }
 
@@ -67,21 +56,13 @@ export const addPickupAddress = async (req, res) => {
 
 export const getPickupAddressList = async (req, res) => {
     try {
-        const ownerId = req.user.id; 
+        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
 
-        const shop = await Shop.findOne({
-            ownerId,
-            isDeleted: false,
-        }).lean();
-
-        if (!shop) {
-            return res.status(404).json({
-                message: "Shop not found",
-            });
-        }
+        // Convert to plain object if needed
+        const shopData = shop.toObject ? shop.toObject() : shop;
 
         // Lọc address chưa bị xoá
-        const pickupAddresses = shop.shopPickupAddresses.filter(
+        const pickupAddresses = (shopData.shopPickupAddresses || []).filter(
             (addr) => !addr.isDeleted
         );
 
@@ -99,7 +80,7 @@ export const getPickupAddressList = async (req, res) => {
 
 export const getPickupAddressDetail = async (req, res) => {
     try {
-        const ownerId = req.user.id;
+        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
         const { pickupAddressId } = req.params;
 
         // Validate ObjectId
@@ -109,20 +90,10 @@ export const getPickupAddressDetail = async (req, res) => {
             });
         }
 
-        const shop = await Shop.findOne({
-            ownerId,
-            isDeleted: false,
-            "shopPickupAddresses._id": pickupAddressId,
-        }).lean();
-        console.log("thong tin cua shop: " + shop);
+        // Convert to plain object if needed
+        const shopData = shop.toObject ? shop.toObject() : shop;
 
-        if (!shop) {
-            return res.status(404).json({
-                message: "Pickup address not found",
-            });
-        }
-
-        const pickupAddress = shop.shopPickupAddresses.find(
+        const pickupAddress = (shopData.shopPickupAddresses || []).find(
             (addr) =>
                 addr._id.toString() === pickupAddressId &&
                 !addr.isDeleted
@@ -148,7 +119,7 @@ export const getPickupAddressDetail = async (req, res) => {
 
 export const updatePickupAddress = async (req, res) => {
   try {
-    const ownerId = req.user.id;
+    const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
     const { pickupAddressId } = req.params;
 
     const {
@@ -163,17 +134,6 @@ export const updatePickupAddress = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(pickupAddressId)) {
       return res.status(400).json({
         message: "Invalid pickup address id",
-      });
-    }
-
-    const shop = await Shop.findOne({
-      ownerId,
-      isDeleted: false,
-    });
-
-    if (!shop) {
-      return res.status(404).json({
-        message: "Shop not found",
       });
     }
 
@@ -216,25 +176,13 @@ export const updatePickupAddress = async (req, res) => {
 
 export const deletePickupAddress = async (req, res) => {
     try {
-        const ownerId = req.user.id;
+        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
         const { pickupAddressId } = req.params;
 
         // 1️⃣ Validate ObjectId
         if (!mongoose.Types.ObjectId.isValid(pickupAddressId)) {
             return res.status(400).json({
                 message: "Invalid pickup address id",
-            });
-        }
-
-        // 2️⃣ Find shop
-        const shop = await Shop.findOne({
-            ownerId,
-            isDeleted: false,
-        });
-
-        if (!shop) {
-            return res.status(404).json({
-                message: "Shop not found",
             });
         }
 
@@ -273,23 +221,12 @@ export const deletePickupAddress = async (req, res) => {
 
 export const setDefaultPickupAddress = async (req, res) => {
     try {
-        const ownerId = req.user.id;
+        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
         const { pickupAddressId } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(pickupAddressId)) {
             return res.status(400).json({
                 message: "Invalid pickup address id",
-            });
-        }
-
-        const shop = await Shop.findOne({
-            ownerId,
-            isDeleted: false,
-        });
-
-        if (!shop) {
-            return res.status(404).json({
-                message: "Shop not found",
             });
         }
 
