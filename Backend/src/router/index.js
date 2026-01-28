@@ -10,7 +10,7 @@ import uploadImageRoute from "./uploadImage.routes.js";
 import sellerManageInformationRoutes from "./sellerManageInformationRoutes.js";
 import sellerRequestRoute from "./sellerRequest.routes.js";
 import bannerRoute from "./banner.routes.js";
-
+import cartRoutes from "./cart.routes.js";
 
 
 function route(app) {
@@ -26,8 +26,7 @@ function route(app) {
     app.use("/api/upload", uploadImageRoute);
     app.use("/api/seller-request", sellerRequestRoute);
     app.use("/api/banners", bannerRoute);
-
-
+    app.use("/api/cart", cartRoutes);
 }
 
 export default route;
