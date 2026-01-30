@@ -16,19 +16,15 @@ export default function CartPage() {
         refetch,
         updateQty,
         removeItem,
-
-        // select
         selectedIds,
         isSelected,
         toggleSelect,
-
-        // modal
         modal,
         closeModal,
         handleModalConfirm,
     } = useCart();
 
-    // ✅ TÍNH TỔNG TIỀN THEO ITEM ĐÃ TICK
+    // TÍNH TỔNG TIỀN THEO ITEM ĐÃ TICK
     const selectedSubtotal = useMemo(() => {
         let sum = 0;
 
@@ -47,7 +43,7 @@ export default function CartPage() {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            <div className="mx-auto max-w-6xl px-4 py-8">
+            <div className="mx-auto max-w-6xl px-2 py-8">
                 <CartHeader onRefresh={ refetch } />
 
                 { loading ? (

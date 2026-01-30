@@ -25,7 +25,7 @@ export default function QuantityControl({ value, stock, disabled, onChange }) {
 
         debounceRef.current = setTimeout(() => {
             onChange(nextQty);
-        }, 1000);
+        }, 500);
     };
 
     const handleDraftChange = (next) => {

@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Package, MapPin, Shirt } from "lucide-react";
 
-export default function ProductInfo({ product }) {
+export default function ProductInfo({ product, currentPrice }) {
     const images = useMemo(() => product?.images ?? [], [product]);
     const [activeImg, setActiveImg] = useState(images[0] || "");
 
@@ -110,7 +110,7 @@ export default function ProductInfo({ product }) {
                         <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4">
                             <div className="text-sm text-slate-500">Giá bán</div>
                             <div className="mt-1 text-3xl font-bold text-blue-600">
-                                { product.defaultPrice.toLocaleString() }₫
+                                { currentPrice.toLocaleString() }₫
                             </div>
                             <div className="mt-1 text-xs text-slate-500">
                                 Giá có thể thay đổi theo phân loại (size/variant)

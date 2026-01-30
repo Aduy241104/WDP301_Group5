@@ -7,7 +7,7 @@ import { ShoppingCart, Zap, Minus, Plus } from "lucide-react";
 import { addToCartAPI } from "../../services/cartService";
 import { useToast } from "../../context/ToastContext";
 
-export default function AddToCartSection({ product }) {
+export default function AddToCartSection({ product, setCurrentPrice }) {
     const [variant, setVariant] = useState(product.variants.find((v) => v.stock > 0) || null);
     const [quantity, setQuantity] = useState(1);
 
@@ -90,6 +90,7 @@ export default function AddToCartSection({ product }) {
                             onClick={ () => {
                                 if (disabled) return;
                                 setVariant(v);
+                                setCurrentPrice(v.price);
                             } }
                             className={ [
                                 "px-4 py-2 rounded-xl border text-sm font-semibold transition-all",

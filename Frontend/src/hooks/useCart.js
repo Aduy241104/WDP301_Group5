@@ -66,7 +66,6 @@ export function useCart() {
 
     const updateQty = useCallback(
         async (variantId, nextQty) => {
-            // optimistic UI
             setGroups((prev) =>
                 prev.map((g) => ({
                     ...g,
@@ -112,7 +111,6 @@ export function useCart() {
                     .filter((g) => (g.items || []).length > 0)
             );
 
-            // nếu item bị xóa → bỏ chọn luôn
             setSelectedIds((prev) => {
                 const next = new Set(prev);
                 next.delete(variantId);
