@@ -143,7 +143,7 @@ export default function Header() {
                 <div className="flex items-center gap-2">
                     {/* cart */ }
                     <button
-                        onClick={ () => go("/cart") }
+                        onClick={ () => go("/my-cart") }
                         className="relative px-3 py-2 bg-white"
                         title="Giỏ hàng"
                     >
