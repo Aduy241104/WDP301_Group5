@@ -8,7 +8,7 @@ import { ToastProvider } from "./context/ToastContext.jsx";
 import { BrowserRouter } from "react-router-dom";
 
 createRoot(document.getElementById("root")).render(
-   <StrictMode>
+   // <StrictMode>
       <BrowserRouter>
          <AuthProvider>
             <ModalProvider>
@@ -18,5 +18,5 @@ createRoot(document.getElementById("root")).render(
             </ModalProvider>
          </AuthProvider>
       </BrowserRouter>
-   </StrictMode>
+   // </StrictMode>
 );

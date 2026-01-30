@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Package, MapPin, Shirt } from "lucide-react";
 
-export default function ProductInfo({ product }) {
+export default function ProductInfo({ product, currentPrice }) {
     const images = useMemo(() => product?.images ?? [], [product]);
     const [activeImg, setActiveImg] = useState(images[0] || "");
 
@@ -31,7 +31,6 @@ export default function ProductInfo({ product }) {
                                 ) }
                             </div>
                         </div>
-
                         <div className="mt-3 grid grid-cols-6 gap-2">
                             { images.map((img, idx) => {
                                 const isActive = img === activeImg;
@@ -89,7 +88,6 @@ export default function ProductInfo({ product }) {
                                 <Package className="w-4 h-4" />
                                 Đã bán { product.totalSale }
                             </span>
-
                             <span
                                 className={ [
                                     "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold border",
@@ -112,7 +110,7 @@ export default function ProductInfo({ product }) {
                         <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4">
                             <div className="text-sm text-slate-500">Giá bán</div>
                             <div className="mt-1 text-3xl font-bold text-blue-600">
-                                { product.defaultPrice.toLocaleString() }₫
+                                { currentPrice.toLocaleString() }₫
                             </div>
                             <div className="mt-1 text-xs text-slate-500">
                                 Giá có thể thay đổi theo phân loại (size/variant)
@@ -139,7 +137,6 @@ export default function ProductInfo({ product }) {
                                 </div>
                             </div>
                         </div>
-
                         {/* Shop */ }
                         <div className="pt-2">
                             <div className="rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
@@ -148,7 +145,6 @@ export default function ProductInfo({ product }) {
                                     alt={ product.shop?.name || "shop" }
                                     className="w-12 h-12 rounded-full object-cover border border-slate-200"
                                 />
-
                                 <div className="min-w-0">
                                     <div className="font-semibold text-slate-900 truncate">
                                         { product.shop?.name }
@@ -157,7 +153,6 @@ export default function ProductInfo({ product }) {
                                         { product.shop?.description }
                                     </div>
                                 </div>
-
                                 <button
                                     type="button"
                                     className="ml-auto rounded-xl border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition"

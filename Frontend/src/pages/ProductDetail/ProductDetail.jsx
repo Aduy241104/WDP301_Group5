@@ -10,12 +10,14 @@ export default function ProductDetail() {
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentPrice, setCurrentPrice] = useState(0);
 
     useEffect(() => {
         (async () => {
             try {
                 const data = await getProductDetailAPI(productId);
                 setProduct(data.item);
+                setCurrentPrice(data?.item?.variants?.[0]?.price ?? 0)
             } finally {
                 setLoading(false);
             }
@@ -32,16 +34,16 @@ export default function ProductDetail() {
 
     return (
         <div className="bg-slate-50 min-h-screen">
-            <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+            <div className="max-w-7xl mx-auto px-1 py-6 space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Product info */ }
                     <div className="lg:col-span-2">
-                        <ProductInfo product={ product } />
+                        <ProductInfo currentPrice={ currentPrice } product={ product } />
                     </div>
 
                     {/* Add to cart */ }
                     <div>
-                        <AddToCartSection product={ product } />
+                        <AddToCartSection setCurrentPrice={ setCurrentPrice } product={ product } />
                     </div>
                 </div>
 

@@ -68,10 +68,10 @@ export default function CenterToast({
             <div
                 role="status"
                 className={ [
-                    "relative w-full max-w-[420px]",
-                    "rounded-2xl",
+                    "relative w-full max-w-[360px]",
+                    "rounded-lg",
                     box,
-                    "shadow-2xl shadow-black/10",
+                    "shadow-lg shadow-black/5",
                     "px-10 py-8",
                     "text-center",
                     "animate-in fade-in zoom-in duration-150",
@@ -81,7 +81,7 @@ export default function CenterToast({
                     className={ [
                         "mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full",
                         circle,
-                        "ring-8 shadow-lg shadow-black/30",
+                        "ring-8 shadow-lg shadow-black/10",
                     ].join(" ") }
                 >
                     <Icon className="h-9 w-9 text-white stroke-[3]" />
@@ -96,14 +96,12 @@ export default function CenterToast({
                     <button
                         type="button"
                         onClick={ onClose }
-                        className="
-              mt-6 w-full
-              inline-flex items-center justify-center
-              rounded-xl bg-white/12 px-4 py-2.5
-              text-sm font-semibold text-white
-              hover:bg-white/18
-              transition
-            "
+                        className="mt-6 w-full
+                                   inline-flex items-center justify-center
+                                   rounded-xl bg-white/12 px-4 py-2.5
+                                   text-sm font-semibold text-white
+                                   hover:bg-white/18
+                                   transition"
                     >
                         Đã hiểu
                     </button>

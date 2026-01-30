@@ -18,6 +18,7 @@ import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageSto
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
+import CartPage from "../pages/CartPage";
 
 
 
@@ -43,6 +44,7 @@ export default function AppRoutes() {
         <Route element={ <PrivateRoute /> }>
           <Route path="/profile" element={ <ProfilePage /> } />
           <Route path="/addresses" element={ <AddressPage /> } />
+          <Route path="/my-cart" element={ <CartPage /> } />
         </Route>
       </Route>
 
