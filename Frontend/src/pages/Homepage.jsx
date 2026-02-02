@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import HomeBannerSection from "../components/home/HomeBannerSection";
 import TopSaleSection from "../components/home/TopSaleSection";
 import SuggestSection from "../components/home/SuggestSection";
-
-// service của bạn
 import { getDiscoverAPI } from "../services/productDiscoveryService";
 
 export default function HomePage() {
@@ -13,8 +11,6 @@ export default function HomePage() {
     const [banners, setBanners] = useState([]);
     const [topSaleProducts, setTopSaleProducts] = useState([]);
     const [suggestProducts, setSuggestProducts] = useState([]);
-
-    
 
     useEffect(() => {
         let alive = true;

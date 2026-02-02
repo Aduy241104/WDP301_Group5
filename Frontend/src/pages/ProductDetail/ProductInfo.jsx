@@ -116,27 +116,6 @@ export default function ProductInfo({ product, currentPrice }) {
                                 Giá có thể thay đổi theo phân loại (size/variant)
                             </div>
                         </div>
-
-                        {/* Meta cards */ }
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                            <div className="rounded-xl border border-slate-100 p-3 flex items-start gap-2 hover:bg-blue-50/40 transition">
-                                <MapPin className="w-4 h-4 mt-0.5 text-slate-500" />
-                                <div>
-                                    <div className="text-slate-500">Xuất xứ</div>
-                                    <div className="font-semibold text-slate-900">{ product.origin }</div>
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-slate-100 p-3 flex items-start gap-2 hover:bg-blue-50/40 transition">
-                                <Shirt className="w-4 h-4 mt-0.5 text-slate-500" />
-                                <div>
-                                    <div className="text-slate-500">Thuộc tính</div>
-                                    <div className="font-semibold text-slate-900">
-                                        { product.attributes?.material } • { product.attributes?.fit }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         {/* Shop */ }
                         <div className="pt-2">
                             <div className="rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
@@ -160,6 +139,40 @@ export default function ProductInfo({ product, currentPrice }) {
                                     Xem shop
                                 </button>
                             </div>
+                        </div>
+
+
+                    </div>
+
+                    <div className="py-5 my-4">
+                        <div>
+                            <h1 className="font-bold text-lg">CHI TIẾT SẢN PHẨM</h1>
+                            <div className="">
+                                { product.attributes &&
+                                    Object.entries(product.attributes).map(([key, value]) => (
+                                        <div
+                                            key={ key }
+                                            className="grid grid-cols-2 gap-6 py-3 text-sm"
+                                        >
+                                            {/* Label */ }
+                                            <div className="text-slate-500">
+                                                { key }
+                                            </div>
+
+                                            {/* Value */ }
+                                            <div className="text-slate-900">
+                                                { Array.isArray(value) ? value.join(", ") : value }
+                                            </div>
+                                        </div>
+                                    )) }
+                            </div>
+                        </div>
+
+                        <div className="my-8">
+                            <h1 className="font-bold text-lg">MÔ TẢ SẢN PHẨM</h1>
+                            <p className="text-slate-500 mt-2 leading-relaxed">
+                                { product.description }
+                            </p>
                         </div>
                     </div>
                 </div>

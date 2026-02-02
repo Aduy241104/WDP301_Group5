@@ -19,6 +19,7 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 import CartPage from "../pages/CartPage";
+import TopSaleProduct from "../pages/TopSaleProduct";
 
 
 
@@ -29,6 +30,7 @@ export default function AppRoutes() {
       <Route element={ <MainLayoutRoute /> }>
         <Route path="/" element={ <HomePage /> } />
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
+        <Route path="/top-sale" element={ <TopSaleProduct /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
