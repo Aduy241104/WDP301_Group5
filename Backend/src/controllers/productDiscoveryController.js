@@ -21,7 +21,7 @@ export const getProductDiscovery = async (req, res) => {
             .sort({ priority: -1, createdAt: -1 })
             .limit(6)
             .lean();
-        
+
         const banners = bannerDocs.map((b) => ({
             _id: b._id,
             title: b.title,
@@ -30,7 +30,7 @@ export const getProductDiscovery = async (req, res) => {
             linkType: b.linkType,
             linkTargetId: b.linkTargetId,
         }));
-        
+
         //const banners = [];
 
         const suggestProducts = [];
@@ -227,7 +227,7 @@ export const getProductDetailById = async (req, res) => {
 
                     shop: 1,
 
-                    variants: 1, // nếu bạn muốn "chưa cần size+stock" thì mình sẽ bỏ phần này
+                    variants: 1,
                     totalStock: 1,
                     inStock: 1,
                 },
@@ -248,3 +248,92 @@ export const getProductDetailById = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
     }
 };
+
+export const searchProducts = async (req, res) => {
+    try {
+        const qRaw = req.query.q ?? "";
+        const q = String(qRaw).trim();
+
+        const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 50);
+        const skip = (page - 1) * limit;
+
+        // Base constraints: chỉ lấy hàng đang hiển thị
+        const base = {
+            isDeleted: false,
+            status: "approved",
+            activeStatus: "active",
+        };
+
+        // Nếu không có q thì trả về list mới nhất (hoặc bạn có thể trả [] tuỳ UX)
+        if (!q) {
+            const [items, total] = await Promise.all([
+                Product.find(base)
+                    .sort({ publishedAt: -1, createdAt: -1 })
+                    .skip(skip)
+                    .limit(limit)
+                    .select("name slug images defaultPrice ratingAvg totalSale shopId brandId shopCategoryId publishedAt")
+                    .lean(),
+                Product.countDocuments(base),
+            ]);
+
+            return res.status(StatusCodes.OK).json({
+                query: q,
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                items,
+            });
+        }
+
+        // Có q: dùng $text + textScore
+        const query = {
+            ...base,
+            $text: { $search: q },
+        };
+
+        // projection lấy score ra để sort theo relevance + trả về nếu muốn debug
+        const projection = {
+            score: { $meta: "textScore" },
+            name: 1,
+            slug: 1,
+            images: 1,
+            defaultPrice: 1,
+            ratingAvg: 1,
+            totalSale: 1,
+            shopId: 1,
+            brandId: 1,
+            shopCategoryId: 1,
+            publishedAt: 1,
+        };
+
+        const [items, total] = await Promise.all([
+            Product.find(query, projection)
+                .sort({
+                    score: { $meta: "textScore" },
+                    totalSale: -1,       // tie-breaker “bán chạy”
+                    ratingAvg: -1,       // tie-breaker “đánh giá”
+                    publishedAt: -1,     // tie-breaker “mới”
+                })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Product.countDocuments(query),
+        ]);
+
+        return res.status(StatusCodes.OK).json({
+            query: q,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            items,
+        });
+    } catch (err) {
+        console.error("SEARCH_PRODUCTS_ERROR:", err);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: "Search failed." });
+    }
+};  
