@@ -1,7 +1,9 @@
 import React from "react";
 import ProductCard from "../product/ProductCard";
+import { useNavigate } from "react-router-dom";
 
 export default function TopSaleSection({ items = [], title = "Sản phẩm bán chạy", subtitle = "Top sản phẩm được mua nhiều nhất" }) {
+    const navigate = useNavigate();
     return (
         <section className="mt-8">
             <div className="flex items-end justify-between gap-3 mb-4">
@@ -10,7 +12,10 @@ export default function TopSaleSection({ items = [], title = "Sản phẩm bán 
                     <p className="text-sm text-slate-500 mt-1">{ subtitle }</p>
                 </div>
 
-                <button className="text-sm font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                <button
+                    className="text-sm font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                    onClick={ () => navigate("/top-sale") }
+                >
                     Xem thêm
                 </button>
             </div>
