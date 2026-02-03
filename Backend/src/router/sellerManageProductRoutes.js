@@ -1,5 +1,10 @@
 import express from "express";
-import { getSellerProductList, createProduct } from "../controllers/sellerManageProductController.js";
+import {
+  getSellerProductList,
+  createProduct,
+  updateProduct,
+  getSellerProductDetail,
+} from "../controllers/sellerManageProductController.js";
 import { authenticationMiddleware, sellerMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { checkApprovedShop } from "../middlewares/checkApprovedShope.js";
 
@@ -25,6 +30,22 @@ router.post(
   sellerMiddleware,
   checkApprovedShop,
   createProduct
+);
+
+router.get(
+  "/:productId",
+  authenticationMiddleware,
+  sellerMiddleware,
+  checkApprovedShop,
+  getSellerProductDetail
+);
+
+router.put(
+  "/:productId",
+  authenticationMiddleware,
+  sellerMiddleware,
+  checkApprovedShop,
+  updateProduct
 );
 
 export default router;

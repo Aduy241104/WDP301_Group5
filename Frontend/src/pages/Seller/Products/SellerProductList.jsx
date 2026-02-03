@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getSellerProductsAPI } from "../../../services/sellerManageProduct.service";
 
-export default function SellerProductList({ onAdd }) {
+export default function SellerProductList({ onAdd, onEdit }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -55,6 +55,7 @@ export default function SellerProductList({ onAdd }) {
                 <th className="text-right px-4 py-3 font-semibold text-gray-700">Giá</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Active</th>
+                <th className="text-right px-4 py-3 font-semibold text-gray-700">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -97,6 +98,15 @@ export default function SellerProductList({ onAdd }) {
                     }`}>
                       {p.activeStatus || "—"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onEdit?.(p._id)}
+                      className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                    >
+                      Sửa
+                    </button>
                   </td>
                 </tr>
               ))}

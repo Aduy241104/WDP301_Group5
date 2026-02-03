@@ -10,6 +10,16 @@ export const createSellerProductAPI = async (payload) => {
   return res.data;
 };
 
+export const getSellerProductDetailAPI = async (productId) => {
+  const res = await axiosInstance.get(`/api/seller/products/${productId}`);
+  return res.data;
+};
+
+export const updateSellerProductAPI = async (productId, payload) => {
+  const res = await axiosInstance.put(`/api/seller/products/${productId}`, payload);
+  return res.data;
+};
+
 export const getBrandsAPI = async () => {
   const res = await axiosInstance.get("/api/seller/brands");
   return res.data?.data || [];
