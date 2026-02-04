@@ -19,9 +19,8 @@ import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 import CartPage from "../pages/CartPage";
+import SellerProducts from "../pages/Seller/Products/SellerProducts";
 import TopSaleProduct from "../pages/TopSaleProduct";
-
-
 
 export default function AppRoutes() {
   return (
@@ -73,6 +72,7 @@ export default function AppRoutes() {
           <Route path="dashboard" element={ <SellerDashboard /> } />
           <Route path="store-information" element={ <SellerStoreInformation /> } />
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
+          <Route path="products" element={ <SellerProducts /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
         </Route>
