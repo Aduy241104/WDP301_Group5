@@ -3,6 +3,7 @@ import { Product } from "../models/Product.js";
 import { Banner } from "../models/Banner.js";
 import { StatusCodes } from "http-status-codes";
 import { getTopSale } from "../services/productDisCoveryService.js";
+import { getRecommendedProductsService } from "../services/recommenService.js"
 
 
 export const getProductDiscovery = async (req, res) => {
@@ -336,4 +337,17 @@ export const searchProducts = async (req, res) => {
             .status(StatusCodes.INTERNAL_SERVER_ERROR)
             .json({ message: "Search failed." });
     }
-};  
+};
+
+export async function getRecommendedProducts(req, res, next) {
+    try {
+        const result = await getRecommendedProductsService({
+            userId: req.user?.id || null,
+            limit: req.query.limit,
+        });
+
+        return res.json(result);
+    } catch (err) {
+        return next(err);
+    }
+}
