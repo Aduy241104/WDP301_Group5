@@ -11,7 +11,17 @@ import {
     AdminBlockSellerController,
     AdminUnblockSellerController,
     AdminShopListController,
+    AdminShopDetailController,
+    AdminBlockShopController,
+    AdminUnblockShopController,
 } from "../controllers/AdminSellerController.js";
+
+import {
+    AdminUserListController,
+    AdminUserProfileController,
+    AdminBlockUserController,
+    AdminUnblockUserController,
+} from "../controllers/AdminUserController.js";
 
 import {
     AdminBannerListController,
@@ -52,6 +62,17 @@ router.post("/sellers/:userId/unblock", AdminUnblockSellerController);
 
 // View shop list
 router.get("/shops", AdminShopListController);
+// View shop detail
+router.get("/shops/:shopId", AdminShopDetailController);
+// Block / Unblock shop
+router.post("/shops/:shopId/block", AdminBlockShopController);
+router.post("/shops/:shopId/unblock", AdminUnblockShopController);
+
+// User management
+router.get("/users", AdminUserListController);
+router.get("/users/:userId/profile", AdminUserProfileController);
+router.post("/users/:userId/block", AdminBlockUserController);
+router.post("/users/:userId/unblock", AdminUnblockUserController);
 
 // Banner management
 router.get("/banners", AdminBannerListController);

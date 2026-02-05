@@ -337,3 +337,77 @@ export const AdminShopListController = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
+
+// ============================================
+// VIEW SHOP DETAIL
+// ============================================
+export const AdminShopDetailController = async (req, res) => {
+    try {
+        const { shopId } = req.params;
+
+        const shop = await Shop.findOne({ _id: shopId, isDeleted: false })
+            .populate("ownerId", "email fullName phone role status")
+            .lean();
+
+        if (!shop) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Shop not found." });
+        }
+
+        return res.status(StatusCodes.OK).json({ shop });
+    } catch (err) {
+        console.error("ADMIN_SHOP_DETAIL_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
+
+// ============================================
+// BLOCK SHOP
+// ============================================
+export const AdminBlockShopController = async (req, res) => {
+    try {
+        const { shopId } = req.params;
+
+        const shop = await Shop.findOne({ _id: shopId, isDeleted: false });
+        if (!shop) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Shop not found." });
+        }
+
+        shop.status = "blocked";
+        shop.isBlockedByAdmin = true;
+        await shop.save();
+
+        return res.status(StatusCodes.OK).json({
+            message: "Shop blocked.",
+            shop: { id: shop._id, status: shop.status },
+        });
+    } catch (err) {
+        console.error("ADMIN_BLOCK_SHOP_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
+
+// ============================================
+// UNBLOCK SHOP
+// ============================================
+export const AdminUnblockShopController = async (req, res) => {
+    try {
+        const { shopId } = req.params;
+
+        const shop = await Shop.findOne({ _id: shopId, isDeleted: false });
+        if (!shop) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Shop not found." });
+        }
+
+        shop.status = "approved";
+        shop.isBlockedByAdmin = false;
+        await shop.save();
+
+        return res.status(StatusCodes.OK).json({
+            message: "Shop unblocked.",
+            shop: { id: shop._id, status: shop.status },
+        });
+    } catch (err) {
+        console.error("ADMIN_UNBLOCK_SHOP_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
