@@ -5,12 +5,18 @@ export default function SellerProductList({ onAdd, onEdit }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     const fetch = async () => {
       try {
         setError("");
-        const res = await getSellerProductsAPI({ page: 1, limit: 20 });
+        const params = { page: 1, limit: 20 };
+        if (statusFilter && statusFilter !== "all") params.status = statusFilter;
+        if (activeFilter && activeFilter !== "all") params.activeStatus = activeFilter;
+
+        const res = await getSellerProductsAPI(params);
         setProducts(res?.data || []);
       } catch (e) {
         setError(e?.response?.data?.message || "Không thể tải danh sách sản phẩm");
@@ -19,18 +25,47 @@ export default function SellerProductList({ onAdd, onEdit }) {
       }
     };
     fetch();
-  }, []);
+  }, [statusFilter, activeFilter]);
 
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">Danh sách sản phẩm</h2>
-        <button
-          onClick={onAdd}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-        >
-          + Add Product
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border rounded-lg"
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">Active</label>
+            <select
+              value={activeFilter}
+              onChange={(e) => setActiveFilter(e.target.value)}
+              className="px-3 py-2 border rounded-lg"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <button
+            onClick={onAdd}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+          >
+            + Add Product
+          </button>
+        </div>
       </div>
 
       {error && (
