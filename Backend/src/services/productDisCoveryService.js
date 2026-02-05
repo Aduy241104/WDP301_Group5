@@ -1,4 +1,6 @@
 import { Product } from "../models/Product.js";
+import { UserProductEvent } from "../models/UserProductEvent.js";
+import mongoose from "mongoose";
 
 export const getTopSale = async (skip, limit) => {
     const baseMatch = {
@@ -126,11 +128,7 @@ export const getTopSale = async (skip, limit) => {
                             ratingAvg: 1,
                             totalSale: 1,
 
-
-
                             shop: 1, // snapshot shop basic
-
-                            // không trả variants/inStocks để nhẹ payload
                         },
                     },
                 ],
