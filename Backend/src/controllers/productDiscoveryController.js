@@ -8,8 +8,14 @@ import { getRecommendedProductsService } from "../services/recommenService.js"
 
 export const getProductDiscovery = async (req, res) => {
     try {
+        const userId = req.user?.id ?? undefined ;
         const topSaleProductsDoc = await getTopSale(0, 8);
         const topSaleProducts = topSaleProductsDoc.items;
+        const recommendProductDoc = await getRecommendedProductsService({
+            userId,
+            limit: 8,
+        });
+        const suggestProducts = recommendProductDoc.items;
         // Get active banners for home_top position
         const now = new Date();
         const bannerDocs = await Banner.find({
@@ -32,11 +38,6 @@ export const getProductDiscovery = async (req, res) => {
             linkTargetId: b.linkTargetId,
         }));
 
-        //const banners = [];
-
-        const suggestProducts = [];
-
-
         const responseFormat = {
             banners,
             topSaleProducts,
@@ -48,7 +49,7 @@ export const getProductDiscovery = async (req, res) => {
             data: responseFormat
         });
     } catch (error) {
-        console.error("getTopSaleProducts error:", err);
+        console.error("getTopSaleProducts error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: "Internal server error",
         });

@@ -61,7 +61,7 @@ export async function getTopCategoriesForUser(userId, topN = 3) {
 /** ---------------------------
  *  Top categories: GUEST (từ Product)
  *  --------------------------*/
-export async function getTopCategoriesForGuest(topN = 3) {
+export async function getTopCategoriesForGuest(topN = 4) {
     return Product.aggregate([
         { $match: BASE_MATCH },
         {
@@ -110,15 +110,15 @@ function allocateByCount(total, n) {
 /** ---------------------------
  *  Service chính (✅ có phân trang)
  *  --------------------------*/
-export async function getRecommendedProductsService({ userId, limit = 3, page }) {
+export async function getRecommendedProductsService({ userId, limit = 8, page }) {
     const finalLimit = Math.min(Math.max(parseInt(limit || "30", 10), 1), 60);
     const currentPage = Math.max(parseInt(page || "1", 10), 1);
     const isGuest = !userId;
-
+    
     // 1) Lấy top categories
     let categories = [];
     if (isGuest) {
-        categories = await getTopCategoriesForGuest(3);
+        categories = await getTopCategoriesForGuest(4);
     } else {
         categories = await getTopCategoriesForUser(userId, 3);
     }
@@ -131,6 +131,7 @@ export async function getRecommendedProductsService({ userId, limit = 3, page })
 
     // 4) Query products theo từng nhóm (✅ skip theo page)
     let groups = [];
+    let allItems = [];
 
     if (userNoData) {
         //RANDOM toàn hệ thống + phân trang
@@ -144,6 +145,7 @@ export async function getRecommendedProductsService({ userId, limit = 3, page })
         );
 
         groups = [{ category: null, items }];
+        allItems = [...items]
     } else {
         groups = await Promise.all(
             categories.map(async (c, idx) => {
@@ -166,9 +168,10 @@ export async function getRecommendedProductsService({ userId, limit = 3, page })
 
                 const items = await Product.aggregate(pipeline);
 
+                allItems = [...items, ...allItems];
+
                 return {
                     category: { _id: c.categoryId, name: c.name, score: c.score },
-                    items,
                 };
             })
         );
@@ -190,6 +193,7 @@ export async function getRecommendedProductsService({ userId, limit = 3, page })
                 ? "user_no_event_random_paginated"
                 : `user_behavior_by_${categories.length}_categories_paginated`,
         categories: groups,
+        items: allItems
     };
 }
 

@@ -10,7 +10,7 @@ import { optionalAuthenticationMiddleware } from "../middlewares/authenticationM
 
 const router = express.Router();
 
-router.get("/", getProductDiscovery);
+router.get("/", optionalAuthenticationMiddleware, getProductDiscovery);
 
 router.get("/top-sale", getTopSaleProducts);
 
