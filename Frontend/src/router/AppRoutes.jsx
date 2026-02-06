@@ -5,7 +5,7 @@ import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import AddressPage from "../pages/AddressPage";
-import SellerDashboard from "../pages/SellerDashboard";
+import SellerDashboard from "../pages/Seller/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
@@ -13,8 +13,10 @@ import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
 import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
+import SellerCancelledOrders from "../pages/Seller/SellerCancelledOrders";
 import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import SellerReviews from "../pages/Seller/SellerReviews";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
@@ -66,7 +68,9 @@ export default function AppRoutes() {
           {/* ROUTE RÕ RÀNG */ }
           <Route path="dashboard" element={ <SellerDashboard /> } />
           <Route path="store" element={ <SellerManageStore /> } />
+          <Route path="reviews" element={ <SellerReviews /> } />
           <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
           {/* ROUTE RÕ RÀNG */ }
           <Route path="dashboard" element={ <SellerDashboard /> } />
@@ -74,6 +78,7 @@ export default function AppRoutes() {
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
           <Route path="products" element={ <SellerProducts /> } />
           <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
         </Route>
       </Route>
