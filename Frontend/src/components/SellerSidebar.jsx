@@ -36,6 +36,7 @@ export default function SellerSidebar() {
       <nav className="flex-1 px-3 py-4 space-y-1 text-sm">
         {menu.map((item) => (
           <NavLink
+            key={item.to}
             to={item.to}
             end={item.to === "/seller"}
             className={({ isActive }) =>
