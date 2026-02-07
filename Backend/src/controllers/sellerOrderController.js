@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Order } from "../models/Order.js";
 import { Shop } from "../models/Shop.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
+import { Inventory } from "../models/Inventory.js";
 
 export const getOrders = async (req, res) => {
   const { status, keyword, trackingCode } = req.query;
@@ -49,24 +50,66 @@ export const confirmOrder = async (req, res) => {
 };
 
 export const cancelOrder = async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-  if (!order) return res.status(404).json({ message: "Order not found" });
+    if (["shipped", "delivered"].includes(order.orderStatus)) {
+      return res
+        .status(400)
+        .json({ message: "Cannot cancel shipped or delivered order" });
+    }
 
-  if (["shipped", "delivered"].includes(order.orderStatus)) {
-    return res
-      .status(400)
-      .json({ message: "Cannot cancel shipped/delivered order" });
+    if (order.orderStatus === "cancelled") {
+      return res.status(400).json({ message: "Order already cancelled" });
+    }
+
+    // 🧠 ensure statusHistory
+    if (!Array.isArray(order.statusHistory)) {
+      order.statusHistory = [];
+    }
+
+    // ✅ cộng lại tồn kho
+    for (const item of order.items) {
+      if (!item.variantId) {
+        return res
+          .status(400)
+          .json({ message: "Order item missing variantId" });
+      }
+
+      const inv = await Inventory.findOneAndUpdate(
+        { variantId: item.variantId },
+        {
+          $inc: { stock: item.quantity },
+          $set: { updatedAt: new Date() },
+        },
+      );
+
+      if (!inv) {
+        return res.status(400).json({
+          message: `Inventory not found for variant ${item.variantId}`,
+        });
+      }
+    }
+
+    order.orderStatus = "cancelled";
+    order.cancelledAt = new Date();
+    order.statusHistory.push({
+      status: "cancelled",
+      createdAt: new Date(),
+    });
+
+    await order.save();
+
+    res.json(order);
+  } catch (err) {
+    console.error("❌ cancelOrder error:", err);
+    res.status(500).json({ message: err.message });
   }
-
-  order.orderStatus = "cancelled";
-  order.cancelledAt = new Date();
-  order.statusHistory.push({ status: "cancelled" });
-
-  await order.save();
-
-  res.json(order);
 };
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { status, trackingCode, pickupAddressId } = req.body;
@@ -396,4 +439,3 @@ const buildRevenueSeries = async (shopId) => {
 
   return { dailySeries, monthlySeries };
 };
-
