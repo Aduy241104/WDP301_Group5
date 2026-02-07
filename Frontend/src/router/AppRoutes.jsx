@@ -23,6 +23,7 @@ import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStore
 import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
 import TopSaleProduct from "../pages/TopSaleProduct";
+import OrderSummary from "../pages/OrderCustomer/OrderSummary";
 
 export default function AppRoutes() {
   return (
@@ -48,6 +49,7 @@ export default function AppRoutes() {
           <Route path="/profile" element={ <ProfilePage /> } />
           <Route path="/addresses" element={ <AddressPage /> } />
           <Route path="/my-cart" element={ <CartPage /> } />
+          <Route path="/place-order" element={ <OrderSummary /> } />
         </Route>
       </Route>
 

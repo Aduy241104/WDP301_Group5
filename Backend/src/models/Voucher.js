@@ -11,7 +11,7 @@ const VoucherSchema = new Schema(
         name: { type: String, required: true },
         description: { type: String, default: "" },
 
-        discountType: { type: String, enum: ["percent", "fixed"], required: true },
+        discountType: { type: String, enum: ["percent", "fixed", "ship"], required: true },
         discountValue: { type: Number, required: true, min: 0 },
 
         minOrderValue: { type: Number, default: 0, min: 0 },
