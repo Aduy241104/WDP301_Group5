@@ -200,13 +200,14 @@ export const prepareOrdersFromCart = async (req, res, next) => {
         // gom lỗi chung + tính tổng
         const invalidItems = [];
         let grandTotal = 0;
+        let shippingFee = 0;
 
         for (const g of groups) {
             // chỉ cộng total từ item hợp lệ
             const validTotal = (g.validItems || []).reduce((s, it) => s + (it.lineTotal || 0), 0);
             g.subTotal = validTotal;
             grandTotal += validTotal;
-
+            shippingFee += 20000;
             for (const it of g.invalidItems || []) {
                 invalidItems.push({
                     variantId: it.variant,
@@ -219,11 +220,14 @@ export const prepareOrdersFromCart = async (req, res, next) => {
             delete g.invalidItems;
         }
 
+        grandTotal += shippingFee;
+
         return res.json({
             message: "Prepare orders success",
             grandTotal,
+            shippingFee,
             groups,
-            invalidItems, // danh sách lỗi để FE hiện “món này hết hàng…”
+            invalidItems,
         });
     } catch (err) {
         next(err);

@@ -1,4 +1,3 @@
-// components/order/ShopOrderCard.jsx
 import React from "react";
 import OrderItemRow from "./OrderItemRow";
 
@@ -9,6 +8,7 @@ export default function ShopOrderCard({
     group,
     voucher,
     onSelectVoucher,
+    onRemoveVoucher,
 }) {
     return (
         <div className="rounded-xl bg-white border border-slate-200">
@@ -20,9 +20,7 @@ export default function ShopOrderCard({
                     className="w-10 h-10 rounded-lg object-cover"
                 />
                 <div className="font-semibold">{ group.shop.name }</div>
-                <div className="ml-auto font-semibold">
-                    { formatVND(group.subTotal) }
-                </div>
+                <div className="ml-auto font-semibold">{ formatVND(group.subTotal) }</div>
             </div>
 
             {/* ITEMS */ }
@@ -32,7 +30,7 @@ export default function ShopOrderCard({
                 )) }
             </div>
 
-            {/* VOUCHER UI (placeholder) */ }
+            {/* VOUCHER */ }
             <div className="flex items-center justify-between p-4 bg-slate-50">
                 <div>
                     <div className="text-sm font-medium">Voucher của shop</div>
@@ -41,12 +39,25 @@ export default function ShopOrderCard({
                     </div>
                 </div>
 
-                <button
-                    onClick={ onSelectVoucher }
-                    className="px-3 py-1.5 text-sm border rounded-lg bg-white hover:bg-slate-100"
-                >
-                    Chọn
-                </button>
+                <div className="flex items-center gap-2">
+                    { voucher && (
+                        <button
+                            onClick={ onRemoveVoucher }
+                            className="px-3 py-1.5 text-sm border rounded-lg bg-white hover:bg-red-50 text-red-600 border-red-200"
+                            type="button"
+                        >
+                            Gỡ
+                        </button>
+                    ) }
+
+                    { !voucher && <button
+                        onClick={ onSelectVoucher }
+                        className="px-3 py-1.5 text-sm border rounded-lg bg-white hover:bg-slate-100"
+                        type="button"
+                    >
+                        Voucher
+                    </button> }
+                </div>
             </div>
         </div>
     );
