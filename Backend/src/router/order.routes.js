@@ -4,8 +4,8 @@ import { prepareOrdersFromCart } from "../controllers/orderController.js";
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
 
 
-router.get("/create-order", authenticationMiddleware, prepareOrdersFromCart);
-
-
+router.post("/create-order", authenticationMiddleware, prepareOrdersFromCart);
 
 export default router;
+
+
