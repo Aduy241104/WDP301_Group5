@@ -3,12 +3,19 @@ import { Product } from "../models/Product.js";
 import { Banner } from "../models/Banner.js";
 import { StatusCodes } from "http-status-codes";
 import { getTopSale } from "../services/productDisCoveryService.js";
+import { getRecommendedProductsService } from "../services/recommenService.js"
 
 
 export const getProductDiscovery = async (req, res) => {
     try {
+        const userId = req.user?.id ?? undefined ;
         const topSaleProductsDoc = await getTopSale(0, 8);
         const topSaleProducts = topSaleProductsDoc.items;
+        const recommendProductDoc = await getRecommendedProductsService({
+            userId,
+            limit: 8,
+        });
+        const suggestProducts = recommendProductDoc.items;
         // Get active banners for home_top position
         const now = new Date();
         const bannerDocs = await Banner.find({
@@ -31,11 +38,6 @@ export const getProductDiscovery = async (req, res) => {
             linkTargetId: b.linkTargetId,
         }));
 
-        //const banners = [];
-
-        const suggestProducts = [];
-
-
         const responseFormat = {
             banners,
             topSaleProducts,
@@ -47,7 +49,7 @@ export const getProductDiscovery = async (req, res) => {
             data: responseFormat
         });
     } catch (error) {
-        console.error("getTopSaleProducts error:", err);
+        console.error("getTopSaleProducts error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: "Internal server error",
         });
@@ -336,4 +338,17 @@ export const searchProducts = async (req, res) => {
             .status(StatusCodes.INTERNAL_SERVER_ERROR)
             .json({ message: "Search failed." });
     }
-};  
+};
+
+export async function getRecommendedProducts(req, res, next) {
+    try {
+        const result = await getRecommendedProductsService({
+            userId: req.user?.id || null,
+            limit: req.query.limit,
+        });
+
+        return res.json(result);
+    } catch (err) {
+        return next(err);
+    }
+}

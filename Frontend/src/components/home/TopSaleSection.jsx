@@ -25,9 +25,9 @@ export default function TopSaleSection({ items = [], title = "Sản phẩm bán 
                     <p className="text-slate-600">Chưa có sản phẩm bán chạy.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
                     { items.map((p) => (
-                        <ProductCard key={ p?._id } product={ p } />
+                        <ProductCard key={ p?._id } product={ p } isHot={ true } />
                     )) }
                 </div>
             ) }
