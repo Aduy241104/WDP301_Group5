@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { fetchShopList } from "../services/adminSellerServices";
+import { Link } from "react-router-dom";
+import { fetchShopList, blockShop, unblockShop } from "../services/adminSellerServices";
 
 const STATUS_OPTIONS = [
     { value: "", label: "Tất cả trạng thái" },
@@ -8,10 +8,6 @@ const STATUS_OPTIONS = [
     { value: "pending", label: "Chờ duyệt" },
     { value: "blocked", label: "Bị khóa" },
 ];
-
-function getOwnerId(shop) {
-    return shop?.ownerId?._id ?? shop?.ownerId ?? null;
-}
 
 function StatusPill({ status }) {
     const map = {
@@ -29,10 +25,10 @@ function StatusPill({ status }) {
 }
 
 export default function AdminShopList() {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [allItems, setAllItems] = useState([]);
+    const [actionShopId, setActionShopId] = useState(null); // shop đang khóa/mở khóa
 
     const [query, setQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
@@ -79,6 +75,25 @@ export default function AdminShopList() {
         const blocked = allItems.filter((s) => s?.status === "blocked").length;
         return { total, active, pending, blocked };
     }, [allItems]);
+
+    const handleBlockToggle = async (shop) => {
+        const isBlocked = shop.status === "blocked";
+        const confirmText = isBlocked ? "Mở khóa shop này?" : "Khóa shop này?";
+        if (!window.confirm(confirmText)) return;
+        try {
+            setActionShopId(shop._id);
+            if (isBlocked) {
+                await unblockShop(shop._id);
+            } else {
+                await blockShop(shop._id);
+            }
+            await refreshData();
+        } catch (err) {
+            alert(err?.response?.data?.message || err?.message || "Thao tác thất bại.");
+        } finally {
+            setActionShopId(null);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -178,46 +193,63 @@ export default function AdminShopList() {
                                     </td>
                                 </tr>
                             ) : (
-                                visibleItems.map((shop) => {
-                                    const ownerId = getOwnerId(shop);
-                                    return (
-                                        <tr key={shop._id} className="border-b border-slate-100 hover:bg-slate-50">
-                                            <td className="px-5 py-4">
-                                                <div className="font-semibold text-slate-900">{shop.name}</div>
-                                                <div className="text-xs text-slate-500 line-clamp-1">
-                                                    {shop.description || "—"}
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <div className="text-slate-800">
-                                                    {shop.ownerId?.email || "—"}
-                                                </div>
-                                                <div className="text-slate-500">
-                                                    {shop.ownerId?.fullName || "—"}
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                {shop.createdAt
-                                                    ? new Date(shop.createdAt).toLocaleDateString("vi-VN")
-                                                    : "—"}
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <StatusPill status={shop.status} />
-                                            </td>
+                                visibleItems.map((shop) => (
+                                    <tr key={shop._id} className="border-b border-slate-100 hover:bg-slate-50">
+                                        <td className="px-5 py-4">
+                                            <div className="font-semibold text-slate-900">{shop.name}</div>
+                                            <div className="text-xs text-slate-500 line-clamp-1">
+                                                {shop.description || "—"}
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="text-slate-800">
+                                                {shop.ownerId?.email || "—"}
+                                            </div>
+                                            <div className="text-slate-500">
+                                                {shop.ownerId?.fullName || "—"}
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            {shop.createdAt
+                                                ? new Date(shop.createdAt).toLocaleDateString("vi-VN")
+                                                : "—"}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <StatusPill status={shop.status} />
+                                        </td>
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center justify-end gap-3">
-                                                    <IconButton
-                                                        title="Xem seller"
-                                                        onClick={() => ownerId && navigate(`/admin/sellers/${ownerId}`)}
-                                                        disabled={!ownerId}
+                                                    <Link
+                                                        to={`/admin/shops/${shop._id}`}
+                                                        title="Xem chi tiết"
+                                                        className="h-9 w-9 rounded-full grid place-items-center transition text-slate-700 hover:bg-slate-100"
                                                     >
                                                         <EyeIcon />
-                                                    </IconButton>
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        title={shop.status === "blocked" ? "Mở khóa" : "Khóa"}
+                                                        onClick={() => handleBlockToggle(shop)}
+                                                        disabled={actionShopId === shop._id}
+                                                        className={[
+                                                            "h-9 w-9 rounded-full grid place-items-center transition disabled:opacity-40 disabled:cursor-not-allowed",
+                                                            shop.status === "blocked"
+                                                                ? "text-emerald-600 hover:bg-emerald-50"
+                                                                : "text-rose-600 hover:bg-rose-50",
+                                                        ].join(" ")}
+                                                    >
+                                                        {actionShopId === shop._id ? (
+                                                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                                        ) : shop.status === "blocked" ? (
+                                                            <UnlockIcon />
+                                                        ) : (
+                                                            <BlockIcon />
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </td>
-                                        </tr>
-                                    );
-                                })
+                                    </tr>
+                                ))
                             )}
                         </tbody>
                     </table>
@@ -236,24 +268,6 @@ function StatCard({ label, value, valueClass }) {
     );
 }
 
-function IconButton({ children, onClick, title, disabled }) {
-    return (
-        <button
-            type="button"
-            title={title}
-            onClick={onClick}
-            disabled={disabled}
-            className={[
-                "h-9 w-9 rounded-full grid place-items-center transition",
-                "text-slate-700 hover:bg-slate-100",
-                disabled ? "opacity-40 cursor-not-allowed hover:bg-transparent" : "",
-            ].join(" ")}
-        >
-            {children}
-        </button>
-    );
-}
-
 function EyeIcon() {
     return (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -263,6 +277,38 @@ function EyeIcon() {
                 strokeWidth="2"
             />
             <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+        </svg>
+    );
+}
+
+function BlockIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+            <path
+                d="M7.5 7.5 16.5 16.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+            />
+        </svg>
+    );
+}
+
+function UnlockIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path
+                d="M7 11V8a5 5 0 0 1 10 0"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+            />
+            <path
+                d="M6 11h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"
+                stroke="currentColor"
+                strokeWidth="2"
+            />
         </svg>
     );
 }
