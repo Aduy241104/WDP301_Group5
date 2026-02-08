@@ -1,5 +1,6 @@
 import { Cart } from "../models/Cart.js";
 import { Types } from "mongoose";
+import { createOrdersFromCartService } from "../services/orderService.js";
 
 export const prepareOrdersFromCart = async (req, res, next) => {
     try {
@@ -231,5 +232,28 @@ export const prepareOrdersFromCart = async (req, res, next) => {
         });
     } catch (err) {
         next(err);
+    }
+};
+
+
+export const createOrdersFromCart = async (req, res) => {
+    try {
+        const userId = req.user?._id || req.user?.id;
+        if (!userId || !Types.ObjectId.isValid(userId)) return res.status(401).json({ message: "Unauthorized" });
+
+        const result = await createOrdersFromCartService({
+            userId: String(userId),
+            ...req.body, // variantIds, deliveryAddress, vouchers, paymentMethod
+        });
+
+        return res.status(201).json(result);
+    } catch (err) {
+        const status = err?.status || 500;
+        if (status >= 500) console.error("[createOrdersFromCart]", err);
+
+        return res.status(status).json({
+            message: err?.message || "Create order failed",
+            error: err?.data || null,
+        });
     }
 };
