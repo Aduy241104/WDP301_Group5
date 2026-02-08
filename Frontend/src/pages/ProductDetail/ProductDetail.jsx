@@ -5,12 +5,15 @@ import { getProductDetailAPI } from "../../services/productDiscoveryService";
 import ProductInfo from "./ProductInfo";
 import AddToCartSection from "./AddToCartSection";
 import ProductFeedbackSection from "./ProductFeedbackSection";
+import { useAuth } from "../../context/AuthContext";
+import { userTrackingAPI } from "../../services/userTrackingService";
 
 export default function ProductDetail() {
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentPrice, setCurrentPrice] = useState(0);
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         (async () => {
@@ -23,6 +26,22 @@ export default function ProductDetail() {
             }
         })();
     }, [productId]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const handleTrackingUserEvent = async () => {
+                try {
+                    console.log("HÊLLOLOEO");
+                    
+                    const response = await userTrackingAPI(productId, "view_detail");
+                } catch (error) {
+                    console.log("ERROR WHEN TRACKING USER EVENT: ", error.message);
+                }
+            }
+
+            handleTrackingUserEvent();
+        }
+    }, [productId])
 
     if (loading) {
         return <div className="p-6 text-center">Loading...</div>;
