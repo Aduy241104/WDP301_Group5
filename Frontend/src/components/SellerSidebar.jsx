@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Star,
   Bell,
+  Image,
 } from "lucide-react";
 
 const menu = [
@@ -17,6 +18,7 @@ const menu = [
   { label: "Manage Pickup Address", to: "/seller/pickup-addresses", icon: Store },
   { label: "Categories", to: "/seller/categories", icon: Boxes },
   { label: "Products", to: "/seller/products", icon: Package },
+  { label: "Banners", to: "/seller/banners", icon: Image },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
   { label: "Returns", to: "/seller/returns", icon: RotateCcw },
@@ -36,6 +38,7 @@ export default function SellerSidebar() {
       <nav className="flex-1 px-3 py-4 space-y-1 text-sm">
         {menu.map((item) => (
           <NavLink
+            key={item.to}
             to={item.to}
             end={item.to === "/seller"}
             className={({ isActive }) =>

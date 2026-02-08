@@ -61,3 +61,85 @@ export const AdminReportDetailController = async (req, res) => {
     }
 };
 
+// Classify Report - Classify reports by shop, product, or user
+export const AdminClassifyReportController = async (req, res) => {
+    try {
+        const { targetType } = req.query;        const validTargetTypes = ["shop", "product", "user"];
+        if (targetType && !validTargetTypes.includes(targetType)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: `Invalid targetType. Must be one of: ${validTargetTypes.join(", ")}`,
+            });
+        }
+
+        const query = { isDeleted: false };
+        if (targetType) {
+            query.targetType = targetType;
+        }
+
+        // Group by targetType and count
+        const classification = await Report.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: "$targetType",
+                    count: { $sum: 1 },
+                    reports: {
+                        $push: {
+                            _id: "$_id",
+                            reporterId: "$reporterId",
+                            targetId: "$targetId",
+                            category: "$category",
+                            status: "$status",
+                            createdAt: "$createdAt",
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    targetType: "$_id",
+                    count: 1,
+                    reports: 1,
+                },
+            },
+            { $sort: { count: -1 } },
+        ]);
+
+        // Get total counts
+        const totalByType = await Report.aggregate([
+            { $match: { isDeleted: false } },
+            {
+                $group: {
+                    _id: "$targetType",
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    targetType: "$_id",
+                    count: 1,
+                },
+            },
+        ]);
+
+        const summary = {
+            total: await Report.countDocuments({ isDeleted: false }),
+            byType: totalByType.reduce((acc, item) => {
+                acc[item.targetType] = item.count;
+                return acc;
+            }, {}),
+        };
+
+        return res.status(StatusCodes.OK).json({
+            message: "Reports classified successfully",
+            summary,
+            classification: targetType ? classification : null,
+            details: targetType ? classification[0]?.reports || [] : null,
+        });
+    } catch (err) {
+        console.error("ADMIN_CLASSIFY_REPORT_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
