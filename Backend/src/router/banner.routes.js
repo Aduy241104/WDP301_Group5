@@ -11,8 +11,9 @@ import { authenticationMiddleware, adminMiddleware } from "../middlewares/authen
 const router = express.Router();
 
 // Public routes
-router.get("/:position", getBannersByPosition);
 router.get("/popup/banner", getPopupBanner);
+router.get("/:position", getBannersByPosition);
+
 
 router.post("/", authenticationMiddleware, adminMiddleware, createBanner);       // Tạo banner mới
 router.put("/:id", authenticationMiddleware, adminMiddleware, updateBanner);     // Cập nhật banner

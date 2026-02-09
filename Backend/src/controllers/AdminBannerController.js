@@ -9,20 +9,105 @@ export const AdminBannerListController = async (req, res) => {
         const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20)));
         const skip = (page - 1) * limit;
 
-        const query = { isDeleted: false };
         const position = String(req.query.position ?? "").trim();
-        if (position) query.position = position;
 
-        const [items, total] = await Promise.all([
-            Banner.find(query)
-                .populate("createdBy", "email fullName")
-                .populate("updatedBy", "email fullName")
-                .sort({ priority: -1, createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            Banner.countDocuments(query),
-        ]);
+        // Build match stage - only show admin banners (no shopId) created or edited by admin users
+        const matchStage = {
+            isDeleted: false,
+            $or: [
+                { shopId: null },
+                { shopId: { $exists: false } },
+            ],
+        };
+        if (position) matchStage.position = position;
+
+        // Use aggregation to filter by admin role
+        const pipeline = [
+            { $match: matchStage },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "createdBy",
+                    foreignField: "_id",
+                    as: "creator",
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "updatedBy",
+                    foreignField: "_id",
+                    as: "updater",
+                },
+            },
+            {
+                $match: {
+                    $or: [
+                        { "creator.role": "admin" },
+                        { "updater.role": "admin" },
+                    ],
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "createdBy",
+                    foreignField: "_id",
+                    as: "createdByInfo",
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "updatedBy",
+                    foreignField: "_id",
+                    as: "updatedByInfo",
+                },
+            },
+            {
+                $addFields: {
+                    createdBy: {
+                        $cond: {
+                            if: { $gt: [{ $size: "$createdByInfo" }, 0] },
+                            then: {
+                                email: { $arrayElemAt: ["$createdByInfo.email", 0] },
+                                fullName: { $arrayElemAt: ["$createdByInfo.fullName", 0] },
+                            },
+                            else: null,
+                        },
+                    },
+                    updatedBy: {
+                        $cond: {
+                            if: { $gt: [{ $size: "$updatedByInfo" }, 0] },
+                            then: {
+                                email: { $arrayElemAt: ["$updatedByInfo.email", 0] },
+                                fullName: { $arrayElemAt: ["$updatedByInfo.fullName", 0] },
+                            },
+                            else: null,
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    creator: 0,
+                    updater: 0,
+                    createdByInfo: 0,
+                    updatedByInfo: 0,
+                },
+            },
+            { $sort: { priority: -1, createdAt: -1 } },
+            {
+                $facet: {
+                    items: [{ $skip: skip }, { $limit: limit }],
+                    totalCount: [{ $count: "count" }],
+                },
+            },
+        ];
+
+        const result = await Banner.aggregate(pipeline);
+        const items = result[0]?.items || [];
+        const total = result[0]?.totalCount[0]?.count || 0;
 
         return res.status(StatusCodes.OK).json({
             items,

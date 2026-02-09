@@ -39,7 +39,7 @@ export default function AppRoutes() {
                 {/* Admin: layout + trang Seller Management */}
                 <Route element={<AdminRoute />}>
                     <Route path="/admin" element={<AdminLayoutRoute />}>
-                        <Route index element={<Navigate to="/admin/seller-requests" replace />} />
+                        <Route index element={<HomePage />} />
                         <Route path="seller-requests" element={<AdminSellerRequestApproval />} />
                         <Route path="sellers" element={<AdminSellerList />} />
                         <Route path="sellers/:userId" element={<AdminSellerProfile />} />
