@@ -17,6 +17,7 @@ import categorySchemaRoutes from "./categorySchema.routes.js";
 import sellerReviewRoutes from "./sellerReview.route.js";
 import userEventProductRoutes from "./userEventProduct.routes.js";
 import orderRoutes from "./order.routes.js";
+import voucherRoutes from "./voucher.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -27,6 +28,7 @@ function route(app) {
     app.use("/api/user-event", userEventProductRoutes);
     app.use("/api/order", orderRoutes);
     app.use("/api/admin", adminRoute);
+    app.use("/api/voucher", voucherRoutes);
     // Seller routes
     app.use("/api/seller/products", sellerManageProduct);
     app.use("/api/seller/shop", sellerManageShopRoutes);

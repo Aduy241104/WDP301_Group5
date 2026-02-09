@@ -10,6 +10,7 @@ export default function OrderTotalBox({
     onPickSystemVoucher,
     onRemoveSystemVoucher,
     onSubmit,
+    submitting
 }) {
     return (
         <div className="mt-8 rounded-2xl bg-white border border-slate-200 p-6 shadow-sm space-y-5">
@@ -82,10 +83,11 @@ export default function OrderTotalBox({
                 </span>
             </div>
             <button
+                disabled={ submitting }
                 onClick={ onSubmit }
                 className="w-full rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-[0.99] transition text-white font-bold py-3 shadow-sm"
             >
-                Đặt hàng
+                { submitting ? "Đang đặt hàng..." : "Đặt hàng" }
             </button>
         </div>
     );

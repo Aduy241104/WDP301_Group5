@@ -41,3 +41,8 @@ export const applySystemVoucher = async ({
 
     return response.data;
 };
+
+export const placeOrderAPI = async (data) => {
+    const response = await axiosInstance.post("/api/order/place-order", data);
+    return response.data;
+}

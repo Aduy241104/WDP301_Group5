@@ -215,8 +215,8 @@ export async function createOrdersFromCartService({
             lineTotal: money(price * s.quantity),
         });
     }
-
-    if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems });
+ if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems 
+   });
 
     // 4) group shops
     const groups = groupByShop(lines);
