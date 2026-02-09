@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Voucher } from "../models/Voucher.js";
 import { VoucherUsage } from "../models/VoucherUsage.js";
+import { StatusCodes } from "http-status-codes";
 
 const { Types } = mongoose;
 
@@ -177,3 +178,34 @@ export const applySystemShipVoucherPreview = async (req, res, next) => {
         next(e);
     }
 };
+
+export const getVoucherByShop = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { shopId } = req.params;
+
+        const shopVouchers = await Voucher.find({
+            scope: "shop",
+            shopId: shopId,
+            isDeleted: false,
+            startAt: { $lte: new Date() },
+            endAt: { $gte: new Date() }
+        }).lean();
+
+        const voucherIds = shopVouchers.map((v) => v._id);
+        const shopVouchersMap = new Map(
+            shopVouchers.map(v => [v._id.toString(), v])
+        );
+
+        const voucherUseage = await VoucherUsage.find({ voucherId: { $in: voucherIds }, userId }).lean();
+
+        for (const vu of voucherUseage) {
+            const key = vu.voucherId.toString();
+            shopVouchersMap.delete(key); // delete ko cần has cũng được
+        }
+        res.status(StatusCodes.OK).json({ message: "get voucher by shop success", vouchers: Object.fromEntries(shopVouchersMap) })
+
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
+}
