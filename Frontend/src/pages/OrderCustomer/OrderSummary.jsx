@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, Link } from "react-router-dom";
-import { createOrder } from "../../services/orderCustomerServices";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { createOrder, placeOrderAPI } from "../../services/orderCustomerServices";
 import ShopOrderCard from "../../components/order/ShopOrderCard";
 import InvalidItemsBox from "../../components/order/InvalidItemsBox";
 import OrderTotalBox from "../../components/order/OrderTotalBox";
 import SystemVoucherModal from "../../components/order/SystemVoucherModal";
 import VoucherModal from "../../components/order/VoucherModal";
+import { buildCreateOrderPayload } from "../../utils/builCreateOrderPayload"
 
 function OrderSummary() {
     const { state } = useLocation();
+    const navigate = useNavigate();
 
     const [dataOrder, setDataOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,24 @@ function OrderSummary() {
     const [baseShopSubTotals, setBaseShopSubTotals] = useState({}); // lưu giá gốc theo shopId
 
     const [voucherModal, setVoucherModal] = useState({ open: false, shopId: null });
+
+    const [paymentMethod, setPaymentMethod] = useState(state?.paymentMethod ?? "cod");
+    const [submitting, setSubmitting] = useState(false);
+
+
+    const [deliveryAddress, setDeliveryAddress] = useState({
+        contact: {
+            name: "Nguyễn Văn A",
+            phone: "0900000000",
+        },
+        address: {
+            province: "HCM",
+            district: "Thủ Đức",
+            ward: "Linh Trung",
+            streetAddress: "12 ABC",
+            fullAddress: "12 ABC, Linh Trung, Thủ Đức, HCM",
+        },
+    });
 
     const variantIds = useMemo(() => {
         const raw = state?.selectedIds;
@@ -98,9 +118,7 @@ function OrderSummary() {
     }, [dataOrder, voucherModal.shopId]);
 
     const handleAppliedVoucher = ({ shopId, voucherCode, newSubTotal }) => {
-
         setShopVouchers((prev) => ({ ...prev, [shopId]: voucherCode }));
-
         setDataOrder((prev) => {
             if (!prev) return prev;
 
@@ -126,9 +144,7 @@ function OrderSummary() {
             const groups = prev.groups.map((g) =>
                 g.shopId === shopId ? { ...g, subTotal: baseSub } : g
             );
-
             const newGrandTotal = recomputeGrandTotal(groups, prev.shippingFee ?? 0, shipDiscount);
-
             return { ...prev, groups, grandTotal: newGrandTotal };
         });
     };
@@ -145,6 +161,37 @@ function OrderSummary() {
 
             return { ...prev, grandTotal: newGrandTotal };
         });
+    };
+
+    const handleSubmitOrder = async () => {
+        try {
+            setSubmitting(true);
+            setError("");
+
+            const payload = buildCreateOrderPayload({
+                variantIds,
+                deliveryAddress,
+                systemVoucher,
+                shopVouchers,
+                paymentMethod: "cod",
+            });
+
+            if (!payload.variantIds.length)
+                throw new Error("Không có sản phẩm để đặt hàng");
+
+            if (!deliveryAddress) {
+                throw new Error("Chưa chọn địa chỉ đặt hàng");
+            }
+
+            const res = await placeOrderAPI(payload);
+
+            navigate("/order-success", { replace: true });
+
+        } catch (err) {
+            setError(err?.response?.data?.message || err.message || "Có lỗi xảy ra");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (loading) return <div className="p-8 text-center">Đang tạo đơn hàng…</div>;
@@ -186,10 +233,10 @@ function OrderSummary() {
                     total={ dataOrder.grandTotal }
                     systemVoucher={ systemVoucher }
                     onPickSystemVoucher={ () => setSystemModalOpen(true) }
-                    onSubmit={ () => alert("Đặt hàng (demo)") }
+                    onSubmit={ handleSubmitOrder }              // ✅ đổi chỗ này
+                    submitting={ submitting }                   // ✅ thêm prop này (nếu component hỗ trợ)
                     onRemoveSystemVoucher={ removeSystemVoucher }
                 />
-
                 <SystemVoucherModal
                     open={ systemModalOpen }
                     onClose={ () => setSystemModalOpen(false) }

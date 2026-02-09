@@ -24,6 +24,7 @@ import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
 import TopSaleProduct from "../pages/TopSaleProduct";
 import OrderSummary from "../pages/OrderCustomer/OrderSummary";
+import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +34,7 @@ export default function AppRoutes() {
         <Route path="/" element={ <HomePage /> } />
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
+        <Route path="/order-success" element={ <OrderSuccess /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
