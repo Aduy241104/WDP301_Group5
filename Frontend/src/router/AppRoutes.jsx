@@ -5,7 +5,7 @@ import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import AddressPage from "../pages/AddressPage";
-import SellerDashboard from "../pages/SellerDashboard";
+import SellerDashboard from "../pages/Seller/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayoutRoute from "./MainLayoutRoute";
@@ -13,14 +13,19 @@ import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
 import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
+import SellerCancelledOrders from "../pages/Seller/SellerCancelledOrders";
 import SellerLayout from "../layouts/sellerLayout/SellerLayout";
 import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import SellerReviews from "../pages/Seller/SellerReviews";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
+import SellerBanners from "../pages/Seller/Banners/SellerBanners";
 import TopSaleProduct from "../pages/TopSaleProduct";
+import OrderSummary from "../pages/OrderCustomer/OrderSummary";
+import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
 
 export default function AppRoutes() {
   return (
@@ -30,6 +35,7 @@ export default function AppRoutes() {
         <Route path="/" element={ <HomePage /> } />
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
+        <Route path="/order-success" element={ <OrderSuccess /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
@@ -46,6 +52,7 @@ export default function AppRoutes() {
           <Route path="/profile" element={ <ProfilePage /> } />
           <Route path="/addresses" element={ <AddressPage /> } />
           <Route path="/my-cart" element={ <CartPage /> } />
+          <Route path="/place-order" element={ <OrderSummary /> } />
         </Route>
       </Route>
 
@@ -66,14 +73,18 @@ export default function AppRoutes() {
           {/* ROUTE RÕ RÀNG */ }
           <Route path="dashboard" element={ <SellerDashboard /> } />
           <Route path="store" element={ <SellerManageStore /> } />
+          <Route path="reviews" element={ <SellerReviews /> } />
           <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
           {/* ROUTE RÕ RÀNG */ }
           <Route path="dashboard" element={ <SellerDashboard /> } />
           <Route path="store-information" element={ <SellerStoreInformation /> } />
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
           <Route path="products" element={ <SellerProducts /> } />
+          <Route path="banners" element={ <SellerBanners /> } />
           <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
         </Route>
       </Route>

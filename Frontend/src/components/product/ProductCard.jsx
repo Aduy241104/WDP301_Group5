@@ -6,7 +6,7 @@ const formatVND = (value) => {
     return n.toLocaleString("vi-VN") + "₫";
 };
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, isHot = false }) {
     if (!product) return null;
 
     const id = product._id;
@@ -38,12 +38,14 @@ export default function ProductCard({ product }) {
                 />
 
                 {/* Badge */ }
-                <span className="absolute top-1.5 left-1.5 
+                { isHot && (
+                    <span className="absolute top-1.5 left-1.5 
                          text-[10px] font-semibold 
                          px-1.5 py-0.5 rounded-full 
                          bg-white/90 border border-slate-200">
-                    🔥 Hot
-                </span>
+                        🔥 Hot
+                    </span>
+                ) }
             </div>
 
             {/* Content */ }

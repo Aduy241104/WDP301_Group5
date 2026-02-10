@@ -12,6 +12,7 @@ import {
   sellerMiddleware,
 } from "../middlewares/authenticationMiddlewares.js";
 import { checkApprovedShop } from "../middlewares/checkApprovedShope.js";
+import { getShopBanners, addShopBanner, updateShopBanner, deleteShopBanner } from "../controllers/sellerShopBannerController.js";
 
 const router = express.Router();
 
@@ -64,5 +65,11 @@ router.put(
   checkApprovedShop,
   setDefaultPickupAddress,
 );
+
+// Shop Banner Management (Seller)
+router.get("/banners", authenticationMiddleware, sellerMiddleware, checkApprovedShop, getShopBanners);
+router.post("/banners", authenticationMiddleware, sellerMiddleware, checkApprovedShop, addShopBanner);
+router.put("/banners/:bannerId", authenticationMiddleware, sellerMiddleware, checkApprovedShop, updateShopBanner);
+router.delete("/banners/:bannerId", authenticationMiddleware, sellerMiddleware, checkApprovedShop, deleteShopBanner);
 
 export default router;

@@ -11,7 +11,17 @@ import {
     AdminBlockSellerController,
     AdminUnblockSellerController,
     AdminShopListController,
+    AdminShopDetailController,
+    AdminBlockShopController,
+    AdminUnblockShopController,
 } from "../controllers/AdminSellerController.js";
+
+import {
+    AdminUserListController,
+    AdminUserProfileController,
+    AdminBlockUserController,
+    AdminUnblockUserController,
+} from "../controllers/AdminUserController.js";
 
 import {
     AdminBannerListController,
@@ -23,7 +33,13 @@ import {
 import {
     AdminReportListController,
     AdminReportDetailController,
+    AdminClassifyReportController,
 } from "../controllers/AdminReportController.js";
+
+import {
+    AdminGMVStatisticsController,
+    AdminRevenueByShopController,
+} from "../controllers/AdminRevenueAnalyticsController.js";
 
 const router = express.Router();
 
@@ -52,6 +68,17 @@ router.post("/sellers/:userId/unblock", AdminUnblockSellerController);
 
 // View shop list
 router.get("/shops", AdminShopListController);
+// View shop detail
+router.get("/shops/:shopId", AdminShopDetailController);
+// Block / Unblock shop
+router.post("/shops/:shopId/block", AdminBlockShopController);
+router.post("/shops/:shopId/unblock", AdminUnblockShopController);
+
+// User management
+router.get("/users", AdminUserListController);
+router.get("/users/:userId/profile", AdminUserProfileController);
+router.post("/users/:userId/block", AdminBlockUserController);
+router.post("/users/:userId/unblock", AdminUnblockUserController);
 
 // Banner management
 router.get("/banners", AdminBannerListController);
@@ -62,6 +89,11 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 // Report management
 router.get("/reports", AdminReportListController);
 router.get("/reports/:reportId", AdminReportDetailController);
+router.get("/reports/classify", AdminClassifyReportController);
+
+// Revenue Analytics
+router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);
+router.get("/revenue/by-shop", AdminRevenueByShopController);
 
 export default router;
 
