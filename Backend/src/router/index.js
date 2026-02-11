@@ -11,6 +11,7 @@ import sellerManageInformationRoutes from "./sellerManageInformationRoutes.js";
 import sellerRequestRoute from "./sellerRequest.routes.js";
 import bannerRoute from "./banner.routes.js";
 import cartRoutes from "./cart.routes.js";
+import shopRoutes from "./shop.routes.js";
 
 
 function route(app) {
@@ -27,6 +28,7 @@ function route(app) {
     app.use("/api/seller-request", sellerRequestRoute);
     app.use("/api/banners", bannerRoute);
     app.use("/api/cart", cartRoutes);
+    app.use("/api/shops", shopRoutes);
 }
 
 export default route;
