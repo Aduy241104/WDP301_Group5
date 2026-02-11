@@ -11,6 +11,9 @@ import AdminSellerRequestApproval from "../pages/AdminSellerRequestApproval";
 import AdminSellerList from "../pages/AdminSellerList";
 import AdminSellerProfile from "../pages/AdminSellerProfile";
 import AdminShopList from "../pages/AdminShopList";
+import AdminShopDetail from "../pages/AdminShopDetail";
+import AdminUserList from "../pages/AdminUserList";
+import AdminUserProfile from "../pages/AdminUserProfile";
 import AdminBannerList from "../pages/AdminBannerList";
 import AdminBannerForm from "../pages/AdminBannerForm";
 import AdminReportList from "../pages/AdminReportList";
@@ -36,11 +39,14 @@ export default function AppRoutes() {
                 {/* Admin: layout + trang Seller Management */}
                 <Route element={<AdminRoute />}>
                     <Route path="/admin" element={<AdminLayoutRoute />}>
-                        <Route index element={<Navigate to="/admin/seller-requests" replace />} />
+                        <Route index element={<HomePage />} />
                         <Route path="seller-requests" element={<AdminSellerRequestApproval />} />
                         <Route path="sellers" element={<AdminSellerList />} />
                         <Route path="sellers/:userId" element={<AdminSellerProfile />} />
                         <Route path="shops" element={<AdminShopList />} />
+                        <Route path="shops/:shopId" element={<AdminShopDetail />} />
+                        <Route path="users" element={<AdminUserList />} />
+                        <Route path="users/:userId" element={<AdminUserProfile />} />
                         <Route path="banners" element={<AdminBannerList />} />
                         <Route path="banners/new" element={<AdminBannerForm />} />
                         <Route path="banners/:bannerId/edit" element={<AdminBannerForm />} />

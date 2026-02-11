@@ -168,7 +168,8 @@ export default function AdminSidebar() {
                     </div>
                 </div>
 
-                <NavPlaceholder
+                <NavItem
+                    to="/admin/users"
                     label="Quản lý Người dùng"
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

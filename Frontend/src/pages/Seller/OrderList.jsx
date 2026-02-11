@@ -15,15 +15,16 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [trackingCode, setTrackingCode] = useState("");
 
   useEffect(() => {
     fetchOrders();
-  }, [status, keyword]);
+  }, [status, keyword, trackingCode]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const data = await getSellerOrdersAPI({ status, keyword });
+      const data = await getSellerOrdersAPI({ status, keyword, trackingCode });
       setOrders(data || []);
     } catch (err) {
       console.error(err);
@@ -37,6 +38,14 @@ export default function OrderList() {
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Orders</h2>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/seller/orders/cancelled"
+            className="text-sm bg-red-50 text-red-700 px-3 py-2 rounded-lg hover:bg-red-100"
+          >
+            View Cancelled Orders
+          </Link>
+        </div>
       </div>
 
       {/* FILTER */}
@@ -47,6 +56,14 @@ export default function OrderList() {
           className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Search by tracking code..."
+          className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          value={trackingCode}
+          onChange={(e) => setTrackingCode(e.target.value)}
         />
 
         <select

@@ -13,7 +13,7 @@ const ProductAttributeSchema = new Schema(
 const ProductSchema = new Schema(
     {
         shopId: { type: Schema.Types.ObjectId, ref: "Shop", required: true, index: true },
-        shopCategoryId: { type: Schema.Types.ObjectId, ref: "ShopCategory", required: true, index: true },
+        shopCategoryId: { type: Schema.Types.ObjectId, ref: "ShopCategory", required: false, index: true },
 
         brandId: { type: Schema.Types.ObjectId, ref: "Brand", required: true, index: true },
         categorySchemaId: { type: Schema.Types.ObjectId, ref: "CategorySchema", required: true, index: true },
@@ -35,7 +35,7 @@ const ProductSchema = new Schema(
         status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending", index: true },
         rejectReason: { type: String, default: "" },
 
-        activeStatus: { type: String, enum: ["active", "inactive"], default: "active" },
+        activeStatus: { type: String, enum: ["active", "inactive"], default: "inactive" },
         inactiveBy: { type: String, enum: ["admin", "seller"], default: null },
         inactiveReason: { type: String, default: "" },
         inactiveAt: { type: Date },
