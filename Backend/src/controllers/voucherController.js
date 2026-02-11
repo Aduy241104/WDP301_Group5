@@ -203,7 +203,9 @@ export const getVoucherByShop = async (req, res) => {
             const key = vu.voucherId.toString();
             shopVouchersMap.delete(key); // delete ko cần has cũng được
         }
-        res.status(StatusCodes.OK).json({ message: "get voucher by shop success", vouchers: Object.fromEntries(shopVouchersMap) })
+
+        const shopVouchersArr = [...shopVouchersMap.values()];
+        res.status(StatusCodes.OK).json({ message: "get voucher by shop success", vouchers: shopVouchersArr })
 
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });

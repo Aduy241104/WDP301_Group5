@@ -6,7 +6,8 @@ import InvalidItemsBox from "../../components/order/InvalidItemsBox";
 import OrderTotalBox from "../../components/order/OrderTotalBox";
 import SystemVoucherModal from "../../components/order/SystemVoucherModal";
 import VoucherModal from "../../components/order/VoucherModal";
-import { buildCreateOrderPayload } from "../../utils/builCreateOrderPayload"
+import { buildCreateOrderPayload } from "../../utils/builCreateOrderPayload";
+import OrderCreateErrorCard from "./OrderCreateErrorCard";
 
 function OrderSummary() {
     const { state } = useLocation();
@@ -15,6 +16,7 @@ function OrderSummary() {
     const [dataOrder, setDataOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [orderError, setOrderError] = useState(null);
 
     // system voucher
     const [systemVoucher, setSystemVoucher] = useState(null);
@@ -69,6 +71,7 @@ function OrderSummary() {
             try {
                 setLoading(true);
                 setError("");
+                setOrderError(null);
 
                 const res = await createOrder({ variantIds });
                 setDataOrder(res);
@@ -167,6 +170,7 @@ function OrderSummary() {
         try {
             setSubmitting(true);
             setError("");
+            setOrderError(null);
 
             const payload = buildCreateOrderPayload({
                 variantIds,
@@ -176,26 +180,45 @@ function OrderSummary() {
                 paymentMethod: "cod",
             });
 
-            if (!payload.variantIds.length)
+            if (!payload.variantIds.length) {
                 throw new Error("Không có sản phẩm để đặt hàng");
+            }
 
             if (!deliveryAddress) {
                 throw new Error("Chưa chọn địa chỉ đặt hàng");
             }
-
             const res = await placeOrderAPI(payload);
-
             navigate("/order-success", { replace: true });
-
         } catch (err) {
-            setError(err?.response?.data?.message || err.message || "Có lỗi xảy ra");
+            const apiData = err?.response?.data;
+
+            if (apiData?.error?.invalidItems?.length) {
+                setOrderError(apiData);
+                setError("");
+            } else {
+                setError(apiData?.message || err.message || "Có lỗi xảy ra");
+            }
+
         } finally {
             setSubmitting(false);
         }
     };
 
+
     if (loading) return <div className="p-8 text-center">Đang tạo đơn hàng…</div>;
     if (error) return <div className="p-8 text-center text-red-600">{ error }</div>;
+    if (orderError) {
+        return (
+            <div className="p-4">
+                <OrderCreateErrorCard
+                    errorResponse={ orderError }
+                    onBackToCart={ () => navigate("/my-cart") }
+                    onClose={ () => setOrderError(null) }
+                />
+            </div>
+        );
+    }
+
     if (!dataOrder) return null;
 
     return (
