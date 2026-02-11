@@ -8,6 +8,7 @@ import SystemVoucherModal from "../../components/order/SystemVoucherModal";
 import VoucherModal from "../../components/order/VoucherModal";
 import { buildCreateOrderPayload } from "../../utils/builCreateOrderPayload";
 import OrderCreateErrorCard from "./OrderCreateErrorCard";
+import DeliveryAddressPicker from "../../components/order/DeliveryAddressPicker.JSX";
 
 function OrderSummary() {
     const { state } = useLocation();
@@ -28,24 +29,10 @@ function OrderSummary() {
     const [baseShopSubTotals, setBaseShopSubTotals] = useState({}); // lưu giá gốc theo shopId
 
     const [voucherModal, setVoucherModal] = useState({ open: false, shopId: null });
-
-    const [paymentMethod, setPaymentMethod] = useState(state?.paymentMethod ?? "cod");
     const [submitting, setSubmitting] = useState(false);
 
 
-    const [deliveryAddress, setDeliveryAddress] = useState({
-        contact: {
-            name: "Nguyễn Văn A",
-            phone: "0900000000",
-        },
-        address: {
-            province: "HCM",
-            district: "Thủ Đức",
-            ward: "Linh Trung",
-            streetAddress: "12 ABC",
-            fullAddress: "12 ABC, Linh Trung, Thủ Đức, HCM",
-        },
-    });
+    const [deliveryAddress, setDeliveryAddress] = useState(null);
 
     const variantIds = useMemo(() => {
         const raw = state?.selectedIds;
@@ -94,7 +81,6 @@ function OrderSummary() {
                 setLoading(false);
             }
         };
-
         handleCreateOrder();
     }, [variantIds]);
 
@@ -204,7 +190,6 @@ function OrderSummary() {
         }
     };
 
-
     if (loading) return <div className="p-8 text-center">Đang tạo đơn hàng…</div>;
     if (error) return <div className="p-8 text-center text-red-600">{ error }</div>;
     if (orderError) {
@@ -232,7 +217,6 @@ function OrderSummary() {
                     </Link>
                 </div>
 
-                {/* SHOPS */ }
                 <div className="space-y-6">
                     { dataOrder.groups.map((group) => (
                         <ShopOrderCard
@@ -245,10 +229,13 @@ function OrderSummary() {
                     )) }
                 </div>
 
-                {/* INVALID ITEMS */ }
                 <InvalidItemsBox items={ dataOrder.invalidItems } />
 
-                {/* TOTAL */ }
+                <DeliveryAddressPicker
+                    deliveryAddress={ deliveryAddress }
+                    setDeliveryAddress={ setDeliveryAddress }
+                    onAddAddress={ () => navigate("/profile") }
+                />
                 <OrderTotalBox
                     subTotal={ grandSubTotal }
                     shippingFee={ shippingFeeTotal }
@@ -256,8 +243,8 @@ function OrderSummary() {
                     total={ dataOrder.grandTotal }
                     systemVoucher={ systemVoucher }
                     onPickSystemVoucher={ () => setSystemModalOpen(true) }
-                    onSubmit={ handleSubmitOrder }              // ✅ đổi chỗ này
-                    submitting={ submitting }                   // ✅ thêm prop này (nếu component hỗ trợ)
+                    onSubmit={ handleSubmitOrder }
+                    submitting={ submitting }
                     onRemoveSystemVoucher={ removeSystemVoucher }
                 />
                 <SystemVoucherModal
@@ -270,7 +257,6 @@ function OrderSummary() {
                 />
             </div>
 
-            {/* SHOP VOUCHER MODAL */ }
             <VoucherModal
                 open={ voucherModal.open }
                 onClose={ closeVoucher }
