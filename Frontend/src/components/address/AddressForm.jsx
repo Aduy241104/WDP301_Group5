@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 const emptyForm = {
+  fullName: "",
+  phone: "",
   province: "",
   district: "",
   ward: "",
@@ -25,7 +27,10 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
 
     // ✅ THÊM VALIDATE
     const newErrors = {};
-
+    if (!form.fullName.trim())
+      newErrors.fullName = "Vui lòng nhập họ và tên";
+    if (!form.phone.trim())
+      newErrors.phone = "Vui lòng nhập số điện thoại";
     if (!form.province.trim())
       newErrors.province = "Vui lòng nhập Tỉnh / Thành phố";
     if (!form.district.trim())
@@ -45,6 +50,7 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
       await onSubmit(form); // giữ nguyên
       setErrors({});
       setSuccessMsg("Lưu địa chỉ thành công");
+      setForm(emptyForm);
       setTimeout(() => {
         setSuccessMsg("");
       }, 3000);
@@ -55,110 +61,146 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
 
   return (
     <form
-      onSubmit={ handleSubmit }
+      onSubmit={handleSubmit}
       className="w-full shrink-0 rounded-2xl border border-slate-100 bg-white shadow-md"
     >
-      {/* Header */ }
+      {/* Header */}
       <div className="px-7 pt-7">
         <h2 className="text-lg font-semibold text-slate-900">
-          { editingAddress ? "Cập nhật địa chỉ" : "Thêm địa chỉ" }
+          {editingAddress ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
           Thông tin địa chỉ dùng cho giao hàng
         </p>
       </div>
 
-      {/* Body */ }
+      {/* Body */}
       <div className="px-7 pb-7 pt-6 space-y-5">
-        {/* PROVINCE */ }
+
+        {/* FULL NAME */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-700">Họ và tên</label>
+          <input
+            className={`w-full rounded-xl border px-4 py-3 text-sm
+      ${errors.fullName ? "border-rose-300" : "border-slate-200"}`}
+            placeholder="Ví dụ: Nguyen Van A"
+            value={form.fullName}
+            onChange={(e) => {
+              setForm({ ...form, fullName: e.target.value });
+              setErrors(p => ({ ...p, fullName: "" }));
+            }}
+          />
+          {errors.fullName && (
+            <p className="text-xs text-rose-600">{errors.fullName}</p>
+          )}
+        </div>
+
+        {/* PHONE */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-700">Số điện thoại</label>
+          <input
+            className={`w-full rounded-xl border px-4 py-3 text-sm
+      ${errors.phone ? "border-rose-300" : "border-slate-200"}`}
+            placeholder="0xxxxxxxxx"
+            value={form.phone}
+            onChange={(e) => {
+              setForm({ ...form, phone: e.target.value });
+              setErrors(p => ({ ...p, phone: "" }));
+            }}
+          />
+          {errors.phone && (
+            <p className="text-xs text-rose-600">{errors.phone}</p>
+          )}
+        </div>
+        {/* PROVINCE */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">
             Tỉnh / Thành phố
           </label>
           <input
-            className={ `w-full rounded-xl border px-4 py-3 text-sm
+            className={`w-full rounded-xl border px-4 py-3 text-sm
           bg-white text-slate-900 placeholder:text-slate-400
           focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-300
-          ${errors.province ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}` }
+          ${errors.province ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}`}
             placeholder="Ví dụ: TP. Hồ Chí Minh"
-            value={ form.province }
-            onChange={ (e) => {
+            value={form.province}
+            onChange={(e) => {
               setForm({ ...form, province: e.target.value });
               setErrors((p) => ({ ...p, province: "" }));
-            } }
+            }}
           />
-          { errors.province && (
-            <p className="text-xs text-rose-600">{ errors.province }</p>
-          ) }
+          {errors.province && (
+            <p className="text-xs text-rose-600">{errors.province}</p>
+          )}
         </div>
 
-        {/* DISTRICT */ }
+        {/* DISTRICT */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">
             Quận / Huyện
           </label>
           <input
-            className={ `w-full rounded-xl border px-4 py-3 text-sm
+            className={`w-full rounded-xl border px-4 py-3 text-sm
           bg-white text-slate-900 placeholder:text-slate-400
           focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-300
-          ${errors.district ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}` }
+          ${errors.district ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}`}
             placeholder="Ví dụ: Quận 1"
-            value={ form.district }
-            onChange={ (e) => {
+            value={form.district}
+            onChange={(e) => {
               setForm({ ...form, district: e.target.value });
               setErrors((p) => ({ ...p, district: "" }));
-            } }
+            }}
           />
-          { errors.district && (
-            <p className="text-xs text-rose-600">{ errors.district }</p>
-          ) }
+          {errors.district && (
+            <p className="text-xs text-rose-600">{errors.district}</p>
+          )}
         </div>
 
-        {/* WARD */ }
+        {/* WARD */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">
             Phường / Xã
           </label>
           <input
-            className={ `w-full rounded-xl border px-4 py-3 text-sm
+            className={`w-full rounded-xl border px-4 py-3 text-sm
           bg-white text-slate-900 placeholder:text-slate-400
           focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-300
-          ${errors.ward ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}` }
+          ${errors.ward ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}`}
             placeholder="Ví dụ: Phường Bến Nghé"
-            value={ form.ward }
-            onChange={ (e) => {
+            value={form.ward}
+            onChange={(e) => {
               setForm({ ...form, ward: e.target.value });
               setErrors((p) => ({ ...p, ward: "" }));
-            } }
+            }}
           />
-          { errors.ward && (
-            <p className="text-xs text-rose-600">{ errors.ward }</p>
-          ) }
+          {errors.ward && (
+            <p className="text-xs text-rose-600">{errors.ward}</p>
+          )}
         </div>
 
-        {/* STREET */ }
+        {/* STREET */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">
             Địa chỉ cụ thể
           </label>
           <input
-            className={ `w-full rounded-xl border px-4 py-3 text-sm
+            className={`w-full rounded-xl border px-4 py-3 text-sm
           bg-white text-slate-900 placeholder:text-slate-400
           focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-sky-300
-          ${errors.streetAddress ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}` }
+          ${errors.streetAddress ? "border-rose-300 focus:ring-rose-100" : "border-slate-200"}`}
             placeholder="Số nhà, tên đường…"
-            value={ form.streetAddress }
-            onChange={ (e) => {
+            value={form.streetAddress}
+            onChange={(e) => {
               setForm({ ...form, streetAddress: e.target.value });
               setErrors((p) => ({ ...p, streetAddress: "" }));
-            } }
+            }}
           />
-          { errors.streetAddress && (
-            <p className="text-xs text-rose-600">{ errors.streetAddress }</p>
-          ) }
+          {errors.streetAddress && (
+            <p className="text-xs text-rose-600">{errors.streetAddress}</p>
+          )}
         </div>
 
-        {/* DEFAULT */ }
+        {/* DEFAULT */}
         <label className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-slate-800">
@@ -170,20 +212,20 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
           </div>
           <input
             type="checkbox"
-            checked={ form.isDefault }
-            onChange={ (e) => setForm({ ...form, isDefault: e.target.checked }) }
+            checked={form.isDefault}
+            onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
             className="h-4 w-4 shrink-0 rounded border-slate-300 text-sky-600 focus:ring-sky-200"
           />
         </label>
 
-        {/* ACTION */ }
+        {/* ACTION */}
         <button
           type="submit"
           className="w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white
                  hover:bg-slate-800 transition
                  focus:outline-none focus:ring-4 focus:ring-slate-200"
         >
-          { editingAddress ? "Cập nhật địa chỉ" : "Thêm địa chỉ" }
+          {editingAddress ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}
         </button>
       </div>
     </form>

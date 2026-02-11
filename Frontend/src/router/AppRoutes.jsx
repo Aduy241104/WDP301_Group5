@@ -26,6 +26,8 @@ import SellerBanners from "../pages/Seller/Banners/SellerBanners";
 import TopSaleProduct from "../pages/TopSaleProduct";
 import OrderSummary from "../pages/OrderCustomer/OrderSummary";
 import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
+import ShopListPage from "../pages/ShopListPage";
+import ShopDetailPage from "../pages/ShopDetailPage";
 
 export default function AppRoutes() {
   return (
@@ -36,6 +38,8 @@ export default function AppRoutes() {
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
         <Route path="/order-success" element={ <OrderSuccess /> } />
+        <Route path="/shops/:productId" element={<ShopListPage />} />
+        <Route path="/shop/:shopId" element={<ShopDetailPage />} />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }

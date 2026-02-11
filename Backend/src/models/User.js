@@ -4,11 +4,15 @@ const { Schema, model } = mongoose;
 
 const UserAddressSchema = new Schema(
     {
+        fullName: { type: String, trim: true }, 
+        phone: { type: String, trim: true },
+
         province: { type: String, required: true },
         district: { type: String, required: true },
         ward: { type: String, required: true },
         streetAddress: { type: String, required: true },
         fullAddress: { type: String, required: true },
+
         isDefault: { type: Boolean, default: false },
     },
     { _id: true }

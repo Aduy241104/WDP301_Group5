@@ -15,3 +15,11 @@ export const updateAddressAPI = async (addressId, data) => {
     const res = await axiosInstance.put(`/api/profile/addresses/${addressId}`, data);
     return res.data;
 };
+
+export const deleteAddressAPI = async (addressId) => {
+    const res = await axiosInstance.delete(
+        `/api/profile/addresses/${addressId}`
+    );
+    return res.data;
+};
+
