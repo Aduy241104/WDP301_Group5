@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { emptyAttr, emptyVariant } from "./productForm.utils";
 
 export default function ProductForm({
@@ -12,7 +13,14 @@ export default function ProductForm({
   onBack,
   onSubmit,
   variantHelpText,
+  imageFiles,
+  onImageFilesChange,
+  defaultPrice,
+  onDefaultPriceChange,
+  enableDefaultPrice,
 }) {
+  const [previewUrls, setPreviewUrls] = useState([]);
+
   const setFormField = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
   const addRow = (key, empty) =>
@@ -24,6 +32,22 @@ export default function ProductForm({
       ...p,
       [key]: p[key].map((it, i) => (i === idx ? { ...it, ...patch } : it)),
     }));
+
+  // Tạo URL preview từ File để hiển thị thumbnail
+  useEffect(() => {
+    if (!imageFiles || imageFiles.length === 0) {
+      setPreviewUrls([]);
+      return;
+    }
+
+    const urls = imageFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+
+    // cleanup: giải phóng object URL khi unmount / đổi file
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imageFiles]);
 
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200">
@@ -142,6 +166,46 @@ export default function ProductForm({
               </button>
             </div>
           ))}
+          <div className="space-y-2 pt-2 border-t border-dashed border-gray-200 mt-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Upload ảnh (chỉ upload khi bấm "{submitLabel}")
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) =>
+                onImageFilesChange?.(Array.from(e.target.files || []))
+              }
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700
+                hover:file:bg-indigo-100"
+            />
+            {imageFiles?.length > 0 && (
+              <>
+                <p className="text-xs text-gray-500">
+                  Đã chọn {imageFiles.length} ảnh. Ảnh sẽ được upload lên cloud khi bạn bấm "{submitLabel}".
+                </p>
+                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {previewUrls.map((url, idx) => (
+                    <div
+                      key={idx}
+                      className="relative w-full pb-[100%] overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+                    >
+                      <img
+                        src={url}
+                        alt={`preview-${idx}`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -204,6 +268,26 @@ export default function ProductForm({
               + Thêm phân loại
             </button>
           </div>
+          {enableDefaultPrice && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 bg-indigo-50/40 border border-dashed border-indigo-200 rounded-xl p-3">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Giá mặc định
+                </label>
+                <input
+                  type="number"
+                  value={defaultPrice ?? ""}
+                  onChange={(e) => onDefaultPriceChange?.(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
+                  min={0}
+                  placeholder="Nhập giá mặc định cho các phân loại"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Nếu phân loại không nhập giá, sẽ tự dùng giá mặc định này.
+                </p>
+              </div>
+            </div>
+          )}
           {form.variants.map((v, idx) => (
             <div
               key={v._id || `new-${idx}`}

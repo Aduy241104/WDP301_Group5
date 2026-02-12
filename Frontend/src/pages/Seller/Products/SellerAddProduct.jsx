@@ -4,6 +4,7 @@ import {
   getBrandsAPI,
   getCategorySchemasAPI,
 } from "../../../services/sellerManageProduct.service";
+import { uploadSingleImageAPI } from "../../../services/uploadService";
 import ProductForm from "./ProductForm";
 import {
   createEmptyProductForm,
@@ -16,6 +17,8 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
   const [error, setError] = useState("");
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
+   const [defaultPrice, setDefaultPrice] = useState("");
 
   const [form, setForm] = useState(() => createEmptyProductForm());
 
@@ -46,13 +49,46 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
         return;
       }
 
-      const { payload, variants } = serializeProductPayload(form);
+      // 1) Chuẩn bị danh sách ảnh: ảnh URL user nhập + ảnh mới chọn file
+      let currentImages = form.images || [];
+
+      // Chỉ upload ảnh khi user thực sự bấm submit
+      if (imageFiles.length > 0) {
+        const uploadResults = await Promise.all(
+          imageFiles.map((file) =>
+            uploadSingleImageAPI({ file, folder: "products" })
+          )
+        );
+
+        const uploadedUrls = uploadResults
+          .map((r) => r?.url)
+          .filter(Boolean);
+
+        currentImages = [...currentImages, ...uploadedUrls];
+      }
+
+      // Áp dụng giá mặc định cho những variant không nhập giá
+      const filledVariants = (form.variants || []).map((v) => {
+        if (v.price !== "" && v.price != null) return v;
+        if (!defaultPrice) return v;
+        return { ...v, price: defaultPrice };
+      });
+
+      const { payload, variants } = serializeProductPayload({
+        ...form,
+        images: currentImages,
+        variants: filledVariants,
+      });
       if (variants.length === 0) {
         setError("Sản phẩm phải có ít nhất 1 phân loại (giá bắt buộc)");
         return;
       }
 
       await createSellerProductAPI(payload);
+
+      // Reset file đã chọn sau khi tạo thành công
+      setImageFiles([]);
+      setDefaultPrice("");
 
       onSuccess?.();
       onBack?.();
@@ -76,6 +112,11 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
       onBack={onBack}
       onSubmit={handleSubmit}
       variantHelpText="Mỗi dòng = 1 biến thể. SKU tự động tạo, không trùng."
+      imageFiles={imageFiles}
+      onImageFilesChange={setImageFiles}
+      defaultPrice={defaultPrice}
+      onDefaultPriceChange={setDefaultPrice}
+      enableDefaultPrice
     />
   );
 }
