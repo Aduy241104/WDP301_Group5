@@ -46,3 +46,17 @@ export const placeOrderAPI = async (data) => {
     const response = await axiosInstance.post("/api/order/place-order", data);
     return response.data;
 }
+
+export const getMyOrderListAPI = async (page, limit, status) => {
+    const response = await axiosInstance.get("/api/order/my-orders", {
+        params: {
+            page, limit, status
+        }
+    });
+    return response.data;
+}
+
+export const getOrderDetailAPI = async (orderId) => {
+    const response = await axiosInstance.get(`/api/order/order-detail/${orderId}`);
+    return response.data;
+}

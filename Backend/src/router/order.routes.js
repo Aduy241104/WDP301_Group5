@@ -1,5 +1,5 @@
 import express from "express";
-import { prepareOrdersFromCart, createOrdersFromCart } from "../controllers/orderController.js";
+import { prepareOrdersFromCart, createOrdersFromCart, listMyOrders, getMyOrderDetail } from "../controllers/orderController.js";
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { applyShopVoucherPreview, applySystemShipVoucherPreview } from "../controllers/voucherController.js";
 import { createOrdersFromCartSchema } from "../middlewares/orderMiddleware/orderValidation.js";
@@ -13,6 +13,10 @@ router.post("/shops/:shopId/apply-voucher", authenticationMiddleware, applyShopV
 router.post("/system/apply-voucher", authenticationMiddleware, applySystemShipVoucherPreview);
 
 router.post("/place-order", authenticationMiddleware, validateBody(createOrdersFromCartSchema), createOrdersFromCart);
+
+router.get("/my-orders", authenticationMiddleware, listMyOrders);
+
+router.get("/order-detail/:orderId", authenticationMiddleware, getMyOrderDetail);
 
 export default router;
 
