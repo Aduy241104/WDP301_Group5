@@ -1,255 +1,192 @@
-import { StatusCodes } from "http-status-codes";
-import { Banner } from "../models/Banner.js";
 import mongoose from "mongoose";
+import { Banner } from "../models/Banner.js";
 
-// Get shop banners list - only show banners created by this seller
+/**
+ * Map position UI → enum trong schema
+ */
+const POSITION_MAP = {
+  top: "home_top",
+  slider: "home_mid",
+  popup: "home_popup",
+};
+
+const normalizePosition = (position) => {
+  if (!position) return undefined;
+  return POSITION_MAP[position] || position;
+};
+
+
+
+// ================= GET =================
 export const getShopBanners = async (req, res) => {
-    try {
-        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
-        const userId = req.user.id; // User ID from authentication middleware
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Number(req.query.limit) || 10);
 
-        // Only show banners created by this seller for this shop
-        const banners = await Banner.find({
-            shopId: shop._id,
-            isDeleted: false,
-            createdBy: userId, // Hiển thị theo người tạo
-        })
-            .populate("createdBy", "email fullName")
-            .populate("updatedBy", "email fullName")
-            .sort({ order: 1, createdAt: -1 })
-            .lean();
+    const query = {
+      createdBy: req.user.id,
+      isDeleted: false,
+    };
 
-        return res.status(StatusCodes.OK).json({
-            message: "Get shop banners successfully",
-            banners,
-        });
-    } catch (err) {
-        console.error("GET_SHOP_BANNERS_ERROR:", err);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    if (req.query.position) {
+      query.position = normalizePosition(req.query.position);
     }
+
+    const banners = await Banner.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(banners);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// Add Banner in shop
+
+
+// ================= CREATE =================
 export const addShopBanner = async (req, res) => {
-    try {
-        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
-        const { title, imageUrl, linkUrl, position, order, startAt, endAt, isActive } = req.body;
+  try {
+    const {
+      title,
+      imageUrl,
+      linkUrl = "",
+      linkType,
+      linkTargetId = null,
+      position,
+      priority = 0,
+      startAt,
+      endAt,
+    } = req.body;
 
-        // Validation
-        if (!imageUrl) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "imageUrl is required",
-            });
-        }
-
-        const validPositions = ["top", "slider", "popup"];
-        if (position && !validPositions.includes(position)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: `Invalid position. Must be one of: ${validPositions.join(", ")}`,
-            });
-        }
-
-        // Validate dates if provided
-        let startDate = null;
-        let endDate = null;
-        if (startAt) {
-            startDate = new Date(startAt);
-            if (isNaN(startDate.getTime())) {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    message: "Invalid date format for startAt",
-                });
-            }
-        }
-        if (endAt) {
-            endDate = new Date(endAt);
-            if (isNaN(endDate.getTime())) {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    message: "Invalid date format for endAt",
-                });
-            }
-        }
-
-        if (startDate && endDate && endDate <= startDate) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "endAt must be after startAt",
-            });
-        }
-
-        // Create banner using Banner model
-        const banner = new Banner({
-            shopId: shop._id,
-            title: title || "",
-            imageUrl,
-            linkUrl: linkUrl || "",
-            linkType: "external", // Default for shop banners
-            position: position || "top",
-            order: order || 0,
-            priority: order || 0, // Use order as priority for shop banners
-            startAt: startDate || new Date(), // Required field, use current date if not provided
-            endAt: endDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Default to 1 year from now
-            isActive: isActive !== undefined ? isActive : true,
-            createdBy: req.user.id,
-        });
-
-        await banner.save();
-        await banner.populate("createdBy", "email fullName");
-
-        return res.status(StatusCodes.CREATED).json({
-            message: "Banner added successfully",
-            banner,
-        });
-    } catch (err) {
-        console.error("ADD_SHOP_BANNER_ERROR:", err);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    // 🔥 VALIDATION TRƯỚC KHI CREATE
+    if (!title || !imageUrl || !linkType || !position || !startAt || !endAt) {
+      return res.status(400).json({
+        message:
+          "Thiếu field bắt buộc: title, imageUrl, linkType, position, startAt, endAt",
+      });
     }
+
+    const startDate = new Date(startAt);
+    const endDate = new Date(endAt);
+
+    if (isNaN(startDate) || isNaN(endDate)) {
+      return res.status(400).json({
+        message: "startAt hoặc endAt không hợp lệ",
+      });
+    }
+
+    if (endDate <= startDate) {
+      return res.status(400).json({
+        message: "endAt phải lớn hơn startAt",
+      });
+    }
+
+    let validatedLinkTargetId = null;
+    if (linkTargetId && mongoose.Types.ObjectId.isValid(linkTargetId)) {
+      validatedLinkTargetId = new mongoose.Types.ObjectId(linkTargetId);
+    }
+
+    const banner = await Banner.create({
+      title,
+      imageUrl,
+      linkUrl,
+      linkType,
+      linkTargetId: validatedLinkTargetId,
+      position: normalizePosition(position),
+      priority: Number(priority),
+      startAt: startDate,
+      endAt: endDate,
+
+      // 🔥 AUTO GÁN SELLER
+      createdBy: req.user.id,
+    });
+
+    res.status(201).json(banner);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
-// Edit Banner in shop
+
+
+// ================= UPDATE =================
 export const updateShopBanner = async (req, res) => {
-    try {
-        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
-        const { bannerId } = req.params;
-        const { title, imageUrl, linkUrl, position, order, startAt, endAt, isActive } = req.body;
+  try {
+    const { id } = req.params;
 
-        // Validate ObjectId
-        if (!mongoose.Types.ObjectId.isValid(bannerId)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "Invalid banner id",
-            });
-        }
+    const banner = await Banner.findOne({
+      _id: id,
+      createdBy: req.user.id,
+      isDeleted: false,
+    });
 
-        // Find banner and check ownership - only banners created by this seller
-        const banner = await Banner.findOne({
-            _id: bannerId,
-            shopId: shop._id,
-            createdBy: req.user.id, // Only allow editing banners created by this seller
-            isDeleted: false,
-        });
-
-        if (!banner) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                message: "Banner not found",
-            });
-        }
-
-        // Update priority when order changes
-        if (order !== undefined) {
-            banner.priority = order;
-        }
-
-        // Validate position if provided
-        if (position) {
-            const validPositions = ["top", "slider", "popup"];
-            if (!validPositions.includes(position)) {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    message: `Invalid position. Must be one of: ${validPositions.join(", ")}`,
-                });
-            }
-            banner.position = position;
-        }
-
-        // Validate dates if provided
-        if (startAt !== undefined) {
-            if (startAt === null) {
-                banner.startAt = null;
-            } else {
-                const startDate = new Date(startAt);
-                if (isNaN(startDate.getTime())) {
-                    return res.status(StatusCodes.BAD_REQUEST).json({
-                        message: "Invalid date format for startAt",
-                    });
-                }
-                banner.startAt = startDate;
-            }
-        }
-
-        if (endAt !== undefined) {
-            if (endAt === null) {
-                banner.endAt = null;
-            } else {
-                const endDate = new Date(endAt);
-                if (isNaN(endDate.getTime())) {
-                    return res.status(StatusCodes.BAD_REQUEST).json({
-                        message: "Invalid date format for endAt",
-                    });
-                }
-                banner.endAt = endDate;
-            }
-        }
-
-        // Check date validity
-        if (banner.startAt && banner.endAt && banner.endAt <= banner.startAt) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "endAt must be after startAt",
-            });
-        }
-
-        // Update fields
-        if (title !== undefined) banner.title = title;
-        if (imageUrl !== undefined) banner.imageUrl = imageUrl;
-        if (linkUrl !== undefined) banner.linkUrl = linkUrl;
-        if (order !== undefined) {
-            banner.order = order;
-            banner.priority = order; // Sync priority with order
-        }
-        if (isActive !== undefined) banner.isActive = isActive;
-
-        // Track who updated the banner
-        banner.updatedBy = req.user.id;
-
-        await banner.save();
-        await banner.populate("createdBy", "email fullName");
-        await banner.populate("updatedBy", "email fullName");
-
-        return res.status(StatusCodes.OK).json({
-            message: "Banner updated successfully",
-            banner,
-        });
-    } catch (err) {
-        console.error("UPDATE_SHOP_BANNER_ERROR:", err);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    if (!banner) {
+      return res.status(404).json({
+        message: "Không tìm thấy banner hoặc không có quyền",
+      });
     }
+
+    if (req.body.position) {
+      req.body.position = normalizePosition(req.body.position);
+    }
+
+    if (req.body.startAt) {
+      const startDate = new Date(req.body.startAt);
+      if (isNaN(startDate)) {
+        return res.status(400).json({ message: "startAt không hợp lệ" });
+      }
+      banner.startAt = startDate;
+    }
+
+    if (req.body.endAt) {
+      const endDate = new Date(req.body.endAt);
+      if (isNaN(endDate)) {
+        return res.status(400).json({ message: "endAt không hợp lệ" });
+      }
+      banner.endAt = endDate;
+    }
+
+    Object.assign(banner, req.body);
+
+    banner.updatedBy = req.user._id;
+
+    await banner.save();
+
+    res.status(200).json(banner);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
-// Delete Banner in Shop
+
+
+// ================= DELETE (SOFT DELETE) =================
 export const deleteShopBanner = async (req, res) => {
-    try {
-        const shop = req.shop; // Shop đã được lấy từ middleware checkApprovedShop
-        const { bannerId } = req.params;
+  try {
+    const { id } = req.params;
 
-        // Validate ObjectId
-        if (!mongoose.Types.ObjectId.isValid(bannerId)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "Invalid banner id",
-            });
-        }
+    const banner = await Banner.findOne({
+      _id: id,
+      createdBy: req.user.id,
+      isDeleted: false,
+    });
 
-        // Find banner and check ownership - only banners created by this seller
-        const banner = await Banner.findOne({
-            _id: bannerId,
-            shopId: shop._id,
-            createdBy: req.user.id, // Only allow deleting banners created by this seller
-            isDeleted: false,
-        });
-
-        if (!banner) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                message: "Banner not found",
-            });
-        }
-
-        // Soft delete
-        banner.isDeleted = true;
-        banner.deletedAt = new Date();
-        banner.deletedBy = req.user.id;
-
-        await banner.save();
-
-        return res.status(StatusCodes.OK).json({
-            message: "Banner deleted successfully",
-        });
-    } catch (err) {
-        console.error("DELETE_SHOP_BANNER_ERROR:", err);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    if (!banner) {
+      return res.status(404).json({
+        message: "Không tìm thấy banner hoặc không có quyền",
+      });
     }
+
+    banner.isDeleted = true;
+    banner.deletedAt = new Date();
+    banner.deletedBy = req.user._id;
+
+    await banner.save();
+
+    res.status(200).json({ message: "Xóa thành công" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

@@ -14,15 +14,16 @@ export default function SellerBanners() {
   const [uploading, setUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
+
   const [formData, setFormData] = useState({
     title: "",
     imageUrl: "",
     linkUrl: "",
+    linkType: "external",
     position: "top",
-    order: 0,
+    priority: 0,
     startAt: "",
     endAt: "",
-    isActive: true,
   });
 
   useEffect(() => {
@@ -32,10 +33,10 @@ export default function SellerBanners() {
   const loadBanners = async () => {
     try {
       setLoading(true);
-      const response = await getShopBannersAPI();
-      setBanners(response.banners || []);
+      const response = await getShopBannersAPI(formData.position);
+      setBanners(response || []);
     } catch (error) {
-      console.error("Error loading banners:", error);
+      console.error(error);
       alert("Không thể tải danh sách banner");
     } finally {
       setLoading(false);
@@ -44,6 +45,16 @@ export default function SellerBanners() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (
+      !formData.title ||
+      !formData.imageUrl ||
+      !formData.startAt ||
+      !formData.endAt
+    ) {
+      return alert("Vui lòng nhập đầy đủ thông tin bắt buộc");
+    }
+
     try {
       if (editingBanner) {
         await updateShopBannerAPI(editingBanner._id, formData);
@@ -52,25 +63,26 @@ export default function SellerBanners() {
         await addShopBannerAPI(formData);
         alert("Thêm banner thành công");
       }
+
       setShowForm(false);
       setEditingBanner(null);
       resetForm();
       loadBanners();
     } catch (error) {
-      console.error("Error saving banner:", error);
+      console.error(error);
       alert(error.response?.data?.message || "Có lỗi xảy ra");
     }
   };
 
   const handleDelete = async (bannerId) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa banner này?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa banner này?")) return;
 
     try {
       await deleteShopBannerAPI(bannerId);
       alert("Xóa banner thành công");
       loadBanners();
     } catch (error) {
-      console.error("Error deleting banner:", error);
+      console.error(error);
       alert(error.response?.data?.message || "Có lỗi xảy ra");
     }
   };
@@ -81,11 +93,15 @@ export default function SellerBanners() {
 
     try {
       setUploading(true);
-      const result = await uploadSingleImageAPI({ file, folder: "banners" });
+      const result = await uploadSingleImageAPI({
+        file,
+        folder: "banners",
+      });
+
       setFormData({ ...formData, imageUrl: result.url });
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert(error.response?.data?.message || "Không thể tải ảnh lên");
+      console.error(error);
+      alert("Không thể tải ảnh lên");
     } finally {
       setUploading(false);
     }
@@ -97,11 +113,15 @@ export default function SellerBanners() {
       title: banner.title || "",
       imageUrl: banner.imageUrl || "",
       linkUrl: banner.linkUrl || "",
+      linkType: banner.linkType || "external",
       position: banner.position || "top",
-      order: banner.order || 0,
-      startAt: banner.startAt ? new Date(banner.startAt).toISOString().slice(0, 16) : "",
-      endAt: banner.endAt ? new Date(banner.endAt).toISOString().slice(0, 16) : "",
-      isActive: banner.isActive !== undefined ? banner.isActive : true,
+      priority: banner.priority || 0,
+      startAt: banner.startAt
+        ? new Date(banner.startAt).toISOString().slice(0, 16)
+        : "",
+      endAt: banner.endAt
+        ? new Date(banner.endAt).toISOString().slice(0, 16)
+        : "",
     });
     setShowForm(true);
   };
@@ -111,11 +131,11 @@ export default function SellerBanners() {
       title: "",
       imageUrl: "",
       linkUrl: "",
+      linkType: "external",
       position: "top",
-      order: 0,
+      priority: 0,
       startAt: "",
       endAt: "",
-      isActive: true,
     });
   };
 
@@ -130,14 +150,17 @@ export default function SellerBanners() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý Banner Shop</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Quản lý Banner Shop
+        </h1>
+
         <button
           onClick={() => {
             resetForm();
             setEditingBanner(null);
             setShowForm(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg"
         >
           <Plus size={18} />
           Thêm Banner
@@ -147,160 +170,122 @@ export default function SellerBanners() {
       {showForm && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingBanner ? "Chỉnh sửa Banner" : "Thêm Banner Mới"}
+            {editingBanner ? "Chỉnh sửa Banner" : "Thêm Banner"}
           </h2>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tiêu đề
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="Nhập tiêu đề banner"
-              />
-            </div>
+
+            <input
+              type="text"
+              placeholder="Tiêu đề"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            />
+
+            <input
+              type="url"
+              placeholder="Link URL"
+              value={formData.linkUrl}
+              onChange={(e) =>
+                setFormData({ ...formData, linkUrl: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            />
+
+            <select
+              value={formData.linkType}
+              onChange={(e) =>
+                setFormData({ ...formData, linkType: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="external">External</option>
+              <option value="product">Product</option>
+              <option value="shop">Shop</option>
+              <option value="category">Category</option>
+              <option value="search">Search</option>
+            </select>
+
+            <select
+              value={formData.position}
+              onChange={(e) =>
+                setFormData({ ...formData, position: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="top">Top</option>
+              <option value="slider">Slider</option>
+              <option value="popup">Popup</option>
+            </select>
+
+            <input
+              type="number"
+              placeholder="Priority"
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  priority: parseInt(e.target.value) || 0,
+                })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            />
+
+            <input
+              type="datetime-local"
+              value={formData.startAt}
+              onChange={(e) =>
+                setFormData({ ...formData, startAt: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            />
+
+            <input
+              type="datetime-local"
+              value={formData.endAt}
+              onChange={(e) =>
+                setFormData({ ...formData, endAt: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md"
+            />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hình ảnh <span className="text-red-500">*</span>
-              </label>
-              <div className="space-y-3">
-                {formData.imageUrl && (
-                  <div>
-                    <img
-                      src={formData.imageUrl}
-                      alt="Preview"
-                      className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300"
-                    />
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
-                    <Upload size={18} />
-                    <span className="text-sm font-medium text-gray-700">
-                      {uploading ? "Đang tải lên..." : "Chọn file từ máy"}
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                <div className="text-sm text-gray-500">
-                  Hoặc nhập URL trực tiếp:
-                </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Upload size={18} />
+                {uploading ? "Đang tải..." : "Upload ảnh"}
                 <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="https://example.com/image.jpg"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  hidden
                 />
-              </div>
+              </label>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL Liên kết
-              </label>
-              <input
-                type="url"
-                value={formData.linkUrl}
-                onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="https://example.com"
+            {formData.imageUrl && (
+              <img
+                src={formData.imageUrl}
+                alt="Preview"
+                className="w-full h-40 object-cover rounded"
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vị trí
-                </label>
-                <select
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="top">Top</option>
-                  <option value="slider">Slider</option>
-                  <option value="popup">Popup</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Thứ tự
-                </label>
-                <input
-                  type="number"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ngày bắt đầu
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.startAt}
-                  onChange={(e) => setFormData({ ...formData, startAt: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ngày kết thúc
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.endAt}
-                  onChange={(e) => setFormData({ ...formData, endAt: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                Kích hoạt
-              </label>
-            </div>
+            )}
 
             <div className="flex gap-2">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-              >
+              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg">
                 {editingBanner ? "Cập nhật" : "Thêm"}
               </button>
+
               <button
                 type="button"
                 onClick={() => {
                   setShowForm(false);
-                  setEditingBanner(null);
                   resetForm();
+                  setEditingBanner(null);
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 rounded-lg"
               >
                 Hủy
               </button>
@@ -309,70 +294,45 @@ export default function SellerBanners() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Danh sách Banner</h2>
-          {banners.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <ImageIcon size={48} className="mx-auto mb-2 opacity-50" />
-              <p>Chưa có banner nào</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {banners.map((banner) => (
-                <div
-                  key={banner._id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
-                >
-                  <div className="mb-3">
-                    <img
-                      src={banner.imageUrl}
-                      alt={banner.title || "Banner"}
-                      className="w-full h-32 object-cover rounded"
-                      onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/300x150?text=No+Image";
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-1 mb-3">
-                    <h3 className="font-medium text-gray-900">
-                      {banner.title || "Không có tiêu đề"}
-                    </h3>
-                    <p className="text-sm text-gray-500">Vị trí: {banner.position}</p>
-                    <p className="text-sm text-gray-500">Thứ tự: {banner.order}</p>
-                    <p className="text-sm">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          banner.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {banner.isActive ? "Đang hoạt động" : "Tạm dừng"}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(banner)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                    >
-                      <Edit size={16} />
-                      Sửa
-                    </button>
-                    <button
-                      onClick={() => handleDelete(banner._id)}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100"
-                    >
-                      <Trash2 size={16} />
-                      Xóa
-                    </button>
-                  </div>
+      <div className="bg-white rounded-lg shadow p-6">
+        {banners.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <ImageIcon size={48} className="mx-auto mb-2 opacity-50" />
+            <p>Chưa có banner nào</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {banners.map((banner) => (
+              <div key={banner._id} className="border p-4 rounded-lg">
+                <img
+                  src={banner.imageUrl}
+                  alt=""
+                  className="w-full h-32 object-cover rounded"
+                />
+
+                <h3 className="font-medium mt-2">
+                  {banner.title}
+                </h3>
+
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => handleEdit(banner)}
+                    className="flex-1 bg-blue-100 text-blue-600 py-1 rounded"
+                  >
+                    <Edit size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(banner._id)}
+                    className="flex-1 bg-red-100 text-red-600 py-1 rounded"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
