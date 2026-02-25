@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getSellerProductsAPI } from "../../../services/sellerManageProduct.service";
+import {
+  getSellerProductsAPI,
+  deleteSellerProductAPI,
+} from "../../../services/sellerManageProduct.service";
 
 export default function SellerProductList({ onAdd, onEdit }) {
   const [products, setProducts] = useState([]);
@@ -157,12 +160,45 @@ export default function SellerProductList({ onAdd, onEdit }) {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
+                                      <button
                         type="button"
                         onClick={() => onEdit?.(p._id)}
                         className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
                       >
                         Sửa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (
+                            window.confirm(
+                              "Bạn có chắc muốn xoá sản phẩm này?"
+                            )
+                          ) {
+                            try {
+                              setError("");
+                              setLoading(true);
+                              await deleteSellerProductAPI(p._id);
+                              setProducts((prev) =>
+                                prev.filter((x) => x._id !== p._id)
+                              );
+                              setPagination((pg) => ({
+                                ...pg,
+                                total: pg.total > 0 ? pg.total - 1 : 0,
+                              }));
+                            } catch (e) {
+                              setError(
+                                e?.response?.data?.message ||
+                                  "Không thể xoá sản phẩm"
+                              );
+                            } finally {
+                              setLoading(false);
+                            }
+                          }
+                        }}
+                        className="ml-2 px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm"
+                      >
+                        Xoá
                       </button>
                     </td>
                   </tr>

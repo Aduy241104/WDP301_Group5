@@ -272,7 +272,7 @@ export default function ProductForm({
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2 bg-indigo-50/40 border border-dashed border-indigo-200 rounded-xl p-3">
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Giá mặc định
+                  Giá mặc định *
                 </label>
                 <input
                   type="number"
@@ -281,6 +281,7 @@ export default function ProductForm({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   min={0}
                   placeholder="Nhập giá mặc định cho các phân loại"
+                  required={enableDefaultPrice}
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Nếu phân loại không nhập giá, sẽ tự dùng giá mặc định này.
@@ -299,7 +300,7 @@ export default function ProductForm({
                   value={v.size}
                   onChange={(e) => updateRow("variants", idx, { size: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
-                  placeholder="vd: S/M/L, Đỏ, 8GB/128GB"
+                  placeholder="vd: S/M/L"
                 />
               </div>
               <div>
@@ -310,16 +311,18 @@ export default function ProductForm({
                   onChange={(e) => updateRow("variants", idx, { price: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   min={0}
+                  required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Tồn kho</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Tồn kho *</label>
                 <input
                   type="number"
                   value={v.stock}
                   onChange={(e) => updateRow("variants", idx, { stock: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   min={0}
+                  required
                 />
               </div>
               <div className="md:col-span-4 flex justify-end">

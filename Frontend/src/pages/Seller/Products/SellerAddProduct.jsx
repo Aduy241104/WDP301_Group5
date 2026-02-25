@@ -49,6 +49,24 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
         return;
       }
 
+      // Yêu cầu nhập giá mặc định khi tạo sản phẩm mới
+      if (!defaultPrice && defaultPrice !== 0) {
+        setError("Vui lòng nhập giá mặc định");
+        return;
+      }
+
+      // Yêu cầu mỗi phân loại phải có giá và tồn kho
+      for (const v of form.variants || []) {
+        if (v.price === "" || v.price == null) {
+          setError("Vui lòng nhập giá cho tất cả phân loại");
+          return;
+        }
+        if (v.stock === "" || v.stock == null) {
+          setError("Vui lòng nhập tồn kho cho tất cả phân loại");
+          return;
+        }
+      }
+
       // 1) Chuẩn bị danh sách ảnh: ảnh URL user nhập + ảnh mới chọn file
       let currentImages = form.images || [];
 
