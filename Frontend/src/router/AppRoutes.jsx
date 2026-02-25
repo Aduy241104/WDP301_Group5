@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/Homepage";
@@ -29,6 +28,7 @@ import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
 import SellerCategories from "../pages/Seller/Categories/SellerCategories";
 import ShopListPage from "../pages/ShopListPage";
 import ShopDetailPage from "../pages/ShopDetailPage";
+import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
 
 export default function AppRoutes() {
   return (
@@ -39,8 +39,8 @@ export default function AppRoutes() {
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
         <Route path="/order-success" element={ <OrderSuccess /> } />
-        <Route path="/shops/:productId" element={<ShopListPage />} />
-        <Route path="/shop/:shopId" element={<ShopDetailPage />} />
+        <Route path="/shops/:productId" element={ <ShopListPage /> } />
+        <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
@@ -58,6 +58,7 @@ export default function AppRoutes() {
           <Route path="/addresses" element={ <AddressPage /> } />
           <Route path="/my-cart" element={ <CartPage /> } />
           <Route path="/place-order" element={ <OrderSummary /> } />
+          <Route path="/my-order-list" element={ <OrderListPage /> } />
         </Route>
       </Route>
 
