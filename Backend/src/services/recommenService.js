@@ -11,9 +11,7 @@ const BASE_MATCH = {
     isDeleted: false,
 };
 
-/** ---------------------------
- *  Top categories: USER (từ event)
- *  --------------------------*/
+// Top categories: USER
 export async function getTopCategoriesForUser(userId, topN = 3) {
     const uid = new Types.ObjectId(userId);
     const WEIGHTS = { view_detail: 1, wishlist: 3, add_to_cart: 5 };
@@ -58,9 +56,7 @@ export async function getTopCategoriesForUser(userId, topN = 3) {
     ]);
 }
 
-/** ---------------------------
- *  Top categories: GUEST (từ Product)
- *  --------------------------*/
+ //Top categories: GUEST 
 export async function getTopCategoriesForGuest(topN = 4) {
     return Product.aggregate([
         { $match: BASE_MATCH },
@@ -88,7 +84,6 @@ export async function getTopCategoriesForGuest(topN = 4) {
 }
 
 /** ---------------------------
- *  Allocation rule theo yêu cầu:
  *  n=1 => 100%
  *  n=2 => 50/50
  *  n>=3 => chia đều gần đều
@@ -107,15 +102,13 @@ function allocateByCount(total, n) {
     return Array.from({ length: n }, (_, i) => base + (i < rem ? 1 : 0));
 }
 
-/** ---------------------------
- *  Service chính (✅ có phân trang)
- *  --------------------------*/
+
 export async function getRecommendedProductsService({ userId, limit = 8, page }) {
     const finalLimit = Math.min(Math.max(parseInt(limit || "30", 10), 1), 60);
     const currentPage = Math.max(parseInt(page || "1", 10), 1);
     const isGuest = !userId;
-    
-    // 1) Lấy top categories
+
+    //Lấy top categories
     let categories = [];
     if (isGuest) {
         categories = await getTopCategoriesForGuest(4);
@@ -123,64 +116,52 @@ export async function getRecommendedProductsService({ userId, limit = 8, page })
         categories = await getTopCategoriesForUser(userId, 3);
     }
 
-    // 2) Rule: user không có gì luôn => random toàn hệ thống
+    //user không có event data => random toàn hệ thống
     const userNoData = !isGuest && categories.length === 0;
 
-    // 3) Allocation theo số category thực tế
-    const alloc = userNoData ? [finalLimit] : allocateByCount(finalLimit, categories.length);
+    if (userNoData) {
+        categories = await getTopCategoriesForGuest(4);
+    }
 
-    // 4) Query products theo từng nhóm (✅ skip theo page)
+    //Allocation theo số category thực tế
+    const alloc = allocateByCount(finalLimit, categories.length);
+
     let groups = [];
     let allItems = [];
 
-    if (userNoData) {
-        //RANDOM toàn hệ thống + phân trang
-        const items = await Product.aggregate(
-            buildCheckedProductPipeline({
-                extraMatch: {},
-                limit: finalLimit,
-                skip: (currentPage - 1) * finalLimit,
-                random: true,
-            })
-        );
+    groups = await Promise.all(
+        categories.map(async (c, idx) => {
+            const catLimit = alloc[idx] || 0;
 
-        groups = [{ category: null, items }];
-        allItems = [...items]
-    } else {
-        groups = await Promise.all(
-            categories.map(async (c, idx) => {
-                const catLimit = alloc[idx] || 0;
+            if (catLimit <= 0) {
+                return { category: { _id: c.categoryId, name: c.name, score: c.score }, items: [] };
+            }
 
-                if (catLimit <= 0) {
-                    return { category: { _id: c.categoryId, name: c.name, score: c.score }, items: [] };
-                }
+            // phân trang theo từng category
+            const skip = (currentPage - 1) * catLimit;
 
-                // phân trang theo từng category
-                const skip = (currentPage - 1) * catLimit;
+            const pipeline = buildCheckedProductPipeline({
+                extraMatch: { categorySchemaId: c.categoryId },
+                limit: catLimit,
+                skip,
+                random: isGuest || userNoData, // guest: random trong từng category
+                sort: { totalSale: -1, updatedAt: -1, _id: -1 }, // user: hot trong category
+            });
 
-                const pipeline = buildCheckedProductPipeline({
-                    extraMatch: { categorySchemaId: c.categoryId },
-                    limit: catLimit,
-                    skip,
-                    random: isGuest, // guest: random trong từng category
-                    sort: { totalSale: -1, updatedAt: -1, _id: -1 }, // user: hot trong category
-                });
+            const items = await Product.aggregate(pipeline);
 
-                const items = await Product.aggregate(pipeline);
+            allItems = [...items, ...allItems];
 
-                allItems = [...items, ...allItems];
-
-                return {
-                    category: { _id: c.categoryId, name: c.name, score: c.score },
-                };
-            })
-        );
-    }
+            return {
+                category: { _id: c.categoryId, name: c.name, score: c.score },
+            };
+        })
+    );
 
     // hasNextPage: nếu có ít nhất 1 group trả đủ quota (tương đối)
-    const hasNextPage = userNoData
-        ? groups[0]?.items?.length === finalLimit
-        : groups.some((g, idx) => (g.items?.length || 0) === (alloc[idx] || 0));
+    const hasNextPage = groups.some(
+        (g, idx) => (g.items?.length || 0) === (alloc[idx] || 0)
+    );
 
     return {
         ok: true,
@@ -194,7 +175,7 @@ export async function getRecommendedProductsService({ userId, limit = 8, page })
                 : `user_behavior_by_${categories.length}_categories_paginated`,
         categories: groups,
         items: allItems
-    };
+    }
 }
 
 function buildCheckedProductPipeline({

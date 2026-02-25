@@ -152,9 +152,10 @@ export const viewCart = async (req, res, next) => {
         let finalQty = Number(it.quantity ?? 1);
         if (finalQty < 1) finalQty = 1;
 
-        // ✅ Nếu stock > 0 và quantity vượt stock -> clamp
-        if (stock > 0 && finalQty > stock) {
+        //Nếu stock > 0 và quantity vượt stock -> clamp
+        if (stock >= 0 && finalQty > stock) {
             finalQty = stock;
+
             changed = true;
             adjustedCount++;
         }
