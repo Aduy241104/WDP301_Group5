@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getShopDetail, getShopProducts, getShopCategoriesAPI, getShopProductsByCategory, } from "../services/shopService";
 import ShopProductCard from "../components/shop/ShopProductCard";
+import "../App.css";
 
 export default function ShopDetailPage() {
   const { shopId } = useParams();
@@ -14,6 +15,11 @@ export default function ShopDetailPage() {
 
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [pagination, setPagination] = useState(null);
+
 
 
   // ================= FETCH SHOP =================
@@ -31,21 +37,27 @@ export default function ShopDetailPage() {
   };
 
   // ================= FETCH PRODUCTS =================
-  const fetchProducts = async (categoryId = "all") => {
+  const fetchProducts = async (categoryId = "all", currentPage = 1) => {
     try {
       setLoadingProducts(true);
+      setPage(currentPage);
 
       let data;
 
       if (categoryId === "all") {
-        data = await getShopProducts(shopId);
+        data = await getShopProducts(shopId, {
+          page: currentPage,
+          limit,
+        });
       } else {
-        data = await getShopProductsByCategory(shopId, categoryId);
+        data = await getShopProductsByCategory(shopId, categoryId, {
+          page: currentPage,
+          limit,
+        });
       }
 
-      console.log("Products =", data);
-
       setProducts(data.products || []);
+      setPagination(data.pagination);
     } catch (err) {
       console.error(err);
       setProducts([]);
@@ -53,7 +65,6 @@ export default function ShopDetailPage() {
       setLoadingProducts(false);
     }
   };
-
 
 
   const fetchCategories = async () => {
@@ -69,7 +80,10 @@ export default function ShopDetailPage() {
     }
   };
 
-
+  const handleFilter = (id) => {
+    setActiveCategory(id);
+    fetchProducts(id);
+  };
 
   useEffect(() => {
     if (shopId) {
@@ -119,26 +133,45 @@ export default function ShopDetailPage() {
         </div>
       </div>
 
+
+
+
       {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filter">
         <button
-          className="filter-btn"
-          onClick={() => fetchProducts("all")}
+          className={`filter-btn ${activeCategory === "all" ? "active" : ""}`}
+          onClick={() => handleFilter("all")}
         >
           Tất cả
         </button>
 
-        {categories.map((c) => (
+        {categories.slice(0, 4).map((c) => (
           <button
             key={c._id}
-            className="filter-btn"
-            onClick={() => fetchProducts(c._id)}
+            className={`filter-btn ${activeCategory === c._id ? "active" : ""}`}
+            onClick={() => handleFilter(c._id)}
           >
             {c.name}
           </button>
         ))}
-      </div>
 
+        {categories.length > 4 && (
+          <div className="filter-btn more">
+            Thêm ▾
+            <div className="dropdown">
+              {categories.slice(4).map((c) => (
+                <div
+                  key={c._id}
+                  className={`dropdown-item ${activeCategory === c._id ? "active" : ""}`}
+                  onClick={() => handleFilter(c._id)}
+                >
+                  {c.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ================= PRODUCT LIST ================= */}
       <div className="mt-6">
@@ -156,6 +189,95 @@ export default function ShopDetailPage() {
           </div>
         )}
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div
+          style={{
+            marginTop: 30,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              border: "1px solid #ddd",
+              borderRadius: 10,
+              background: "#fff",
+            }}
+          >
+            {/* Nút Prev */}
+            <button
+              disabled={page === 1}
+              onClick={() => fetchProducts(activeCategory, page - 1)}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                background: page === 1 ? "#f5f5f5" : "#fff",
+                cursor: page === 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              {"<"}
+            </button>
+
+            {/* Số trang */}
+            {Array.from({ length: pagination.totalPages }, (_, index) => {
+              const pageNumber = index + 1;
+
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() =>
+                    fetchProducts(activeCategory, pageNumber)
+                  }
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border:
+                      page === pageNumber
+                        ? "1px solid #000"
+                        : "1px solid #ccc",
+                    background:
+                      page === pageNumber ? "#77E2F2" : "#fff",
+                    color:
+                      page === pageNumber ? "#000" : "#000",
+                    fontWeight:
+                      page === pageNumber ? "700" : "normal",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+
+            {/* Nút Next */}
+            <button
+              disabled={page === pagination.totalPages}
+              onClick={() => fetchProducts(activeCategory, page + 1)}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                background:
+                  page === pagination.totalPages
+                    ? "#f5f5f5"
+                    : "#fff",
+                cursor:
+                  page === pagination.totalPages
+                    ? "not-allowed"
+                    : "pointer",
+              }}
+            >
+              {">"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -47,7 +47,7 @@ const AddressPage = () => {
     };
 
     const handleDelete = (id) => {
-        setDeleteId(id); // 👈 chỉ mở popup
+        setDeleteId(id);
     };
 
 
@@ -60,7 +60,7 @@ const AddressPage = () => {
         } catch (err) {
             console.error("Delete address failed", err);
         } finally {
-            setDeleteId(null); // đóng popup
+            setDeleteId(null);
         }
     };
 
