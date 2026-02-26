@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
 import HomePage from "../pages/Homepage";
@@ -22,7 +21,13 @@ import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
 import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
 import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
+import SellerBanners from "../pages/Seller/Banners/SellerBanners";
 import TopSaleProduct from "../pages/TopSaleProduct";
+import OrderSummary from "../pages/OrderCustomer/OrderSummary";
+import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
+import ShopListPage from "../pages/ShopListPage";
+import ShopDetailPage from "../pages/ShopDetailPage";
+import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
 
 export default function AppRoutes() {
   return (
@@ -32,6 +37,9 @@ export default function AppRoutes() {
         <Route path="/" element={ <HomePage /> } />
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
+        <Route path="/order-success" element={ <OrderSuccess /> } />
+        <Route path="/shops/:productId" element={ <ShopListPage /> } />
+        <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
@@ -48,6 +56,8 @@ export default function AppRoutes() {
           <Route path="/profile" element={ <ProfilePage /> } />
           <Route path="/addresses" element={ <AddressPage /> } />
           <Route path="/my-cart" element={ <CartPage /> } />
+          <Route path="/place-order" element={ <OrderSummary /> } />
+          <Route path="/my-order-list" element={ <OrderListPage /> } />
         </Route>
       </Route>
 
@@ -77,6 +87,7 @@ export default function AppRoutes() {
           <Route path="store-information" element={ <SellerStoreInformation /> } />
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
           <Route path="products" element={ <SellerProducts /> } />
+          <Route path="banners" element={ <SellerBanners /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />

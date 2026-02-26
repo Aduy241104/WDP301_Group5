@@ -33,7 +33,9 @@ export const addAddress = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const {
+        let {
+            fullName,
+            phone,
             province,
             district,
             ward,
@@ -41,32 +43,32 @@ export const addAddress = async (req, res) => {
             isDefault = false
         } = req.body;
 
-        // 1. Validate input
-        if (!province || !district || !ward || !streetAddress) {
-            return res.status(400).json({
-                message: "All address fields are required"
-            });
-        }
-
-        // 2. Build full address
-        const fullAddress = `${streetAddress}, ${ward}, ${district}, ${province}`;
-
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({
-                message: "User not found"
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // ✅ FALLBACK từ profile
+        if (!fullName) fullName = user.fullName;
+        if (!phone) phone = user.phone;
+
+        // ✅ Validate SAU fallback
+        if (!fullName || !phone || !province || !district || !ward || !streetAddress) {
+            return res.status(400).json({
+                message: "Missing required address fields"
             });
         }
 
-        // 3. Nếu set default → bỏ default các address khác
+        const fullAddress = `${streetAddress}, ${ward}, ${district}, ${province}`;
+
+        // ✅ Xử lý default
         if (isDefault) {
-            user.addresses.forEach(addr => {
-                addr.isDefault = false;
-            });
+            user.addresses.forEach(addr => addr.isDefault = false);
         }
 
-        // 4. Push new address
         user.addresses.push({
+            fullName,
+            phone,
             province,
             district,
             ward,
@@ -84,64 +86,53 @@ export const addAddress = async (req, res) => {
 
     } catch (error) {
         console.error("ADD_ADDRESS_ERROR:", error);
-        return res.status(500).json({
-            message: "Internal server error"
-        });
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 export const updateAddress = async (req, res) => {
     try {
         const userId = req.user.id;
         const { addressId } = req.params;
 
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const address = user.addresses.id(addressId);
+        if (!address) {
+            return res.status(404).json({ message: "Address not found" });
+        }
+
         const {
+            fullName,
+            phone,
             province,
             district,
             ward,
             streetAddress,
-            isDefault = false
+            isDefault
         } = req.body;
 
-        // 1. Validate input
-        if (!province || !district || !ward || !streetAddress) {
-            return res.status(400).json({
-                message: "All address fields are required"
-            });
+        
+        if (isDefault === true) {
+            user.addresses.forEach(addr => addr.isDefault = false);
+            address.isDefault = true;
         }
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            });
+        if (fullName !== undefined) address.fullName = fullName;
+        if (phone !== undefined) address.phone = phone;
+        if (province) address.province = province;
+        if (district) address.district = district;
+        if (ward) address.ward = ward;
+        if (streetAddress) address.streetAddress = streetAddress;
+
+        
+        if (province || district || ward || streetAddress) {
+            address.fullAddress = `${address.streetAddress}, ${address.ward}, ${address.district}, ${address.province}`;
         }
-
-        // 2. Find address
-        const address = user.addresses.id(addressId);
-        if (!address) {
-            return res.status(404).json({
-                message: "Address not found"
-            });
-        }
-
-        // 3. Nếu set default → reset các address khác
-        if (isDefault) {
-            user.addresses.forEach(addr => {
-                addr.isDefault = false;
-            });
-        }
-
-        // 4. Build fullAddress
-        const fullAddress = `${streetAddress}, ${ward}, ${district}, ${province}`;
-
-        // 5. Update fields
-        address.province = province;
-        address.district = district;
-        address.ward = ward;
-        address.streetAddress = streetAddress;
-        address.fullAddress = fullAddress;
-        address.isDefault = isDefault;
 
         await user.save();
 
@@ -152,6 +143,45 @@ export const updateAddress = async (req, res) => {
 
     } catch (error) {
         console.error("UPDATE_ADDRESS_ERROR:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+
+export const deleteAddress = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { addressId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const address = user.addresses.id(addressId);
+        if (!address) {
+            return res.status(404).json({ message: "Address not found" });
+        }
+
+        const wasDefault = address.isDefault;
+
+        user.addresses.pull(addressId);
+
+        if (wasDefault && user.addresses.length > 0) {
+            user.addresses[0].isDefault = true;
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Delete address successfully",
+            data: user.addresses
+        });
+
+    } catch (error) {
+        console.error("DELETE_ADDRESS_ERROR:", error);
         return res.status(500).json({
             message: "Internal server error"
         });

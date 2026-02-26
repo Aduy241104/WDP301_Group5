@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { viewProfile, updateProfile, changePassword } from "../controllers/profileController.js";
-import { viewAddressList, addAddress, updateAddress } from "../controllers/addressController.js";
+import { viewAddressList, addAddress, updateAddress, deleteAddress } from "../controllers/addressController.js";
 
 const router = express.Router();
 
@@ -19,4 +19,6 @@ router.put("/change-password", authenticationMiddleware, changePassword);
 router.get("/addresses", authenticationMiddleware, viewAddressList);
 router.post("/addresses", authenticationMiddleware, addAddress); 
 router.put("/addresses/:addressId", authenticationMiddleware, updateAddress);
+router.delete("/addresses/:addressId", authenticationMiddleware, deleteAddress);
+
 export default router;

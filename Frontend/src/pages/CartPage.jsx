@@ -4,6 +4,7 @@ import CartHeader from "../components/cart/CartHeader";
 import CartEmpty from "../components/cart/CartEmpty";
 import CartGroup from "../components/cart/CartGroup";
 import AppModal from "../components/common/AppModal";
+import { useNavigate } from "react-router-dom";
 
 const formatVND = (n) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(n || 0);
@@ -24,7 +25,9 @@ export default function CartPage() {
         handleModalConfirm,
     } = useCart();
 
-    // TÍNH TỔNG TIỀN THEO ITEM ĐÃ TICK
+    const navigate = useNavigate();
+
+    // tính tổng tiền theo item đã tick
     const selectedSubtotal = useMemo(() => {
         let sum = 0;
 
@@ -110,18 +113,9 @@ export default function CartPage() {
                                             : "bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.99]",
                                     ].join(" ") }
                                     onClick={ () => {
-                                        const checkoutItems = groups
-                                            .flatMap((g) => g.items)
-                                            .filter((it) =>
-                                                selectedIds.has(it.variantId)
-                                            )
-                                            .map((it) => ({
-                                                variantId: it.variantId,
-                                                quantity: it.quantity,
-                                            }));
-
-                                        console.log("CHECKOUT ITEMS:", checkoutItems);
-                                        alert("Hook checkout sau nhé");
+                                        navigate("/place-order", {
+                                            state: { selectedIds }
+                                        })
                                     } }
                                 >
                                     Tiếp tục thanh toán

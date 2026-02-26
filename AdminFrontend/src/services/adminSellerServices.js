@@ -56,3 +56,19 @@ export const fetchShopList = async (params = {}) => {
     return res.data;
 };
 
+// View shop detail
+export const fetchShopDetail = async (shopId) => {
+    const res = await axiosInstance.get(`/api/admin/shops/${shopId}`);
+    return res.data;
+};
+
+// Block / Unblock shop
+export const blockShop = async (shopId) => {
+    const res = await axiosInstance.post(`/api/admin/shops/${shopId}/block`);
+    return res.data;
+};
+
+export const unblockShop = async (shopId) => {
+    const res = await axiosInstance.post(`/api/admin/shops/${shopId}/unblock`);
+    return res.data;
+};

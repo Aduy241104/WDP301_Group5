@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Star,
   Bell,
+  Image,
 } from "lucide-react";
 
 const menu = [
@@ -17,6 +18,7 @@ const menu = [
   { label: "Manage Pickup Address", to: "/seller/pickup-addresses", icon: Store },
   { label: "Categories", to: "/seller/categories", icon: Boxes },
   { label: "Products", to: "/seller/products", icon: Package },
+  { label: "Banners", to: "/seller/banners", icon: Image },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
   { label: "Returns", to: "/seller/returns", icon: RotateCcw },

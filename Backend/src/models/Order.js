@@ -51,7 +51,7 @@ const OrderSchema = new Schema(
 
         shop: { type: Schema.Types.ObjectId, ref: "Shop", required: true, index: true },
 
-        pickupAddressSnapshotId: { type: Schema.Types.ObjectId, ref: "OrderAddressSnapshot", required: true },
+        pickupAddressSnapshotId: { type: Schema.Types.ObjectId, ref: "OrderAddressSnapshot", required: false, default: null },
         deliveryAddressSnapshotId: { type: Schema.Types.ObjectId, ref: "OrderAddressSnapshot", required: true },
 
         items: { type: [OrderItemSchema], required: true, default: [] },
