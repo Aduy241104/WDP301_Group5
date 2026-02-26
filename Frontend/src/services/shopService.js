@@ -13,9 +13,10 @@ export const getShopDetail = async (shopId) => {
 };
 
 
-export const getShopProducts = async (shopId, page = 1, limit = 20) => {
+export const getShopProducts = async (shopId, params = {}) => {
   const res = await axiosInstance.get(
-    `/api/shops/${shopId}/products?page=${page}&limit=${limit}`
+    `/api/shops/${shopId}/products`,
+    { params }
   );
   return res.data;
 };
@@ -35,17 +36,12 @@ export const getShopCategoriesAPI = async (shopId) => {
  */
 export const getShopProductsByCategory = async (
   shopId,
-  shopCategoryId,
-  page = 1,
-  limit = 20,
-  sortBy = "createdAt",
-  order = "desc"
+  categoryId,
+  params = {}
 ) => {
   const res = await axiosInstance.get(
-    `/api/shops/${shopId}/categories/${shopCategoryId}/products`, // ✔ đúng router
-    {
-      params: { page, limit, sortBy, order },
-    }
+    `/api/shops/${shopId}/categories/${categoryId}/products`,
+    { params }
   );
   return res.data;
 };
