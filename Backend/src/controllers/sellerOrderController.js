@@ -50,65 +50,57 @@ export const confirmOrder = async (req, res) => {
 };
 
 export const cancelOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).session(session);
     if (!order) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "Order not found" });
     }
 
     if (["shipped", "delivered"].includes(order.orderStatus)) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ message: "Cannot cancel shipped or delivered order" });
     }
 
     if (order.orderStatus === "cancelled") {
+      await session.abortTransaction();
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
-    // 🧠 ensure statusHistory
-    if (!Array.isArray(order.statusHistory)) {
-      order.statusHistory = [];
-    }
-
-    // ✅ cộng lại tồn kho
     for (const item of order.items) {
-      if (!item.variantId) {
-        return res
-          .status(400)
-          .json({ message: "Order item missing variantId" });
-      }
-
-      const inv = await Inventory.findOneAndUpdate(
+      await Inventory.findOneAndUpdate(
         { variantId: item.variantId },
         {
           $inc: { stock: item.quantity },
           $set: { updatedAt: new Date() },
         },
+        { session },
       );
-
-      if (!inv) {
-        return res.status(400).json({
-          message: `Inventory not found for variant ${item.variantId}`,
-        });
-      }
     }
 
+    // ✅ update order status
     order.orderStatus = "cancelled";
     order.cancelledAt = new Date();
-    order.statusHistory.push({
-      status: "cancelled",
-      createdAt: new Date(),
-    });
+    order.statusHistory.push({ status: "cancelled", createdAt: new Date() });
 
-    await order.save();
+    await order.save({ session });
 
+    await session.commitTransaction();
     res.json(order);
   } catch (err) {
+    await session.abortTransaction();
     console.error("❌ cancelOrder error:", err);
     res.status(500).json({ message: err.message });
+  } finally {
+    session.endSession();
   }
 };
+
 
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -126,7 +118,7 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // 3️⃣ ensure statusHistory exists (🔥 lỗi gây 500 phổ biến nhất)
+    // 3️⃣ ensure statusHistory exists
     if (!Array.isArray(order.statusHistory)) {
       order.statusHistory = [];
     }
@@ -140,7 +132,7 @@ export const updateOrderStatus = async (req, res) => {
         order.trackingCode = trackingCode;
       }
 
-      // validate pickupAddressId trước
+      // validate pickupAddressId and create snapshot
       if (pickupAddressId && mongoose.Types.ObjectId.isValid(pickupAddressId)) {
         const shop = await Shop.findById(order.shop);
         if (!shop) {
