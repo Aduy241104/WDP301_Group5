@@ -50,36 +50,30 @@ export const confirmOrder = async (req, res) => {
 };
 
 export const cancelOrder = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const order = await Order.findById(req.params.id).session(session);
+    const order = await Order.findById(req.params.id);
     if (!order) {
-      await session.abortTransaction();
       return res.status(404).json({ message: "Order not found" });
     }
 
     if (["shipped", "delivered"].includes(order.orderStatus)) {
-      await session.abortTransaction();
       return res
         .status(400)
         .json({ message: "Cannot cancel shipped or delivered order" });
     }
 
     if (order.orderStatus === "cancelled") {
-      await session.abortTransaction();
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
+    // ✅ hoàn stock
     for (const item of order.items) {
       await Inventory.findOneAndUpdate(
         { variantId: item.variantId },
         {
           $inc: { stock: item.quantity },
           $set: { updatedAt: new Date() },
-        },
-        { session },
+        }
       );
     }
 
@@ -88,16 +82,12 @@ export const cancelOrder = async (req, res) => {
     order.cancelledAt = new Date();
     order.statusHistory.push({ status: "cancelled", createdAt: new Date() });
 
-    await order.save({ session });
+    await order.save();
 
-    await session.commitTransaction();
     res.json(order);
   } catch (err) {
-    await session.abortTransaction();
     console.error("❌ cancelOrder error:", err);
     res.status(500).json({ message: err.message });
-  } finally {
-    session.endSession();
   }
 };
 
@@ -205,6 +195,7 @@ export const getOrderPickupAddresses = async (req, res) => {
   res.json({ pickupAddresses });
 };
 
+
 export const getDashboardStats = async (req, res) => {
   try {
     const sellerId = req.user.id;
@@ -216,22 +207,28 @@ export const getDashboardStats = async (req, res) => {
 
     const shopId = shop._id;
 
-    // ===== Time ranges =====
+    // ===== Time ranges (UTC) =====
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
     const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastMonthStart = new Date(
-      today.getFullYear(),
-      today.getMonth() - 1,
-      1,
-    );
+    const monthStart = new Date(Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      1
+    ));
+
+    const lastMonthStart = new Date(Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth() - 1,
+      1
+    ));
+
     const lastMonthEnd = monthStart;
 
     // ===== Revenue today =====
@@ -293,7 +290,7 @@ export const getDashboardStats = async (req, res) => {
       },
     ]);
 
-    // ===== New orders today (theo createdAt là ĐÚNG) =====
+    // ===== New orders today (theo createdAt) =====
     const newOrdersToday = await Order.countDocuments({
       shop: new mongoose.Types.ObjectId(shopId),
       createdAt: { $gte: today, $lt: tomorrow },
@@ -311,11 +308,11 @@ export const getDashboardStats = async (req, res) => {
     const lastMonthRev = lastMonthRevenue[0]?.total || 0;
 
     const dayChangePercent = yesterdayRev
-      ? (((todayRev - yesterdayRev) / yesterdayRev) * 100).toFixed(1)
+      ? Number((((todayRev - yesterdayRev) / yesterdayRev) * 100).toFixed(1))
       : 0;
 
     const monthChangePercent = lastMonthRev
-      ? (((monthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1)
+      ? Number((((monthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1))
       : 0;
 
     const { dailySeries, monthlySeries } = await buildRevenueSeries(shopId);
@@ -332,19 +329,21 @@ export const getDashboardStats = async (req, res) => {
       monthlyRevenueLast12Months: monthlySeries,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 const buildRevenueSeries = async (shopId) => {
+  // ===== Today (UTC) =====
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
 
   // ===== Last 7 days =====
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    d.setUTCDate(d.getUTCDate() - i);
     days.push(d);
   }
 
@@ -365,6 +364,7 @@ const buildRevenueSeries = async (shopId) => {
           $dateToString: {
             format: "%Y-%m-%d",
             date: "$deliveredAt",
+            timezone: "Asia/Ho_Chi_Minh",
           },
         },
         total: { $sum: "$totalAmount" },
@@ -379,7 +379,7 @@ const buildRevenueSeries = async (shopId) => {
   });
 
   const dailySeries = days.map((d) => {
-    const key = d.toISOString().slice(0, 10);
+    const key = new Date(d).toISOString().slice(0, 10);
     return { date: key, total: dailyMap[key] || 0 };
   });
 
@@ -387,15 +387,19 @@ const buildRevenueSeries = async (shopId) => {
   const now = new Date();
   const months = [];
   for (let i = 11; i >= 0; i--) {
-    months.push(new Date(now.getFullYear(), now.getMonth() - i, 1));
+    months.push(new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth() - i,
+      1
+    )));
   }
 
   const monthStart = months[0];
-  const monthEnd = new Date(
-    months[months.length - 1].getFullYear(),
-    months[months.length - 1].getMonth() + 1,
-    1,
-  );
+  const monthEnd = new Date(Date.UTC(
+    months[months.length - 1].getUTCFullYear(),
+    months[months.length - 1].getUTCMonth() + 1,
+    1
+  ));
 
   const monthlyMatches = await Order.aggregate([
     {
@@ -411,6 +415,7 @@ const buildRevenueSeries = async (shopId) => {
           $dateToString: {
             format: "%Y-%m",
             date: "$deliveredAt",
+            timezone: "Asia/Ho_Chi_Minh",
           },
         },
         total: { $sum: "$totalAmount" },
@@ -425,7 +430,7 @@ const buildRevenueSeries = async (shopId) => {
   });
 
   const monthlySeries = months.map((m) => {
-    const key = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`;
+    const key = `${m.getUTCFullYear()}-${String(m.getUTCMonth() + 1).padStart(2, "0")}`;
     return { month: key, total: monthMap[key] || 0 };
   });
 
