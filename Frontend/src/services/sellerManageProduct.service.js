@@ -29,3 +29,8 @@ export const getCategorySchemasAPI = async () => {
   const res = await axiosInstance.get("/api/seller/category-schemas");
   return res.data?.data || [];
 };
+
+export const deleteSellerProductAPI = async (productId) => {
+  const res = await axiosInstance.delete(`/api/seller/products/${productId}`);
+  return res.data;
+};
