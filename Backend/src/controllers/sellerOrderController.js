@@ -12,20 +12,36 @@ dayjs.extend(timezone);
 
 const TZ = "Asia/Ho_Chi_Minh";
 
-
 export const getOrders = async (req, res) => {
-  const { status, keyword, trackingCode } = req.query;
+  try {
+    const sellerId = req.user.id;
+    const { status, keyword, trackingCode } = req.query;
 
-  const filter = {};
+    const shop = await Shop.findOne({
+      ownerId: new mongoose.Types.ObjectId(sellerId),
+      isDeleted: false,
+    });
 
-  if (status) filter.orderStatus = status;
-  if (keyword) filter.orderCode = { $regex: keyword, $options: "i" };
-  if (trackingCode)
-    filter.trackingCode = { $regex: trackingCode, $options: "i" };
+    if (!shop) {
+      return res.status(404).json({ message: "Seller chưa có shop" });
+    }
 
-  const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const filter = {
+      shop: shop._id, // 🔥 CỰC KỲ QUAN TRỌNG
+    };
 
-  res.json(orders);
+    if (status) filter.orderStatus = status;
+    if (keyword) filter.orderCode = { $regex: keyword, $options: "i" };
+    if (trackingCode)
+      filter.trackingCode = { $regex: trackingCode, $options: "i" };
+
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export const getOrderDetail = async (req, res) => {
@@ -82,7 +98,7 @@ export const cancelOrder = async (req, res) => {
         {
           $inc: { stock: item.quantity },
           $set: { updatedAt: new Date() },
-        }
+        },
       );
     }
 
@@ -99,7 +115,6 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -204,8 +219,6 @@ export const getOrderPickupAddresses = async (req, res) => {
   res.json({ pickupAddresses });
 };
 
-
-
 export const getDashboardStats = async (req, res) => {
   try {
     const sellerId = req.user.id;
@@ -221,29 +234,58 @@ export const getDashboardStats = async (req, res) => {
     const startOfToday = dayjs().tz(TZ).startOf("day").utc().toDate();
     const endOfToday = dayjs().tz(TZ).endOf("day").utc().toDate();
 
-    const startOfYesterday = dayjs().tz(TZ).subtract(1, "day").startOf("day").utc().toDate();
-    const endOfYesterday = dayjs().tz(TZ).subtract(1, "day").endOf("day").utc().toDate();
+    const startOfYesterday = dayjs()
+      .tz(TZ)
+      .subtract(1, "day")
+      .startOf("day")
+      .utc()
+      .toDate();
+    const endOfYesterday = dayjs()
+      .tz(TZ)
+      .subtract(1, "day")
+      .endOf("day")
+      .utc()
+      .toDate();
 
     const startOfThisMonth = dayjs().tz(TZ).startOf("month").utc().toDate();
-    const startOfLastMonth = dayjs().tz(TZ).subtract(1, "month").startOf("month").utc().toDate();
-    const endOfLastMonth = dayjs().tz(TZ).subtract(1, "month").endOf("month").utc().toDate();
+    const startOfLastMonth = dayjs()
+      .tz(TZ)
+      .subtract(1, "month")
+      .startOf("month")
+      .utc()
+      .toDate();
+    const endOfLastMonth = dayjs()
+      .tz(TZ)
+      .subtract(1, "month")
+      .endOf("month")
+      .utc()
+      .toDate();
 
     const revenueMatch = {
       shop: new mongoose.Types.ObjectId(shopId),
       paymentStatus: "paid",
       orderStatus: "delivered",
-      cancelledAt: { $exists: false },
+      $or: [{ cancelledAt: { $exists: false } }, { cancelledAt: null }],
     };
-
     // ===== Revenue today =====
     const todayRevenue = await Order.aggregate([
-      { $match: { ...revenueMatch, deliveredAt: { $gte: startOfToday, $lte: endOfToday } } },
+      {
+        $match: {
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfToday, $lte: endOfToday },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
 
     // ===== Revenue yesterday =====
     const yesterdayRevenue = await Order.aggregate([
-      { $match: { ...revenueMatch, deliveredAt: { $gte: startOfYesterday, $lte: endOfYesterday } } },
+      {
+        $match: {
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfYesterday, $lte: endOfYesterday },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
 
@@ -255,7 +297,12 @@ export const getDashboardStats = async (req, res) => {
 
     // ===== Revenue last month =====
     const lastMonthRevenue = await Order.aggregate([
-      { $match: { ...revenueMatch, deliveredAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
+      {
+        $match: {
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
+        },
+      },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
 
@@ -327,7 +374,7 @@ const buildRevenueSeries = async (shopId) => {
         shop: new mongoose.Types.ObjectId(shopId),
         paymentStatus: "paid",
         orderStatus: "delivered",
-        cancelledAt: { $exists: false },
+        $or: [{ cancelledAt: { $exists: false } }, { cancelledAt: null }],
         deliveredAt: { $gte: start, $lte: end },
       },
     },
@@ -346,9 +393,11 @@ const buildRevenueSeries = async (shopId) => {
     { $sort: { _id: 1 } },
   ]);
 
-  const dailyMap = Object.fromEntries(dailyMatches.map(r => [r._id, r.total]));
+  const dailyMap = Object.fromEntries(
+    dailyMatches.map((r) => [r._id, r.total]),
+  );
 
-  const dailySeries = days.map(d => {
+  const dailySeries = days.map((d) => {
     const key = d.format("YYYY-MM-DD");
     return { date: key, total: dailyMap[key] || 0 };
   });
@@ -387,9 +436,11 @@ const buildRevenueSeries = async (shopId) => {
     { $sort: { _id: 1 } },
   ]);
 
-  const monthMap = Object.fromEntries(monthlyMatches.map(r => [r._id, r.total]));
+  const monthMap = Object.fromEntries(
+    monthlyMatches.map((r) => [r._id, r.total]),
+  );
 
-  const monthlySeries = months.map(m => {
+  const monthlySeries = months.map((m) => {
     const key = m.format("YYYY-MM");
     return { month: key, total: monthMap[key] || 0 };
   });
