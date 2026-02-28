@@ -27,7 +27,7 @@ export const getOrders = async (req, res) => {
     }
 
     const filter = {
-      shop: shop._id, // 🔥 CỰC KỲ QUAN TRỌNG
+      shop: shop._id,
     };
 
     if (status) filter.orderStatus = status;
@@ -359,7 +359,6 @@ export const getDashboardStats = async (req, res) => {
 const buildRevenueSeries = async (shopId) => {
   const todayVN = dayjs().tz(TZ).startOf("day");
 
-  // ===== Last 7 days =====
   const days = [];
   for (let i = 6; i >= 0; i--) {
     days.push(todayVN.subtract(i, "day"));
@@ -402,7 +401,6 @@ const buildRevenueSeries = async (shopId) => {
     return { date: key, total: dailyMap[key] || 0 };
   });
 
-  // ===== Last 12 months =====
   const months = [];
   for (let i = 11; i >= 0; i--) {
     months.push(dayjs().tz(TZ).subtract(i, "month").startOf("month"));
