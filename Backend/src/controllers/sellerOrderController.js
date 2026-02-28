@@ -3,20 +3,45 @@ import { Order } from "../models/Order.js";
 import { Shop } from "../models/Shop.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { Inventory } from "../models/Inventory.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const TZ = "Asia/Ho_Chi_Minh";
 
 export const getOrders = async (req, res) => {
-  const { status, keyword, trackingCode } = req.query;
+  try {
+    const sellerId = req.user.id;
+    const { status, keyword, trackingCode } = req.query;
 
-  const filter = {};
+    const shop = await Shop.findOne({
+      ownerId: new mongoose.Types.ObjectId(sellerId),
+      isDeleted: false,
+    });
 
-  if (status) filter.orderStatus = status;
-  if (keyword) filter.orderCode = { $regex: keyword, $options: "i" };
-  if (trackingCode)
-    filter.trackingCode = { $regex: trackingCode, $options: "i" };
+    if (!shop) {
+      return res.status(404).json({ message: "Seller chưa có shop" });
+    }
 
-  const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const filter = {
+      shop: shop._id, // 🔥 CỰC KỲ QUAN TRỌNG
+    };
 
-  res.json(orders);
+    if (status) filter.orderStatus = status;
+    if (keyword) filter.orderCode = { $regex: keyword, $options: "i" };
+    if (trackingCode)
+      filter.trackingCode = { $regex: trackingCode, $options: "i" };
+
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export const getOrderDetail = async (req, res) => {
@@ -66,40 +91,21 @@ export const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
-    // 🧠 ensure statusHistory
-    if (!Array.isArray(order.statusHistory)) {
-      order.statusHistory = [];
-    }
-
-    // ✅ cộng lại tồn kho
+    // ✅ hoàn stock
     for (const item of order.items) {
-      if (!item.variantId) {
-        return res
-          .status(400)
-          .json({ message: "Order item missing variantId" });
-      }
-
-      const inv = await Inventory.findOneAndUpdate(
+      await Inventory.findOneAndUpdate(
         { variantId: item.variantId },
         {
           $inc: { stock: item.quantity },
           $set: { updatedAt: new Date() },
         },
       );
-
-      if (!inv) {
-        return res.status(400).json({
-          message: `Inventory not found for variant ${item.variantId}`,
-        });
-      }
     }
 
+    // ✅ update order status
     order.orderStatus = "cancelled";
     order.cancelledAt = new Date();
-    order.statusHistory.push({
-      status: "cancelled",
-      createdAt: new Date(),
-    });
+    order.statusHistory.push({ status: "cancelled", createdAt: new Date() });
 
     await order.save();
 
@@ -126,7 +132,7 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // 3️⃣ ensure statusHistory exists (🔥 lỗi gây 500 phổ biến nhất)
+    // 3️⃣ ensure statusHistory exists
     if (!Array.isArray(order.statusHistory)) {
       order.statusHistory = [];
     }
@@ -140,7 +146,7 @@ export const updateOrderStatus = async (req, res) => {
         order.trackingCode = trackingCode;
       }
 
-      // validate pickupAddressId trước
+      // validate pickupAddressId and create snapshot
       if (pickupAddressId && mongoose.Types.ObjectId.isValid(pickupAddressId)) {
         const shop = await Shop.findById(order.shop);
         if (!shop) {
@@ -224,31 +230,49 @@ export const getDashboardStats = async (req, res) => {
 
     const shopId = shop._id;
 
-    // ===== Time ranges =====
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // ===== Mốc thời gian theo giờ VN, convert sang UTC để query =====
+    const startOfToday = dayjs().tz(TZ).startOf("day").utc().toDate();
+    const endOfToday = dayjs().tz(TZ).endOf("day").utc().toDate();
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const startOfYesterday = dayjs()
+      .tz(TZ)
+      .subtract(1, "day")
+      .startOf("day")
+      .utc()
+      .toDate();
+    const endOfYesterday = dayjs()
+      .tz(TZ)
+      .subtract(1, "day")
+      .endOf("day")
+      .utc()
+      .toDate();
 
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const startOfThisMonth = dayjs().tz(TZ).startOf("month").utc().toDate();
+    const startOfLastMonth = dayjs()
+      .tz(TZ)
+      .subtract(1, "month")
+      .startOf("month")
+      .utc()
+      .toDate();
+    const endOfLastMonth = dayjs()
+      .tz(TZ)
+      .subtract(1, "month")
+      .endOf("month")
+      .utc()
+      .toDate();
 
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastMonthStart = new Date(
-      today.getFullYear(),
-      today.getMonth() - 1,
-      1,
-    );
-    const lastMonthEnd = monthStart;
-
+    const revenueMatch = {
+      shop: new mongoose.Types.ObjectId(shopId),
+      paymentStatus: "paid",
+      orderStatus: "delivered",
+      $or: [{ cancelledAt: { $exists: false } }, { cancelledAt: null }],
+    };
     // ===== Revenue today =====
     const todayRevenue = await Order.aggregate([
       {
         $match: {
-          shop: new mongoose.Types.ObjectId(shopId),
-          paymentStatus: "paid",
-          deliveredAt: { $gte: today, $lt: tomorrow },
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfToday, $lte: endOfToday },
         },
       },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
@@ -258,9 +282,8 @@ export const getDashboardStats = async (req, res) => {
     const yesterdayRevenue = await Order.aggregate([
       {
         $match: {
-          shop: new mongoose.Types.ObjectId(shopId),
-          paymentStatus: "paid",
-          deliveredAt: { $gte: yesterday, $lt: today },
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfYesterday, $lte: endOfYesterday },
         },
       },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
@@ -268,13 +291,7 @@ export const getDashboardStats = async (req, res) => {
 
     // ===== Revenue this month =====
     const monthRevenue = await Order.aggregate([
-      {
-        $match: {
-          shop: new mongoose.Types.ObjectId(shopId),
-          paymentStatus: "paid",
-          deliveredAt: { $gte: monthStart },
-        },
-      },
+      { $match: { ...revenueMatch, deliveredAt: { $gte: startOfThisMonth } } },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
 
@@ -282,9 +299,8 @@ export const getDashboardStats = async (req, res) => {
     const lastMonthRevenue = await Order.aggregate([
       {
         $match: {
-          shop: new mongoose.Types.ObjectId(shopId),
-          paymentStatus: "paid",
-          deliveredAt: { $gte: lastMonthStart, $lt: lastMonthEnd },
+          ...revenueMatch,
+          deliveredAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
         },
       },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
@@ -293,18 +309,13 @@ export const getDashboardStats = async (req, res) => {
     // ===== Order stats =====
     const orderStats = await Order.aggregate([
       { $match: { shop: new mongoose.Types.ObjectId(shopId) } },
-      {
-        $group: {
-          _id: "$orderStatus",
-          count: { $sum: 1 },
-        },
-      },
+      { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
     ]);
 
-    // ===== New orders today (theo createdAt là ĐÚNG) =====
+    // ===== New orders today (theo createdAt, giờ VN) =====
     const newOrdersToday = await Order.countDocuments({
       shop: new mongoose.Types.ObjectId(shopId),
-      createdAt: { $gte: today, $lt: tomorrow },
+      createdAt: { $gte: startOfToday, $lte: endOfToday },
     });
 
     // ===== Pending orders =====
@@ -319,11 +330,11 @@ export const getDashboardStats = async (req, res) => {
     const lastMonthRev = lastMonthRevenue[0]?.total || 0;
 
     const dayChangePercent = yesterdayRev
-      ? (((todayRev - yesterdayRev) / yesterdayRev) * 100).toFixed(1)
+      ? Number((((todayRev - yesterdayRev) / yesterdayRev) * 100).toFixed(1))
       : 0;
 
     const monthChangePercent = lastMonthRev
-      ? (((monthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1)
+      ? Number((((monthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1))
       : 0;
 
     const { dailySeries, monthlySeries } = await buildRevenueSeries(shopId);
@@ -340,31 +351,31 @@ export const getDashboardStats = async (req, res) => {
       monthlyRevenueLast12Months: monthlySeries,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 const buildRevenueSeries = async (shopId) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayVN = dayjs().tz(TZ).startOf("day");
 
   // ===== Last 7 days =====
   const days = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    days.push(d);
+    days.push(todayVN.subtract(i, "day"));
   }
+
+  const start = days[0].utc().toDate();
+  const end = todayVN.endOf("day").utc().toDate();
 
   const dailyMatches = await Order.aggregate([
     {
       $match: {
         shop: new mongoose.Types.ObjectId(shopId),
         paymentStatus: "paid",
-        deliveredAt: {
-          $gte: days[0],
-          $lt: new Date(days[6].getTime() + 24 * 60 * 60 * 1000),
-        },
+        orderStatus: "delivered",
+        $or: [{ cancelledAt: { $exists: false } }, { cancelledAt: null }],
+        deliveredAt: { $gte: start, $lte: end },
       },
     },
     {
@@ -373,6 +384,7 @@ const buildRevenueSeries = async (shopId) => {
           $dateToString: {
             format: "%Y-%m-%d",
             date: "$deliveredAt",
+            timezone: TZ,
           },
         },
         total: { $sum: "$totalAmount" },
@@ -381,36 +393,32 @@ const buildRevenueSeries = async (shopId) => {
     { $sort: { _id: 1 } },
   ]);
 
-  const dailyMap = {};
-  dailyMatches.forEach((r) => {
-    dailyMap[r._id] = r.total;
-  });
+  const dailyMap = Object.fromEntries(
+    dailyMatches.map((r) => [r._id, r.total]),
+  );
 
   const dailySeries = days.map((d) => {
-    const key = d.toISOString().slice(0, 10);
+    const key = d.format("YYYY-MM-DD");
     return { date: key, total: dailyMap[key] || 0 };
   });
 
   // ===== Last 12 months =====
-  const now = new Date();
   const months = [];
   for (let i = 11; i >= 0; i--) {
-    months.push(new Date(now.getFullYear(), now.getMonth() - i, 1));
+    months.push(dayjs().tz(TZ).subtract(i, "month").startOf("month"));
   }
 
-  const monthStart = months[0];
-  const monthEnd = new Date(
-    months[months.length - 1].getFullYear(),
-    months[months.length - 1].getMonth() + 1,
-    1,
-  );
+  const monthStart = months[0].utc().toDate();
+  const monthEnd = months[months.length - 1].endOf("month").utc().toDate();
 
   const monthlyMatches = await Order.aggregate([
     {
       $match: {
         shop: new mongoose.Types.ObjectId(shopId),
         paymentStatus: "paid",
-        deliveredAt: { $gte: monthStart, $lt: monthEnd },
+        orderStatus: "delivered",
+        cancelledAt: { $exists: false },
+        deliveredAt: { $gte: monthStart, $lte: monthEnd },
       },
     },
     {
@@ -419,6 +427,7 @@ const buildRevenueSeries = async (shopId) => {
           $dateToString: {
             format: "%Y-%m",
             date: "$deliveredAt",
+            timezone: TZ,
           },
         },
         total: { $sum: "$totalAmount" },
@@ -427,13 +436,12 @@ const buildRevenueSeries = async (shopId) => {
     { $sort: { _id: 1 } },
   ]);
 
-  const monthMap = {};
-  monthlyMatches.forEach((r) => {
-    monthMap[r._id] = r.total;
-  });
+  const monthMap = Object.fromEntries(
+    monthlyMatches.map((r) => [r._id, r.total]),
+  );
 
   const monthlySeries = months.map((m) => {
-    const key = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`;
+    const key = m.format("YYYY-MM");
     return { month: key, total: monthMap[key] || 0 };
   });
 
