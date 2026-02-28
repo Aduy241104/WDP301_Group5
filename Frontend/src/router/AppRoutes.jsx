@@ -25,7 +25,6 @@ import SellerBanners from "../pages/Seller/Banners/SellerBanners";
 import TopSaleProduct from "../pages/TopSaleProduct";
 import OrderSummary from "../pages/OrderCustomer/OrderSummary";
 import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
-import SellerCategories from "../pages/Seller/Categories/SellerCategories";
 import ShopListPage from "../pages/ShopListPage";
 import ShopDetailPage from "../pages/ShopDetailPage";
 import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
@@ -88,7 +87,6 @@ export default function AppRoutes() {
           <Route path="store-information" element={ <SellerStoreInformation /> } />
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
           <Route path="products" element={ <SellerProducts /> } />
-          <Route path="categories" element={ <SellerCategories /> } />
           <Route path="banners" element={ <SellerBanners /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />

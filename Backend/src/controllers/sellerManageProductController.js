@@ -246,7 +246,7 @@ export const updateProduct = async (req, res) => {
         if (attributes) product.attributes = attributesMap;
 
         product.defaultPrice = Math.min(...variants.map(v => v.price));
-        product.status = "pending"; 
+        product.status = "pending"; // update lại thì chờ duyệt lại
 
         await product.save();
 
@@ -390,57 +390,6 @@ export const getSellerProductDetail = async (req, res) => {
     console.error("getSellerProductDetail error:", error);
     return res.status(500).json({
       message: "Lỗi server khi lấy chi tiết sản phẩm",
-    });
-  }
-};
-
-/**
- * DELETE /seller/products/:productId
- * Seller soft–delete a product in their shop
- */
-export const deleteSellerProduct = async (req, res) => {
-  try {
-    const { productId } = req.params;
-    const shopId = req.shop?._id;
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ message: "ProductId không hợp lệ" });
-    }
-
-    const product = await Product.findOne({
-      _id: productId,
-      shopId,
-      isDeleted: false,
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Không tìm thấy sản phẩm hoặc không có quyền",
-      });
-    }
-
-    product.isDeleted = true;
-    product.deletedAt = new Date();
-    if (req.user && req.user.id) product.deletedBy = req.user.id;
-    await product.save();
-
-    // soft-delete variants too
-    await Variant.updateMany(
-      { productId, isDeleted: false },
-      {
-        isDeleted: true,
-        deletedAt: new Date(),
-        ...(req.user && req.user.id ? { deletedBy: req.user.id } : {}),
-      }
-    );
-
-    return res.status(200).json({
-      message: "Xóa sản phẩm thành công",
-    });
-  } catch (error) {
-    console.error("deleteSellerProduct error:", error);
-    return res.status(500).json({
-      message: "Lỗi server khi xóa sản phẩm",
     });
   }
 };

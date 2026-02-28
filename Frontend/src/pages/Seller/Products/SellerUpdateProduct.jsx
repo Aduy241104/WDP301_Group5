@@ -5,7 +5,6 @@ import {
   getSellerProductDetailAPI,
   updateSellerProductAPI,
 } from "../../../services/sellerManageProduct.service";
-import { uploadSingleImageAPI } from "../../../services/uploadService";
 import ProductForm from "./ProductForm";
 import {
   createEmptyProductForm,
@@ -20,7 +19,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
   const [error, setError] = useState("");
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
 
   const [form, setForm] = useState(() => createEmptyProductForm({ withVariantId: true }));
 
@@ -83,36 +81,13 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
         return;
       }
 
-      // 1) Chuẩn bị danh sách ảnh: giữ ảnh cũ (form.images), cộng thêm ảnh mới chọn file
-      let currentImages = form.images || [];
-
-      if (imageFiles.length > 0) {
-        const uploadResults = await Promise.all(
-          imageFiles.map((file) =>
-            uploadSingleImageAPI({ file, folder: "products" })
-          )
-        );
-
-        const uploadedUrls = uploadResults
-          .map((r) => r?.url)
-          .filter(Boolean);
-
-        currentImages = [...currentImages, ...uploadedUrls];
-      }
-
-      const { payload, variants } = serializeProductPayload(
-        { ...form, images: currentImages },
-        { includeVariantId: true }
-      );
+      const { payload, variants } = serializeProductPayload(form, { includeVariantId: true });
       if (variants.length === 0) {
         setError("Sản phẩm phải có ít nhất 1 phân loại (giá bắt buộc)");
         return;
       }
 
       await updateSellerProductAPI(productId, payload);
-
-      // Reset file đã chọn sau khi update thành công
-      setImageFiles([]);
 
       onSuccess?.();
       onBack?.();
@@ -144,8 +119,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
       onBack={onBack}
       onSubmit={handleSubmit}
       variantHelpText="Mỗi dòng = 1 biến thể. Variant cũ giữ lại `_id` để update đúng, xoá dòng sẽ soft delete ở backend."
-      imageFiles={imageFiles}
-      onImageFilesChange={setImageFiles}
     />
   );
 }
