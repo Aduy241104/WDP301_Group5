@@ -25,7 +25,7 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-100">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur border-b border-slate-100">
             {/* top strip */ }
             <div className="bg-[rgb(119,226,242)]/25">
                 <div className="mx-auto max-w-7xl px-4 py-2 flex items-center justify-between text-sm">

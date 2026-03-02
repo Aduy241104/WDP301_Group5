@@ -182,4 +182,3 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
     />
   );
 }
-

@@ -45,7 +45,7 @@ export const checkAddToCartAvailability = async (req, res, next) => {
             _id: variant.productId,
             isDeleted: false,
             activeStatus: "active",
-            status: "approved", // bỏ nếu bạn muốn cho pending
+            status: "approved",
         }).lean();
 
         if (!product) {

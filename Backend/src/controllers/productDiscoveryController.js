@@ -8,7 +8,7 @@ import { getRecommendedProductsService } from "../services/recommenService.js"
 
 export const getProductDiscovery = async (req, res) => {
     try {
-        const userId = req.user?.id ?? undefined ;
+        const userId = req.user?.id ?? undefined;
         const topSaleProductsDoc = await getTopSale(0, 8);
         const topSaleProducts = topSaleProductsDoc.items;
         const recommendProductDoc = await getRecommendedProductsService({
@@ -113,6 +113,18 @@ export const getProductDetailById = async (req, res) => {
                     isDeleted: false,
                 },
             },
+
+            {
+                $lookup: {
+                    from: "categoryschemas",
+                    localField: "categorySchemaId",
+                    foreignField: "_id",
+                    as: "category",
+                    pipeline: [
+                        { $project: { _id: 1, name: 1 } },
+                    ],
+                },
+            },
             // shop must be active
             {
                 $lookup: {
@@ -134,6 +146,7 @@ export const getProductDetailById = async (req, res) => {
             },
             { $unwind: "$shop" },
 
+           
             // variants active
             {
                 $lookup: {
@@ -220,6 +233,8 @@ export const getProductDetailById = async (req, res) => {
                     origin: 1,
                     images: 1,
                     attributes: 1,
+                    categorySchemaId: 1,
+                    category: 1,
 
                     defaultPrice: 1,
                     ratingAvg: 1,
