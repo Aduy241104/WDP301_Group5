@@ -20,6 +20,7 @@ import userEventProductRoutes from "./userEventProduct.routes.js";
 import orderRoutes from "./order.routes.js";
 import voucherRoutes from "./voucher.routes.js";
 import sellerManageCategoryRoutes from "./sellerManageCategoryRoutes.js";
+import shopFollowRoutes from "./shopFollow.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -40,6 +41,7 @@ function route(app) {
     app.use("/api/seller/category-schemas", categorySchemaRoutes);
     app.use("/api/seller/categories", sellerManageCategoryRoutes);
     app.use("/api/seller/reviews", sellerReviewRoutes);
+    app.use("/api/shop-follow", shopFollowRoutes);
 
 
     app.use("/api/upload", uploadImageRoute);
