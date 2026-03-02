@@ -23,7 +23,7 @@ export const getSellerCategories = async (req, res) => {
     }
 };
 
-
+// restore category after main revert
 /**
  * POST /api/shop-categories
  * Seller add new category

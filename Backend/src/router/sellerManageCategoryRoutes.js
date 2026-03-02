@@ -3,6 +3,7 @@ import { getSellerCategories, createCategory } from "../controllers/sellerManage
 import { checkApprovedShop } from "../middlewares/checkApprovedShope.js";
 import { authenticationMiddleware, sellerMiddleware,  } from "../middlewares/authenticationMiddlewares.js";
 
+// Seller manage categories of their shop
 const router = express.Router();
 
 router.get("/", authenticationMiddleware, sellerMiddleware, checkApprovedShop, getSellerCategories);

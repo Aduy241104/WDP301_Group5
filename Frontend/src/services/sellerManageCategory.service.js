@@ -1,5 +1,7 @@
 import axiosInstance from "../axios/axiosConfig";
 
+// Get categories of seller's shop
+
 export const getSellerCategoriesAPI = async () => {
   const res = await axiosInstance.get("/api/seller/categories");
   return res.data?.data || [];

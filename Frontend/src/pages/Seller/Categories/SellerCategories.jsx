@@ -10,7 +10,7 @@ export default function SellerCategories() {
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
+// load categories of seller's shop
   const load = async () => {
     try {
       setLoading(true);
