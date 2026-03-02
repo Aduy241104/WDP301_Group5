@@ -135,15 +135,15 @@ export default function ProductForm({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="block text-sm font-medium text-gray-700">Ảnh (URL)</label>
-            <button
+            {/* <button
               type="button"
               onClick={() => addRow("images", "")}
               className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
             >
               + Thêm ảnh
-            </button>
+            </button> */}
           </div>
-          {form.images.map((url, idx) => (
+          {/* {form.images.map((url, idx) => (
             <div key={idx} className="flex gap-2">
               <input
                 value={url}
@@ -165,7 +165,7 @@ export default function ProductForm({
                 Xóa
               </button>
             </div>
-          ))}
+          ))} */}
           <div className="space-y-2 pt-2 border-t border-dashed border-gray-200 mt-4">
             <label className="block text-sm font-medium text-gray-700">
               Upload ảnh (chỉ upload khi bấm "{submitLabel}")
