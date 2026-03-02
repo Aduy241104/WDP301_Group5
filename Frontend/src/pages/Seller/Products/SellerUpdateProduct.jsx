@@ -21,7 +21,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
-  const [defaultPrice, setDefaultPrice] = useState("");
 
   const [form, setForm] = useState(() => createEmptyProductForm({ withVariantId: true }));
 
@@ -64,10 +63,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
                 }))
               : prev.variants,
         }));
-        // load defaultPrice from response if available or compute from variants
-        setDefaultPrice(data?.defaultPrice ?? (
-          incomingVariants.length ? Math.min(...incomingVariants.map((v) => v?.price ?? 0)) : ""
-        ));
       } catch (e) {
         setError(e?.response?.data?.message || "Không thể tải dữ liệu sản phẩm");
       } finally {
@@ -88,24 +83,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
         return;
       }
 
-      // yêu cầu nhập giá mặc định khi cập nhật
-      if (!defaultPrice && defaultPrice !== 0) {
-        setError("Vui lòng nhập giá mặc định");
-        return;
-      }
-
-      // yêu cầu mỗi phân loại phải có giá và tồn kho
-      for (const v of form.variants || []) {
-        if (v.price === "" || v.price == null) {
-          setError("Vui lòng nhập giá cho tất cả phân loại");
-          return;
-        }
-        if (v.stock === "" || v.stock == null) {
-          setError("Vui lòng nhập tồn kho cho tất cả phân loại");
-          return;
-        }
-      }
-
       // 1) Chuẩn bị danh sách ảnh: giữ ảnh cũ (form.images), cộng thêm ảnh mới chọn file
       let currentImages = form.images || [];
 
@@ -123,15 +100,8 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
         currentImages = [...currentImages, ...uploadedUrls];
       }
 
-      // apply defaultPrice to any variant that lacks a price
-      const filledVariants = (form.variants || []).map((v) => {
-        if (v.price !== "" && v.price != null) return v;
-        if (!defaultPrice) return v;
-        return { ...v, price: defaultPrice };
-      });
-
       const { payload, variants } = serializeProductPayload(
-        { ...form, images: currentImages, variants: filledVariants },
+        { ...form, images: currentImages },
         { includeVariantId: true }
       );
       if (variants.length === 0) {
@@ -176,9 +146,6 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
       variantHelpText="Mỗi dòng = 1 biến thể. Variant cũ giữ lại `_id` để update đúng, xoá dòng sẽ soft delete ở backend."
       imageFiles={imageFiles}
       onImageFilesChange={setImageFiles}
-      defaultPrice={defaultPrice}
-      onDefaultPriceChange={setDefaultPrice}
-      enableDefaultPrice
     />
   );
 }
