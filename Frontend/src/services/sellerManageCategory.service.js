@@ -11,4 +11,3 @@ export const createSellerCategoryAPI = async (payload) => {
   const res = await axiosInstance.post("/api/seller/categories", payload);
   return res.data;
 };
-

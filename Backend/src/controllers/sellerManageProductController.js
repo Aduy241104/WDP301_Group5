@@ -246,7 +246,7 @@ export const updateProduct = async (req, res) => {
         if (attributes) product.attributes = attributesMap;
 
         product.defaultPrice = Math.min(...variants.map(v => v.price));
-        product.status = "pending"; 
+        product.status = "pending"; // update lại thì chờ duyệt lại
 
         await product.save();
 
