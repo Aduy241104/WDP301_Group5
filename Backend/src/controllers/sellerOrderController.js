@@ -419,6 +419,7 @@ const buildRevenueSeries = async (shopId) => {
         deliveredAt: { $gte: monthStart, $lte: monthEnd },
       },
     },
+    // nhóm theo tháng (theo giờ VN)
     {
       $group: {
         _id: {
