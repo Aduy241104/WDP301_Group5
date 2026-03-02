@@ -68,4 +68,3 @@ export function serializeProductPayload(form, { includeVariantId = false } = {})
     variants,
   };
 }
-
