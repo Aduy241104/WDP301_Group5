@@ -73,7 +73,7 @@ export default function SellerReviews() {
         <div className="col-span-4 space-y-4">
           <h3 className="font-medium text-gray-700">Products</h3>
 
-          {groups.map((g) => {
+          {groups.map((g, index) => {
             const avg =
               g.avgRating !== null && g.avgRating !== undefined
                 ? Number(g.avgRating).toFixed(1)
@@ -81,7 +81,7 @@ export default function SellerReviews() {
 
             return (
               <div
-                key={g.productId}
+                key={`${g.productId}-${index}`}
                 className={`p-4 rounded-xl border bg-white shadow-sm hover:shadow-md transition cursor-pointer ${
                   selectedProduct === g.productId ? "border-indigo-500" : ""
                 }`}
