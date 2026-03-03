@@ -12,6 +12,7 @@ export default function OrderListPage() {
     const [status, setStatus] = useState(DEFAULT_STATUS);
     const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(1);
+    const [reload, setReload] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -24,6 +25,8 @@ export default function OrderListPage() {
         hasNextPage: false,
         hasPrevPage: false,
     });
+
+
 
     const query = useMemo(
         () => ({
@@ -60,7 +63,11 @@ export default function OrderListPage() {
             mounted = false;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query]);
+    }, [query, reload]);
+
+    const handleReload = () => {
+        setReload(!reload);
+    }
 
     const handleChangeStatus = (nextStatus) => {
         setStatus(nextStatus);
@@ -117,12 +124,11 @@ export default function OrderListPage() {
                                     <OrderCard
                                         key={ o._id }
                                         order={ o }
-                                        onChat={ () => console.log("chat", o._id) }
                                         onViewShop={ () => console.log("view shop", o.shop?._id) }
                                         onRebuy={ () => console.log("rebuy", o._id) }
                                         onReview={ () => console.log("review", o._id) }
                                         onReturn={ () => console.log("return", o._id) }
-                                        onMore={ () => console.log("more", o._id) }
+                                        onReload={ handleReload }
                                     />
                                 )) }
                             </div>

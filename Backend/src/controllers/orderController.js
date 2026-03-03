@@ -5,6 +5,12 @@ import { createOrdersFromCartService } from "../services/orderService.js";
 import { Order } from "../models/Order.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { StatusCodes } from "http-status-codes";
+import { Inventory } from "../models/Inventory.js";
+import { Product } from "../models/Product.js";
+import { sumById, bulkInc } from "../utils/orderHelper.js";
+
+
+const ALLOWED_STATUSES = ["created", "confirmed", "shipped", "delivered", "cancelled"];
 
 export const prepareOrdersFromCart = async (req, res, next) => {
     try {
@@ -261,8 +267,6 @@ export const createOrdersFromCart = async (req, res) => {
     }
 };
 
-const ALLOWED_STATUSES = ["created", "confirmed", "shipped", "delivered", "cancelled"];
-
 export const listMyOrders = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -487,3 +491,45 @@ export const getMyOrderDetail = async (req, res) => {
         });
     }
 };
+
+export const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const { orderId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid orderId." });
+        }
+
+        const now = new Date();
+
+        // 1) Cancel order (atomic) + lấy order sau khi cancel để có items
+        const order = await Order.findOneAndUpdate(
+            { _id: orderId, userId, orderStatus: { $in: ["created", "confirmed"] } },
+            {
+                $set: { orderStatus: "cancelled", cancelledAt: now },
+                $push: { statusHistory: { status: "cancelled", changedAt: now } },
+            },
+            { new: true }
+        ).lean();
+
+        if (!order) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Order not found or cannot be cancelled (status changed).",
+            });
+        }
+
+        // 2) Restore stock + update product sale
+        const vMap = sumById(order.items, "variantId");
+        const pMap = sumById(order.items, "productId");
+
+        await bulkInc(Inventory, "variantId", vMap, "stock", now, true);
+        await bulkInc(Product, "_id", pMap, "totalSale", null, false); // totalSale -= qty => truyền map âm
+
+        return res.status(StatusCodes.OK).json({ message: "Cancel order success", order });
+    } catch (err) {
+        console.error("cancelOrder error:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
+

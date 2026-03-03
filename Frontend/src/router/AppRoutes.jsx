@@ -29,6 +29,7 @@ import SellerCategories from "../pages/Seller/Categories/SellerCategories";
 import ShopListPage from "../pages/ShopListPage";
 import ShopDetailPage from "../pages/ShopDetailPage";
 import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
+import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
 
 export default function AppRoutes() {
   return (
@@ -59,6 +60,7 @@ export default function AppRoutes() {
           <Route path="/my-cart" element={ <CartPage /> } />
           <Route path="/place-order" element={ <OrderSummary /> } />
           <Route path="/my-order-list" element={ <OrderListPage /> } />
+          <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
         </Route>
       </Route>
 

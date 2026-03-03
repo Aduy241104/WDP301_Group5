@@ -1,5 +1,6 @@
 import { Voucher } from "../models/Voucher.js";
 import { VoucherUsage } from "../models/VoucherUsage.js";
+import mongoose from "mongoose";
 
 export const genOrderCode = () => {
     const d = new Date();
@@ -156,3 +157,26 @@ export async function loadAndValidateVoucherNoTxn({ code, scope, shopId, userId,
 export const money = (n) => Math.max(0, Math.round(Number(n || 0)));
 
 export const calcShippingFeePerShop = () => 20000;
+
+
+export const sumById = (items = [], field) =>
+    items.reduce((m, it) => {
+        const id = it?.[field];
+        const qty = Number(it?.quantity) || 0;
+        if (!id || qty <= 0) return m;
+        const key = String(id);
+        m.set(key, (m.get(key) || 0) + qty);
+        return m;
+    }, new Map());
+
+export const bulkInc = async (Model, filterKey, map, incKey, now, upsert = false) => {
+    if (!map.size) return;
+    const ops = [...map.entries()].map(([id, qty]) => ({
+        updateOne: {
+            filter: { [filterKey]: new mongoose.Types.ObjectId(id) },
+            update: { $inc: { [incKey]: qty }, ...(now ? { $set: { updatedAt: now } } : {}) },
+            ...(upsert ? { upsert: true } : {}),
+        },
+    }));
+    await Model.bulkWrite(ops);
+};

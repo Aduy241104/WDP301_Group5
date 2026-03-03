@@ -134,8 +134,6 @@ export default function ShopDetailPage() {
       </div>
 
 
-
-
       {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filter">
         <button

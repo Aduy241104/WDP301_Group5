@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useContext } from "react";
+import { useMemo, useState, useContext } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Header() {
@@ -207,7 +207,7 @@ export default function Header() {
 
                                 <div className="p-2">
                                     <MenuItem label="Tài khoản" onClick={ () => go("/profile") } />
-                                    <MenuItem label="Đơn hàng" onClick={ () => go("/orders") } />
+                                    <MenuItem label="Đơn hàng" onClick={ () => go("/my-order-list") } />
                                     <MenuItem label="Yêu thích" onClick={ () => go("/wishlist") } />
                                     <MenuItem label="Địa chỉ giao hàng" onClick={ () => go("/addresses") } />
 
