@@ -7,6 +7,7 @@ const BrandSchema = new Schema(
         name: { type: String, required: true, trim: true, index: true },
         logo: { type: String, default: "" },
         description: { type: String, default: "" },
+        categoryId: { type: Schema.Types.ObjectId, ref: "CategorySchema", required: true, index: true },
 
         isActive: { type: Boolean, default: true },
 
