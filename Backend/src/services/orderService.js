@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import { Cart } from "../models/Cart.js";
 import { Variant } from "../models/Variant.js";
 import { Product } from "../models/Product.js";
@@ -8,130 +8,23 @@ import { VoucherUsage } from "../models/VoucherUsage.js";
 import { Order } from "../models/Order.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { Shop } from "../models/Shop.js";
+import {
+    genOrderCode,
+    money,
+    calcShippingFeePerShop,
+    allocateProportional,
+    allocateEqualCappedByShip,
+    groupByShop,
+    makeVoucherSnapshot,
+    loadAndValidateVoucherNoTxn
+} from "../utils/orderHelper.js";
 
-const money = (n) => Math.max(0, Math.round(Number(n || 0)));
 const oid = (id) => new Types.ObjectId(id);
 
 const throwE = (status, message, data) => {
     throw { status, message, data };
 };
 
-const genOrderCode = () => {
-    const d = new Date();
-    const y = String(d.getFullYear()).slice(-2);
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const rnd = String(Math.floor(Math.random() * 100000)).padStart(5, "0");
-    return `UT${y}${m}${day}-${rnd}`;
-};
-
-const calcShippingFeePerShop = () => 20000;
-
-const calcDiscount = (v, baseAmount) => {
-    const base = money(baseAmount);
-    if (!v) return 0;
-
-    if (v.discountType === "percent") {
-        const pct = Math.max(0, Math.min(100, Number(v.discountValue || 0)));
-        let d = Math.floor((base * pct) / 100);
-        const maxD = money(v.maxDiscountValue || 0);
-        if (maxD > 0) d = Math.min(d, maxD);
-        return money(Math.min(d, base));
-    }
-
-    if (v.discountType === "fixed") {
-        return money(Math.min(money(v.discountValue || 0), base));
-    }
-
-    return 0;
-};
-
-const allocateProportional = (totalDiscount, bases) => {
-    const total = money(totalDiscount);
-    if (total <= 0) return bases.map(() => 0);
-
-    const sum = bases.reduce((s, x) => s + money(x), 0) || 1;
-    let remaining = total;
-
-    return bases.map((b, i) => {
-        if (i === bases.length - 1) return money(remaining);
-        const alloc = Math.floor((total * money(b)) / sum);
-        remaining -= alloc;
-        return money(alloc);
-    });
-};
-
-const makeVoucherSnapshot = (v, { scope, shopId, appliedDiscountAmount }) => {
-    if (!v) return null;
-    return {
-        voucherId: v._id,
-        code: v.code,
-        scope,
-        shopId: scope === "shop" ? shopId : null,
-        discountType: v.discountType,
-        discountValue: v.discountValue,
-        minOrderValue: v.minOrderValue || 0,
-        maxDiscountValue: v.maxDiscountValue || 0,
-        appliedDiscountAmount: money(appliedDiscountAmount || 0),
-    };
-};
-
-async function loadAndValidateVoucherNoTxn({ code, scope, shopId, userId, baseAmount }) {
-    if (!code) return { voucher: null, discountAmount: 0 };
-
-    const filter = { code: String(code).trim(), scope, isDeleted: false };
-    if (scope === "shop") filter.shopId = shopId;
-    if (scope === "system") filter.shopId = null;
-
-    const v = await Voucher.findOne(filter).lean();
-    if (!v) throwE(400, "VOUCHER_NOT_FOUND", { code, scope, shopId });
-
-    const now = new Date();
-    if (v.startAt && now < new Date(v.startAt)) throwE(400, "VOUCHER_NOT_STARTED", { code });
-    if (v.endAt && now > new Date(v.endAt)) throwE(400, "VOUCHER_EXPIRED", { code });
-
-    if (money(baseAmount) < money(v.minOrderValue || 0)) {
-        throwE(400, "VOUCHER_MIN_ORDER_NOT_MET", { code, baseAmount, minOrderValue: v.minOrderValue || 0 });
-    }
-
-    // usage limits (best-effort, still can race without transaction)
-    const usageLimitTotal = money(v.usageLimitTotal || 0);
-    if (usageLimitTotal > 0 && money(v.usedCount || 0) >= usageLimitTotal) {
-        throwE(400, "VOUCHER_USAGE_LIMIT_REACHED", { code });
-    }
-
-    const usageLimitPerUser = money(v.usageLimitPerUser || 0);
-    if (usageLimitPerUser > 0) {
-        const usedByUser = await VoucherUsage.countDocuments({ voucherId: v._id, userId });
-        if (usedByUser >= usageLimitPerUser) throwE(400, "VOUCHER_USER_LIMIT_REACHED", { code });
-    }
-
-    if (!["percent", "fixed"].includes(v.discountType)) {
-        throwE(400, "VOUCHER_TYPE_NOT_SUPPORTED", { code, discountType: v.discountType });
-    }
-
-    return { voucher: v, discountAmount: calcDiscount(v, baseAmount) };
-}
-
-function groupByShop(lines) {
-    const map = new Map();
-    for (const ln of lines) {
-        const sid = String(ln.shopId);
-        if (!map.has(sid)) map.set(sid, { shopId: sid, items: [], subtotal: 0 });
-        const g = map.get(sid);
-        g.items.push(ln);
-        g.subtotal += ln.lineTotal;
-    }
-    return [...map.values()].map((g) => ({ ...g, subtotal: money(g.subtotal) }));
-}
-
-/**
- * No-transaction version:
- * - Validate
- * - Decrement stock atomically
- * - Create orders/snapshots
- * - If any step fails after decrement -> compensate (increment stock back)
- */
 export async function createOrdersFromCartService({
     userId,
     variantIds,
@@ -215,8 +108,7 @@ export async function createOrdersFromCartService({
             lineTotal: money(price * s.quantity),
         });
     }
- if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems 
-   });
+    if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems });
 
     // 4) group shops
     const groups = groupByShop(lines);
@@ -249,25 +141,40 @@ export async function createOrdersFromCartService({
 
     grandBeforeSystem = money(grandBeforeSystem);
 
-    // 7) system voucher
-    const systemR = await loadAndValidateVoucherNoTxn({
-        code: systemCode,
-        scope: "system",
-        shopId: null,
-        userId: userObjectId,
-        baseAmount: grandBeforeSystem,
-    });
+    // ✅ ship total across shops
+    const shipTotal = money(groups.reduce((s, g) => s + money(g.shippingFee), 0));
 
-    const systemVoucher = systemR.voucher;
-    const systemDiscount = systemR.discountAmount;
+    // 7) system voucher (FIX: if ship voucher, base should be shipTotal)
+    let systemVoucher = null;
+    let systemDiscount = 0;
 
-    const grandTotal = money(grandBeforeSystem - systemDiscount);
+    if (systemCode) {
+        const systemR = await loadAndValidateVoucherNoTxn({
+            code: systemCode,
+            scope: "system",
+            shopId: null,
+            userId: userObjectId,
+            baseAmount: grandBeforeSystem, // ✅ luôn dùng shipTotal
+        });
+
+        systemVoucher = systemR.voucher;
+        systemDiscount = systemR.discountAmount;
+    }
+
+    const grandTotal = money(Math.max(0, grandBeforeSystem - systemDiscount));
 
     // 8) allocate system discount
-    const allocs = allocateProportional(
-        systemDiscount,
-        groups.map((g) => money(g.totalAfterShopVoucher + g.shippingFee))
-    );
+    let allocs = [];
+    if (systemVoucher?.discountType === "ship") {
+        // ✅ evenly split across shops, capped by shippingFee each
+        allocs = allocateEqualCappedByShip(systemDiscount, groups.map((g) => g.shippingFee));
+    } else {
+        // other system types: proportional by (items + shipping)
+        allocs = allocateProportional(
+            systemDiscount,
+            groups.map((g) => money(g.totalAfterShopVoucher + g.shippingFee))
+        );
+    }
     groups.forEach((g, i) => (g.systemAllocatedDiscount = allocs[i]));
 
     // 9) Decrement stock FIRST (atomic). Track what we decremented for rollback.
@@ -329,16 +236,35 @@ export async function createOrdersFromCartService({
             });
 
             await OrderAddressSnapshot.create([
-                { _id: deliverySnapshotId, orderId: orderDoc._id, type: "delivery", contact: deliveryAddress.contact, address: deliveryAddress.address, createdAt: new Date() },
+                {
+                    _id: deliverySnapshotId,
+                    orderId: orderDoc._id,
+                    type: "delivery",
+                    contact: deliveryAddress.contact,
+                    address: deliveryAddress.address,
+                    createdAt: new Date(),
+                },
             ]);
 
             if (g.shopVoucher) {
-                await VoucherUsage.create({ voucherId: g.shopVoucher._id, userId: userObjectId, orderId: orderDoc._id, usedAt: new Date() });
-                await Voucher.updateOne({ _id: g.shopVoucher._id }, { $inc: { usedCount: 1 } });
+                const up = await VoucherUsage.updateOne(
+                    { voucherId: g.shopVoucher._id, userId: userObjectId, orderId: orderDoc._id },
+                    { $setOnInsert: { usedAt: new Date() } },
+                    { upsert: true }
+                );
+
+                if (up.upsertedCount === 1) {
+                    await Voucher.updateOne({ _id: g.shopVoucher._id }, { $inc: { usedCount: 1 } });
+                }
             }
 
+            // ✅ system voucher usage: attach to EVERY order (multi-shop), use upsert
             if (systemVoucher) {
-                await VoucherUsage.create({ voucherId: systemVoucher._id, userId: userObjectId, orderId: orderDoc._id, usedAt: new Date() });
+                await VoucherUsage.updateOne(
+                    { voucherId: systemVoucher._id, userId: userObjectId, orderId: orderDoc._id },
+                    { $setOnInsert: { usedAt: new Date() } },
+                    { upsert: true }
+                );
             }
 
             createdOrders.push({
@@ -353,6 +279,7 @@ export async function createOrdersFromCartService({
             });
         }
 
+        // Keep system usedCount as "per checkout" (1 time), not per order
         if (systemVoucher) {
             await Voucher.updateOne({ _id: systemVoucher._id }, { $inc: { usedCount: 1 } });
         }
