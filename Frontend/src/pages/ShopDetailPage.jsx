@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { getShopDetail, getShopProducts, getShopCategoriesAPI, getShopProductsByCategory, } from "../services/shopService";
 import ShopProductCard from "../components/shop/ShopProductCard";
 import "../App.css";
+import ShopFollowButton from "../components/shop/ShopFollow";
+
 
 export default function ShopDetailPage() {
   const { shopId } = useParams();
@@ -93,111 +95,120 @@ export default function ShopDetailPage() {
     }
   }, [shopId]);
 
-  if (loadingShop) return <div style={{ padding: 20 }}>Loading shop...</div>;
-  if (!shop) return <div style={{ padding: 20 }}>Shop not found</div>;
+  if (loadingShop) return <div style={ { padding: 20 } }>Loading shop...</div>;
+  if (!shop) return <div style={ { padding: 20 } }>Shop not found</div>;
 
   return (
-    <div style={{ padding: 20, maxWidth: 1100, margin: "0 auto" }}>
-      {/* ================= SHOP INFO ================= */}
+    <div style={ { padding: 20, maxWidth: 1100, margin: "0 auto" } }>
+      {/* ================= SHOP INFO ================= */ }
       <div
-        style={{
+        style={ {
           border: "1px solid #ddd",
-          borderRadius: 12,
+          borderRadius: 5,
           padding: 20,
           display: "flex",
           gap: 20,
           alignItems: "center",
-        }}
+          justifyContent: "space-between"
+        } }
       >
-        <img
-          src={shop.avatar || "/no-avatar.png"}
-          alt={shop.name}
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            objectFit: "cover",
-            border: "2px solid #000",
-          }}
-        />
-
         <div>
-          <h2 style={{ margin: 0 }}>{shop.name}</h2>
-          <p style={{ margin: "6px 0" }}>{shop.description}</p>
+          <img
+            src={ shop.avatar || "/no-avatar.png" }
+            alt={ shop.name }
+            style={ {
+              width: 150,
+              height: 150,
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "1px solid #abababff",
+            } }
+          />
 
-          {shop.shopAddress && (
-            <div style={{ fontSize: 14, color: "#555" }}>
-              {shop.shopAddress.fullAddress}
-            </div>
-          )}
+          <div className="mt-5">
+            <ShopFollowButton shopId={ shopId } />
+          </div>
+        </div>
+
+        <div className="">
+          <div>
+            <h2 style={ { margin: 0 } }>{ shop.name }</h2>
+            <p style={ { margin: "6px 0" } }>{ shop.description }</p>
+
+            { shop.shopAddress && (
+              <div style={ { fontSize: 14, color: "#555" } }>
+                { shop.shopAddress.fullAddress }
+              </div>
+            ) }
+          </div>
         </div>
       </div>
 
 
-      {/* ================= CATEGORY FILTER ================= */}
+      {/* ================= CATEGORY FILTER ================= */ }
       <div className="category-filter">
         <button
-          className={`filter-btn ${activeCategory === "all" ? "active" : ""}`}
-          onClick={() => handleFilter("all")}
+          className={ `filter-btn ${activeCategory === "all" ? "active" : ""}` }
+          onClick={ () => handleFilter("all") }
         >
           Tất cả
         </button>
 
-        {categories.slice(0, 4).map((c) => (
+        { categories.slice(0, 4).map((c) => (
           <button
-            key={c._id}
-            className={`filter-btn ${activeCategory === c._id ? "active" : ""}`}
-            onClick={() => handleFilter(c._id)}
+            key={ c._id }
+            className={ `filter-btn ${activeCategory === c._id ? "active" : ""}` }
+            onClick={ () => handleFilter(c._id) }
           >
-            {c.name}
+            { c.name }
           </button>
-        ))}
+        )) }
 
-        {categories.length > 4 && (
+        { categories.length > 4 && (
           <div className="filter-btn more">
             Thêm ▾
             <div className="dropdown">
-              {categories.slice(4).map((c) => (
+              { categories.slice(4).map((c) => (
                 <div
-                  key={c._id}
-                  className={`dropdown-item ${activeCategory === c._id ? "active" : ""}`}
-                  onClick={() => handleFilter(c._id)}
+                  key={ c._id }
+                  className={ `dropdown-item ${activeCategory === c._id ? "active" : ""}` }
+                  onClick={ () => handleFilter(c._id) }
                 >
-                  {c.name}
+                  { c.name }
                 </div>
-              ))}
+              )) }
             </div>
           </div>
-        )}
+        ) }
       </div>
 
-      {/* ================= PRODUCT LIST ================= */}
+      {/* ================= PRODUCT LIST ================= */ }
       <div className="mt-6">
         <h2 className="text-lg font-semibold mb-3">Sản phẩm của shop</h2>
 
-        {loadingProducts ? (
+        { loadingProducts ? (
           <div>Loading products...</div>
         ) : products.length === 0 ? (
           <div>Shop chưa có sản phẩm</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {products.map((product) => (
-              <ShopProductCard key={product._id} product={product} />
-            ))}
+            { products.map((product) => (
+              <ShopProductCard key={ product._id } product={ product } />
+            )) }
           </div>
-        )}
+        ) }
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
+      { pagination && pagination.totalPages > 1 && (
         <div
-          style={{
+          style={ {
             marginTop: 30,
             display: "flex",
             justifyContent: "center",
-          }}
+          } }
         >
           <div
-            style={{
+            style={ {
               display: "flex",
               alignItems: "center",
               gap: 8,
@@ -205,34 +216,34 @@ export default function ShopDetailPage() {
               border: "1px solid #ddd",
               borderRadius: 10,
               background: "#fff",
-            }}
+            } }
           >
-            {/* Nút Prev */}
+            {/* Nút Prev */ }
             <button
-              disabled={page === 1}
-              onClick={() => fetchProducts(activeCategory, page - 1)}
-              style={{
+              disabled={ page === 1 }
+              onClick={ () => fetchProducts(activeCategory, page - 1) }
+              style={ {
                 padding: "6px 10px",
                 borderRadius: 6,
                 border: "1px solid #ccc",
                 background: page === 1 ? "#f5f5f5" : "#fff",
                 cursor: page === 1 ? "not-allowed" : "pointer",
-              }}
+              } }
             >
-              {"<"}
+              { "<" }
             </button>
 
-            {/* Số trang */}
-            {Array.from({ length: pagination.totalPages }, (_, index) => {
+            {/* Số trang */ }
+            { Array.from({ length: pagination.totalPages }, (_, index) => {
               const pageNumber = index + 1;
 
               return (
                 <button
-                  key={pageNumber}
-                  onClick={() =>
+                  key={ pageNumber }
+                  onClick={ () =>
                     fetchProducts(activeCategory, pageNumber)
                   }
-                  style={{
+                  style={ {
                     padding: "6px 10px",
                     borderRadius: 6,
                     border:
@@ -246,18 +257,18 @@ export default function ShopDetailPage() {
                     fontWeight:
                       page === pageNumber ? "700" : "normal",
                     cursor: "pointer",
-                  }}
+                  } }
                 >
-                  {pageNumber}
+                  { pageNumber }
                 </button>
               );
-            })}
+            }) }
 
-            {/* Nút Next */}
+            {/* Nút Next */ }
             <button
-              disabled={page === pagination.totalPages}
-              onClick={() => fetchProducts(activeCategory, page + 1)}
-              style={{
+              disabled={ page === pagination.totalPages }
+              onClick={ () => fetchProducts(activeCategory, page + 1) }
+              style={ {
                 padding: "6px 10px",
                 borderRadius: 6,
                 border: "1px solid #ccc",
@@ -269,13 +280,13 @@ export default function ShopDetailPage() {
                   page === pagination.totalPages
                     ? "not-allowed"
                     : "pointer",
-              }}
+              } }
             >
-              {">"}
+              { ">" }
             </button>
           </div>
         </div>
-      )}
+      ) }
     </div>
   );
 }

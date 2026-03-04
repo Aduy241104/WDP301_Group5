@@ -1,6 +1,5 @@
 import axiosInstance from "../axios/axiosConfig";
 
-
 // POST /api/shop-follow/:shopId/follow
 export const followShopAPI = async (shopId) => {
     const res = await axiosInstance.post(`/api/shop-follow/${shopId}/follow`);
@@ -20,8 +19,14 @@ export const getMyFollowingShopsAPI = async (params = {}) => {
     return res.data;
 };
 
-// GET /api/shop-follow/:shopId/followers
-export const getShopFollowersAPI = async (shopId, params = {}) => {
-    const res = await axiosInstance.get(`/api/shop-follow/${shopId}/followers`, { params });
-    return res.data;
+
+// GET /api/shop-follow/:shopId/is-following
+export const checkFollowShopAPI = async (shopId) => {
+    const res = await axiosInstance.get(`/api/shop-follow/${shopId}/is-following`);
+    return res.data; 
 };
+
+export const getShopFollowersCountAPI = async (shopId) => {
+    const res = await axiosInstance.get(`/api/shop-follow/${shopId}/followers`);
+    return res.data;
+}
