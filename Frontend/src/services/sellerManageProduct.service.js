@@ -34,3 +34,11 @@ export const deleteSellerProductAPI = async (productId) => {
   const res = await axiosInstance.delete(`/api/seller/products/${productId}`);
   return res.data;
 };
+
+export const toggleSellerProductActiveAPI = async (productId, activeStatus) => {
+  const res = await axiosInstance.patch(
+    `/api/seller/products/${productId}/active`,
+    { activeStatus }
+  );
+  return res.data;
+};

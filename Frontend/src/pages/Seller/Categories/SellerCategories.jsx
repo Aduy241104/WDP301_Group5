@@ -2,7 +2,17 @@ import { useEffect, useState } from "react";
 import {
   createSellerCategoryAPI,
   getSellerCategoriesAPI,
+  updateSellerCategoryAPI,
+  deleteSellerCategoryAPI,
+  getSellerCategoryProductsAPI,
+  getSellerCategoryAvailableProductsAPI,
+  addProductsToSellerCategoryAPI,
+  deleteProductFromSellerCategoryAPI,
 } from "../../../services/sellerManageCategory.service";
+import CategoryForm from "./components/CategoryForm";
+import CategoryList from "./components/CategoryList";
+import CategoryProductsList from "./components/CategoryProductsList";
+import AddProductsModal from "./components/AddProductsModal";
 
 export default function SellerCategories() {
   const [categories, setCategories] = useState([]);
@@ -10,6 +20,34 @@ export default function SellerCategories() {
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [editingId, setEditingId] = useState(null);
+  const [editingName, setEditingName] = useState("");
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [categoryProductsPagination, setCategoryProductsPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+  const [categoryProductsLoading, setCategoryProductsLoading] = useState(false);
+
+  const [showAddProductsModal, setShowAddProductsModal] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [availablePagination, setAvailablePagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+  const [availableLoading, setAvailableLoading] = useState(false);
+  const [availableKeyword, setAvailableKeyword] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [addProductsSubmitting, setAddProductsSubmitting] = useState(false);
+
+  const [deletingProductId, setDeletingProductId] = useState(null);
 
   const load = async () => {
     try {
@@ -21,6 +59,47 @@ export default function SellerCategories() {
       setError(e?.response?.data?.message || "Không thể tải danh sách category");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCategoryProducts = async (category, page = 1) => {
+    if (!category) return;
+    try {
+      setCategoryProductsLoading(true);
+      setError("");
+      const res = await getSellerCategoryProductsAPI(category._id, {
+        page,
+        limit: categoryProductsPagination.limit,
+      });
+      setCategoryProducts(res?.data || []);
+      if (res?.pagination) {
+        setCategoryProductsPagination(res.pagination);
+      }
+    } catch (e) {
+      setError(e?.response?.data?.message || "Không thể tải sản phẩm của category");
+    } finally {
+      setCategoryProductsLoading(false);
+    }
+  };
+
+  const loadAvailableProducts = async (category, page = 1, keyword = "") => {
+    if (!category) return;
+    try {
+      setAvailableLoading(true);
+      setError("");
+      const res = await getSellerCategoryAvailableProductsAPI(category._id, {
+        page,
+        limit: availablePagination.limit,
+        keyword: keyword || undefined,
+      });
+      setAvailableProducts(res?.data || []);
+      if (res?.pagination) {
+        setAvailablePagination(res.pagination);
+      }
+    } catch (e) {
+      setError(e?.response?.data?.message || "Không thể tải danh sách sản phẩm để thêm");
+    } finally {
+      setAvailableLoading(false);
     }
   };
 
@@ -44,72 +123,206 @@ export default function SellerCategories() {
     }
   };
 
-  return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">Categories</h2>
-      </div>
+  const handleStartEdit = (cat) => {
+    setEditingId(cat._id);
+    setEditingName(cat.name || "");
+  };
 
-      {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
-          {error}
-        </div>
+  const handleSaveEdit = async (cat) => {
+    if (!editingName.trim()) return;
+    try {
+      setError("");
+      await updateSellerCategoryAPI(cat._id, { name: editingName.trim() });
+      setEditingId(null);
+      setEditingName("");
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || "Cập nhật category thất bại");
+    }
+  };
+
+  const handleDelete = async (cat) => {
+    if (
+      !window.confirm(
+        `Bạn có chắc muốn xoá category "${cat.name}"? Sản phẩm sẽ không còn gắn với category này.`
+      )
+    ) {
+      return;
+    }
+    try {
+      setError("");
+      await deleteSellerCategoryAPI(cat._id);
+      if (selectedCategory && selectedCategory._id === cat._id) {
+        setSelectedCategory(null);
+        setCategoryProducts([]);
+      }
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || "Xoá category thất bại");
+    }
+  };
+
+  const handleSelectCategory = async (cat) => {
+    setSelectedCategory(cat);
+    setCategoryProductsPagination((prev) => ({ ...prev, page: 1 }));
+    await loadCategoryProducts(cat, 1);
+  };
+
+  const handleOpenAddProducts = async () => {
+    if (!selectedCategory) return;
+    setSelectedProductIds([]);
+    setAvailableKeyword("");
+    setAvailablePagination((prev) => ({ ...prev, page: 1 }));
+    setShowAddProductsModal(true);
+    await loadAvailableProducts(selectedCategory, 1, "");
+  };
+
+  const handleToggleSelectProduct = (id) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleAddProductsToCategory = async () => {
+    if (!selectedCategory || selectedProductIds.length === 0) return;
+    try {
+      setAddProductsSubmitting(true);
+      setError("");
+      await addProductsToSellerCategoryAPI(selectedCategory._id, selectedProductIds);
+      setShowAddProductsModal(false);
+      await loadCategoryProducts(selectedCategory, categoryProductsPagination.page);
+    } catch (e) {
+      setError(e?.response?.data?.message || "Thêm sản phẩm vào category thất bại");
+    } finally {
+      setAddProductsSubmitting(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product) => {
+    if (!selectedCategory) return;
+    if (
+      !window.confirm(
+        `Bạn có chắc muốn xoá sản phẩm "${product.name}" khỏi category này?`
+      )
+    ) {
+      return;
+    }
+    try {
+      setDeletingProductId(product._id);
+      setError("");
+      await deleteProductFromSellerCategoryAPI(selectedCategory._id, product._id);
+      await loadCategoryProducts(selectedCategory, categoryProductsPagination.page);
+    } catch (e) {
+      setError(e?.response?.data?.message || "Xoá sản phẩm khỏi category thất bại");
+    } finally {
+      setDeletingProductId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <CategoryForm
+        name={name}
+        onNameChange={setName}
+        onSubmit={handleAdd}
+        submitting={submitting}
+        error={error}
+      />
+
+      <CategoryList
+        categories={categories}
+        loading={loading}
+        selectedCategoryId={selectedCategory?._id}
+        editingId={editingId}
+        editingName={editingName}
+        onSelectCategory={handleSelectCategory}
+        onStartEdit={handleStartEdit}
+        onSaveEdit={handleSaveEdit}
+        onDelete={handleDelete}
+        onEditingNameChange={setEditingName}
+        onCancelEdit={() => {
+          setEditingId(null);
+          setEditingName("");
+        }}
+      />
+
+      {selectedCategory && (
+        <CategoryProductsList
+          selectedCategory={selectedCategory}
+          products={categoryProducts}
+          loading={categoryProductsLoading}
+          pagination={categoryProductsPagination}
+          onOpenAddProducts={handleOpenAddProducts}
+          onPreviousPage={() => {
+            const nextPage = Math.max(1, categoryProductsPagination.page - 1);
+            setCategoryProductsPagination((p) => ({ ...p, page: nextPage }));
+            loadCategoryProducts(selectedCategory, nextPage);
+          }}
+          onNextPage={() => {
+            const nextPage = categoryProductsPagination.totalPages
+              ? Math.min(
+                  categoryProductsPagination.totalPages,
+                  categoryProductsPagination.page + 1
+                )
+              : categoryProductsPagination.page + 1;
+            setCategoryProductsPagination((p) => ({ ...p, page: nextPage }));
+            loadCategoryProducts(selectedCategory, nextPage);
+          }}
+          onDeleteProduct={handleDeleteProduct}
+          deletingProductId={deletingProductId}
+        />
       )}
 
-      <form
-        onSubmit={handleAdd}
-        className="flex flex-col md:flex-row gap-3 items-stretch md:items-end"
-      >
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category name
-          </label>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nhập tên category mới..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={submitting || !name.trim()}
-          className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {submitting ? "Đang thêm..." : "Thêm category"}
-        </button>
-      </form>
-
-      <div className="border-t border-gray-200 pt-4">
-        {loading ? (
-          <div className="py-8 text-center text-gray-500 text-sm">
-            Đang tải danh sách category...
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="py-8 text-center text-gray-500 text-sm">
-            Chưa có category nào. Hãy thêm category mới.
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {categories.map((c) => (
-              <div
-                key={c._id}
-                className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-200 bg-gray-50"
-              >
-                <div>
-                  <div className="font-medium text-gray-800">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    ID: {c._id}
-                  </div>
-                </div>
-                <div className="text-xs text-gray-400">
-                  {c.createdAt ? new Date(c.createdAt).toLocaleString() : ""}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {showAddProductsModal && selectedCategory && (
+        <AddProductsModal
+          selectedCategory={selectedCategory}
+          products={availableProducts}
+          loading={availableLoading}
+          pagination={availablePagination}
+          keyword={availableKeyword}
+          selectedProductIds={selectedProductIds}
+          submitting={addProductsSubmitting}
+          onKeywordChange={setAvailableKeyword}
+          onSearch={() => {
+            setAvailablePagination((p) => ({ ...p, page: 1 }));
+            loadAvailableProducts(selectedCategory, 1, availableKeyword);
+          }}
+          onToggleSelectProduct={handleToggleSelectProduct}
+          onSelectAll={(checked) => {
+            if (checked) {
+              setSelectedProductIds((prev) => [
+                ...new Set([
+                  ...prev,
+                  ...availableProducts.map((p) => p._id),
+                ]),
+              ]);
+            } else {
+              setSelectedProductIds((prev) =>
+                prev.filter(
+                  (id) => !availableProducts.some((p) => p._id === id)
+                )
+              );
+            }
+          }}
+          onPreviousPage={() => {
+            const nextPage = Math.max(1, availablePagination.page - 1);
+            setAvailablePagination((p) => ({ ...p, page: nextPage }));
+            loadAvailableProducts(selectedCategory, nextPage, availableKeyword);
+          }}
+          onNextPage={() => {
+            const nextPage = availablePagination.totalPages
+              ? Math.min(
+                  availablePagination.totalPages,
+                  availablePagination.page + 1
+                )
+              : availablePagination.page + 1;
+            setAvailablePagination((p) => ({ ...p, page: nextPage }));
+            loadAvailableProducts(selectedCategory, nextPage, availableKeyword);
+          }}
+          onAddProducts={handleAddProductsToCategory}
+          onClose={() => setShowAddProductsModal(false)}
+        />
+      )}
     </div>
   );
 }
