@@ -139,29 +139,24 @@ export default function ShopFollowButton({ shopId, className = "", size = "md" }
     const isDisabled = loadingInit || loadingAction;
 
     return (
-        <div className={ `flex items-center gap-3 ${className}` }>
+        <div className={ `flex items-center gap-4 ${className}` }>
             <button
                 type="button"
                 onClick={ handleClick }
                 disabled={ isDisabled }
                 className={ [
-                    "inline-flex items-center justify-center gap-2 rounded-xl border transition select-none",
+                    "inline-flex items-center justify-center gap-2 rounded-xl border transition-all duration-200 select-none active:scale-95",
                     btnSizeCls,
                     isFollowed
                         ? "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-                        : "border-[rgb(119,226,242)] bg-[rgb(119,226,242)]/25 text-slate-800 hover:bg-[rgb(119,226,242)]/35",
-                    isDisabled ? "opacity-60 cursor-not-allowed" : "",
+                        : "border-cyan-300 bg-cyan-300/25 text-slate-800 hover:bg-cyan-300/40",
+                    isDisabled ? "cursor-not-allowed opacity-60" : "",
                 ].join(" ") }
             >
-                { loadingInit ? (
+                { loadingInit || loadingAction ? (
                     <>
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-                        <span>Đang tải</span>
-                    </>
-                ) : loadingAction ? (
-                    <>
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-                        <span>Đang xử lý</span>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+                        <span>{ loadingInit ? "Đang tải" : "Đang xử lý" }</span>
                     </>
                 ) : isFollowed ? (
                     <>
@@ -176,14 +171,16 @@ export default function ShopFollowButton({ shopId, className = "", size = "md" }
                 ) }
             </button>
 
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-slate-500">
                 <span className="font-semibold text-slate-900">
                     { formatNumber(followersCount) }
                 </span>{ " " }
-                follower
+                followers
             </div>
 
-            { errorMsg ? <div className="text-sm text-red-600">{ errorMsg }</div> : null }
+            { errorMsg && (
+                <div className="text-sm text-red-600">{ errorMsg }</div>
+            ) }
         </div>
     );
 }

@@ -4,6 +4,9 @@ import { getShopDetail, getShopProducts, getShopCategoriesAPI, getShopProductsBy
 import ShopProductCard from "../components/shop/ShopProductCard";
 import "../App.css";
 import ShopFollowButton from "../components/shop/ShopFollow";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStore, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import ShopBanner from "../components/shop/ShopBanner";
 
 
 export default function ShopDetailPage() {
@@ -11,6 +14,7 @@ export default function ShopDetailPage() {
 
   const [shop, setShop] = useState(null);
   const [loadingShop, setLoadingShop] = useState(true);
+  const [isDiscovery, setDiscovery] = useState(true);
 
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -83,6 +87,7 @@ export default function ShopDetailPage() {
   };
 
   const handleFilter = (id) => {
+    setDiscovery(false);
     setActiveCategory(id);
     fetchProducts(id);
   };
@@ -99,54 +104,54 @@ export default function ShopDetailPage() {
   if (!shop) return <div style={ { padding: 20 } }>Shop not found</div>;
 
   return (
-    <div style={ { padding: 20, maxWidth: 1100, margin: "0 auto" } }>
+    <div style={ { padding: 10, margin: "0 auto" } }>
       {/* ================= SHOP INFO ================= */ }
-      <div
-        style={ {
-          border: "1px solid #ddd",
-          borderRadius: 5,
-          padding: 20,
-          display: "flex",
-          gap: 20,
-          alignItems: "center",
-          justifyContent: "space-between"
-        } }
-      >
-        <div>
+      <div className="flex items-center justify-between gap-8 rounded-xl border border-slate-200 bg-white p-6 mt-5 shadow-sm">
+
+        {/* Left */ }
+        <div className="flex items-center gap-5">
           <img
             src={ shop.avatar || "/no-avatar.png" }
             alt={ shop.name }
-            style={ {
-              width: 150,
-              height: 150,
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "1px solid #abababff",
-            } }
+            className="h-[150px] w-[150px] rounded-full border border-slate-300 object-cover shadow-sm"
           />
 
-          <div className="mt-5">
-            <ShopFollowButton shopId={ shopId } />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+              <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+                <FontAwesomeIcon icon={ faStore } className="text-slate-500" />
+                { shop.name }
+              </h2>
+
+              { shop.shopAddress && (
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <FontAwesomeIcon icon={ faLocationDot } className="text-red-500" />
+                  { shop.shopAddress.fullAddress }
+                </div>
+              ) }
+            </div>
+
+            <div className="mt-3">
+              <ShopFollowButton shopId={ shopId } />
+            </div>
           </div>
         </div>
 
-        <div className="">
-          <div>
-            <h2 style={ { margin: 0 } }>{ shop.name }</h2>
-            <p style={ { margin: "6px 0" } }>{ shop.description }</p>
+        {/* Right (để trống nếu sau này thêm stats) */ }
+        <div className="flex items-center gap-6 text-sm text-slate-600">
 
-            { shop.shopAddress && (
-              <div style={ { fontSize: 14, color: "#555" } }>
-                { shop.shopAddress.fullAddress }
-              </div>
-            ) }
-          </div>
         </div>
       </div>
 
-
       {/* ================= CATEGORY FILTER ================= */ }
       <div className="category-filter">
+
+        <button
+          className={ `filter-btn ${isDiscovery ? "active" : ""}` }
+          onClick={ () => setDiscovery(true) }
+        >
+          Dạo
+        </button>
         <button
           className={ `filter-btn ${activeCategory === "all" ? "active" : ""}` }
           onClick={ () => handleFilter("all") }
@@ -183,7 +188,7 @@ export default function ShopDetailPage() {
       </div>
 
       {/* ================= PRODUCT LIST ================= */ }
-      <div className="mt-6">
+      { !isDiscovery && <div className="mt-6 rounded-xl bg-slate-50 p-5">
         <h2 className="text-lg font-semibold mb-3">Sản phẩm của shop</h2>
 
         { loadingProducts ? (
@@ -197,96 +202,99 @@ export default function ShopDetailPage() {
             )) }
           </div>
         ) }
-      </div>
 
-      { pagination && pagination.totalPages > 1 && (
-        <div
-          style={ {
-            marginTop: 30,
-            display: "flex",
-            justifyContent: "center",
-          } }
-        >
+
+        { pagination && pagination.totalPages > 1 && (
           <div
             style={ {
+              marginTop: 30,
               display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 12px",
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              background: "#fff",
+              justifyContent: "center",
             } }
           >
-            {/* Nút Prev */ }
-            <button
-              disabled={ page === 1 }
-              onClick={ () => fetchProducts(activeCategory, page - 1) }
+            <div
               style={ {
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                background: page === 1 ? "#f5f5f5" : "#fff",
-                cursor: page === 1 ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                border: "1px solid #ddd",
+                borderRadius: 10,
+                background: "#fff",
               } }
             >
-              { "<" }
-            </button>
+              {/* Nút Prev */ }
+              <button
+                disabled={ page === 1 }
+                onClick={ () => fetchProducts(activeCategory, page - 1) }
+                style={ {
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                  background: page === 1 ? "#f5f5f5" : "#fff",
+                  cursor: page === 1 ? "not-allowed" : "pointer",
+                } }
+              >
+                { "<" }
+              </button>
 
-            {/* Số trang */ }
-            { Array.from({ length: pagination.totalPages }, (_, index) => {
-              const pageNumber = index + 1;
+              {/* Số trang */ }
+              { Array.from({ length: pagination.totalPages }, (_, index) => {
+                const pageNumber = index + 1;
 
-              return (
-                <button
-                  key={ pageNumber }
-                  onClick={ () =>
-                    fetchProducts(activeCategory, pageNumber)
-                  }
-                  style={ {
-                    padding: "6px 10px",
-                    borderRadius: 6,
-                    border:
-                      page === pageNumber
-                        ? "1px solid #000"
-                        : "1px solid #ccc",
-                    background:
-                      page === pageNumber ? "#77E2F2" : "#fff",
-                    color:
-                      page === pageNumber ? "#000" : "#000",
-                    fontWeight:
-                      page === pageNumber ? "700" : "normal",
-                    cursor: "pointer",
-                  } }
-                >
-                  { pageNumber }
-                </button>
-              );
-            }) }
+                return (
+                  <button
+                    key={ pageNumber }
+                    onClick={ () =>
+                      fetchProducts(activeCategory, pageNumber)
+                    }
+                    style={ {
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border:
+                        page === pageNumber
+                          ? "1px solid #000"
+                          : "1px solid #ccc",
+                      background:
+                        page === pageNumber ? "#77E2F2" : "#fff",
+                      color:
+                        page === pageNumber ? "#000" : "#000",
+                      fontWeight:
+                        page === pageNumber ? "700" : "normal",
+                      cursor: "pointer",
+                    } }
+                  >
+                    { pageNumber }
+                  </button>
+                );
+              }) }
 
-            {/* Nút Next */ }
-            <button
-              disabled={ page === pagination.totalPages }
-              onClick={ () => fetchProducts(activeCategory, page + 1) }
-              style={ {
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                background:
-                  page === pagination.totalPages
-                    ? "#f5f5f5"
-                    : "#fff",
-                cursor:
-                  page === pagination.totalPages
-                    ? "not-allowed"
-                    : "pointer",
-              } }
-            >
-              { ">" }
-            </button>
+              {/* Nút Next */ }
+              <button
+                disabled={ page === pagination.totalPages }
+                onClick={ () => fetchProducts(activeCategory, page + 1) }
+                style={ {
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                  background:
+                    page === pagination.totalPages
+                      ? "#f5f5f5"
+                      : "#fff",
+                  cursor:
+                    page === pagination.totalPages
+                      ? "not-allowed"
+                      : "pointer",
+                } }
+              >
+                { ">" }
+              </button>
+            </div>
           </div>
-        </div>
-      ) }
+        ) }
+      </div> }
+
+      { isDiscovery && <ShopBanner shopId={ shopId } /> }
     </div>
   );
 }

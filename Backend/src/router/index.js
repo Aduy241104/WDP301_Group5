@@ -21,6 +21,7 @@ import orderRoutes from "./order.routes.js";
 import voucherRoutes from "./voucher.routes.js";
 import sellerManageCategoryRoutes from "./sellerManageCategoryRoutes.js";
 import shopFollowRoutes from "./shopFollow.routes.js";
+import shopBannerRoutes from "./shopBanner.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -32,6 +33,7 @@ function route(app) {
     app.use("/api/order", orderRoutes);
     app.use("/api/admin", adminRoute);
     app.use("/api/voucher", voucherRoutes);
+    app.use("/api/shop-banner", shopBannerRoutes);
     // Seller routes
     app.use("/api/seller/products", sellerManageProduct);
     app.use("/api/seller/shop", sellerManageShopRoutes);

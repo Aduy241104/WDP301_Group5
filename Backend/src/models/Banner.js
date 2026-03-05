@@ -11,7 +11,7 @@ const BannerSchema = new Schema(
             default: null,
             index: true,
         },
-
+        
         title: { type: String, required: true },
         imageUrl: { type: String, required: true },
 
