@@ -1,17 +1,34 @@
-// components/product/ProductFeedbackSection.jsx
+import { useState } from "react";
+import ReviewForm from "../../components/review/ReviewForm";
+import ReviewList from "../../components/review/ReviewList";
+
 export default function ProductFeedbackSection({ productId }) {
-    return (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">
-                Đánh giá sản phẩm
-            </h2>
 
-            {/* Placeholder */ }
-            <div className="text-slate-500 text-sm">
-                Chưa có đánh giá nào cho sản phẩm này.
-            </div>
+  const [reload, setReload] = useState(false);
 
-            {/* Sau này có thể map reviews ở đây */ }
-        </div>
-    );
+  const reloadReviews = () => {
+    setReload(!reload);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6">
+
+      <h2 className="text-xl font-semibold mb-6">
+        Đánh giá sản phẩm
+      </h2>
+
+      {/* Form review */}
+      {/* <ReviewForm
+        productId={productId}
+        reloadReviews={reloadReviews}
+      /> */}
+
+      {/* List review */}
+      <ReviewList
+        productId={productId}
+        reload={reload}
+      />
+
+    </div>
+  );
 }

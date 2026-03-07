@@ -5,23 +5,30 @@ import {
     followShop,
     unfollowShop,
     getMyFollowingShops,
-    getShopFollowers,
+    getShopFollowersCount,
+    checkFollowShop
 } from "../controllers/shopFollowController.js";
 
 const router = express.Router();
 
-// Follow / Unfollow
 router.post("/:shopId/follow", authenticationMiddleware, followShop);
+
 router.delete("/:shopId/follow", authenticationMiddleware, unfollowShop);
 
-// View lists
 router.get(
     "/me/following/shops",
     authenticationMiddleware,
     getMyFollowingShops
 );
 
-// Public list followers of a shop (nếu muốn private thì thêm authenticationMiddleware)
-router.get("/:shopId/followers", getShopFollowers);
+
+router.get("/:shopId/followers", getShopFollowersCount);
+
+router.get(
+    "/:shopId/is-following",
+    authenticationMiddleware,
+    checkFollowShop
+);
+
 
 export default router;

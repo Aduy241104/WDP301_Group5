@@ -165,6 +165,7 @@ export const applySystemShipVoucherPreview = async (req, res, next) => {
         // ship discount cap:
         // ưu tiên maxDiscountValue nếu >0, còn không dùng discountValue
         const cap = money(voucher.maxDiscountValue) > 0 ? money(voucher.maxDiscountValue) : money(voucher.discountValue);
+
         const shipDiscount = Math.min(shippingFeeTotal, cap);
 
         return res.json({
@@ -200,8 +201,18 @@ export const getVoucherByShop = async (req, res) => {
         const voucherUseage = await VoucherUsage.find({ voucherId: { $in: voucherIds }, userId }).lean();
 
         for (const vu of voucherUseage) {
+
+
+
             const key = vu.voucherId.toString();
-            shopVouchersMap.delete(key); // delete ko cần has cũng được
+
+            const shopVou = shopVouchersMap.get(key);
+
+            if (shopVou.usageLimitPerUser === 0) {
+                console.log("HHEHEHEEHEH");
+                continue;
+            }
+            shopVouchersMap.delete(key);
         }
 
         const shopVouchersArr = [...shopVouchersMap.values()];

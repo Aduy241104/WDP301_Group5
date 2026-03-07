@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getSellerProductsAPI,
   deleteSellerProductAPI,
+  toggleSellerProductActiveAPI,
 } from "../../../services/sellerManageProduct.service";
 
 export default function SellerProductList({ onAdd, onEdit }) {
@@ -149,18 +150,42 @@ export default function SellerProductList({ onAdd, onEdit }) {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          p.activeStatus === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {p.activeStatus || "—"}
-                      </span>
+                      {/* toggle switch */}
+                      <label className="inline-flex relative items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={p.activeStatus === "active"}
+                          disabled={loading}
+                          onChange={async () => {
+                            try {
+                              setError("");
+                              setLoading(true);
+                              const newStatus =
+                                p.activeStatus === "active" ? "inactive" : "active";
+                              await toggleSellerProductActiveAPI(p._id, newStatus);
+                              setProducts((prev) =>
+                                prev.map((x) =>
+                                  x._id === p._id
+                                    ? { ...x, activeStatus: newStatus }
+                                    : x
+                                )
+                              );
+                            } catch (e) {
+                              setError(
+                                e?.response?.data?.message ||
+                                  "Không thể thay đổi trạng thái active"
+                              );
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                        />
+                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                      </label>
                     </td>
                     <td className="px-4 py-3 text-right">
-                                      <button
+                      <button
                         type="button"
                         onClick={() => onEdit?.(p._id)}
                         className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"

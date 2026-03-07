@@ -137,49 +137,53 @@ export async function getMyFollowingShops(req, res, next) {
  * Public (hoặc requireAuth nếu bạn muốn)
  * trả về list user follow shop
  */
-export async function getShopFollowers(req, res, next) {
+export async function getShopFollowersCount(req, res, next) {
     try {
         const { shopId } = req.params;
+
         if (!isValidObjectId(shopId)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid shopId." });
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Invalid shopId.",
+            });
         }
 
-        const page = Math.max(1, Number(req.query.page || 1));
-        const limit = Math.min(50, Math.max(1, Number(req.query.limit || 10)));
-        const skip = (page - 1) * limit;
-
-        const [total, rows] = await Promise.all([
-            ShopFollower.countDocuments({ shopId }),
-            ShopFollower.find({ shopId })
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .populate({
-                    path: "userId",
-                    select: "_id fullName avatar email", // tùy schema User
-                })
-                .lean(),
-        ]);
-
-        const items = rows.map((r) => ({
-            followedAt: r.createdAt,
-            user: r.userId,
-        }));
+        const count = await ShopFollower.countDocuments({ shopId });
 
         return res.status(StatusCodes.OK).json({
-            message: "OK",
+            message: "Get shop followers count success",
             data: {
                 shopId,
-                items,
-                pagination: {
-                    page,
-                    limit,
-                    total,
-                    totalPages: Math.ceil(total / limit),
-                },
+                followersCount: count,
             },
         });
     } catch (err) {
         return next(err);
     }
 }
+
+
+export const checkFollowShop = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { shopId } = req.params;
+
+        // validate shopId
+        if (!mongoose.Types.ObjectId.isValid(shopId)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Invalid shopId",
+            });
+        }
+
+        const isFollowed = await ShopFollower.exists({
+            shopId,
+            userId,
+        });
+
+        return res.status(StatusCodes.OK).json({
+            message: "Check follow status success",
+            isFollowed: !!isFollowed,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
