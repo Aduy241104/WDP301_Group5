@@ -8,6 +8,10 @@ const ShopCategorySchema = new Schema(
         name: { type: String, required: true, trim: true },
 
         productIds: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+
+        isDeleted: { type: Boolean, default: false, index: true },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );

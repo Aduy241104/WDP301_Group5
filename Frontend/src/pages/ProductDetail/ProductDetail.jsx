@@ -7,6 +7,7 @@ import AddToCartSection from "./AddToCartSection";
 import ProductFeedbackSection from "./ProductFeedbackSection";
 import { useAuth } from "../../context/AuthContext";
 import { userTrackingAPI } from "../../services/userTrackingService";
+import SimilarShopList from "./SimilarShopList";
 
 export default function ProductDetail() {
     const { productId } = useParams();
@@ -32,7 +33,7 @@ export default function ProductDetail() {
             const handleTrackingUserEvent = async () => {
                 try {
                     console.log("HÊLLOLOEO");
-                    
+
                     const response = await userTrackingAPI(productId, "view_detail");
                 } catch (error) {
                     console.log("ERROR WHEN TRACKING USER EVENT: ", error.message);
@@ -55,19 +56,23 @@ export default function ProductDetail() {
         <div className="bg-slate-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-2 py-6 space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Product info */ }
+                    {/* Product info */}
                     <div className="lg:col-span-2">
-                        <ProductInfo currentPrice={ currentPrice } product={ product } />
+                        <ProductInfo currentPrice={currentPrice} product={product} />
                     </div>
 
-                    {/* Add to cart */ }
+                    {/* Add to cart */}
                     <div>
-                        <AddToCartSection setCurrentPrice={ setCurrentPrice } product={ product } />
+                        <AddToCartSection setCurrentPrice={setCurrentPrice} product={product} />
+                        <div className="bg-white rounded-xl p-4 shadow">
+                            <h3 className="font-semibold mb-3">Shop bán tương tự</h3>
+                            <SimilarShopList productId={productId} />
+                        </div>
                     </div>
                 </div>
 
-                {/* Feedback */ }
-                <ProductFeedbackSection productId={ product._id } />
+                {/* Feedback */}
+                <ProductFeedbackSection productId={product._id} />
             </div>
         </div>
     );

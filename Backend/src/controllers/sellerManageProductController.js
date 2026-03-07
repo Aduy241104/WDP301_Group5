@@ -393,3 +393,109 @@ export const getSellerProductDetail = async (req, res) => {
     });
   }
 };
+
+/**
+ * DELETE /seller/products/:productId
+ * Seller soft–delete a product in their shop
+ */
+export const deleteSellerProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const shopId = req.shop?._id;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "ProductId không hợp lệ" });
+    }
+
+    const product = await Product.findOne({
+      _id: productId,
+      shopId,
+      isDeleted: false,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Không tìm thấy sản phẩm hoặc không có quyền",
+      });
+    }
+
+    product.isDeleted = true;
+    product.deletedAt = new Date();
+    if (req.user && req.user.id) product.deletedBy = req.user.id;
+    await product.save();
+
+    // soft-delete variants too
+    await Variant.updateMany(
+      { productId, isDeleted: false },
+      {
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(req.user && req.user.id ? { deletedBy: req.user.id } : {}),
+      }
+    );
+
+    return res.status(200).json({
+      message: "Xóa sản phẩm thành công",
+    });
+  } catch (error) {
+    console.error("deleteSellerProduct error:", error);
+    return res.status(500).json({
+      message: "Lỗi server khi xóa sản phẩm",
+    });
+  }
+};
+
+/**
+ * PATCH /seller/products/:productId/active
+ * Seller thay đổi trạng thái active/inactive của sản phẩm
+ */
+export const updateProductActiveStatus = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { activeStatus } = req.body;
+    const shopId = req.shop?._id;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "ProductId không hợp lệ" });
+    }
+
+    if (!["active", "inactive"].includes(activeStatus)) {
+      return res.status(400).json({ message: "activeStatus phải là active hoặc inactive" });
+    }
+
+    const product = await Product.findOne({
+      _id: productId,
+      shopId,
+      isDeleted: false,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Không tìm thấy sản phẩm hoặc không có quyền",
+      });
+    }
+
+    product.activeStatus = activeStatus;
+    if (activeStatus === "inactive") {
+      product.inactiveBy = "seller";
+      product.inactiveActorId = req.user?.id;
+      product.inactiveAt = new Date();
+    } else {
+      product.inactiveBy = null;
+      product.inactiveActorId = null;
+      product.inactiveAt = null;
+    }
+
+    await product.save();
+
+    return res.status(200).json({
+      message: "Cập nhật trạng thái bán thành công",
+      data: { activeStatus: product.activeStatus },
+    });
+  } catch (error) {
+    console.error("updateProductActiveStatus error:", error);
+    return res.status(500).json({
+      message: "Lỗi server khi cập nhật trạng thái bán sản phẩm",
+    });
+  }
+};

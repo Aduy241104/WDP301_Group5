@@ -4,6 +4,14 @@ const { Schema, model } = mongoose;
 
 const BannerSchema = new Schema(
     {
+        // Shop banner fields (optional - for shop banners)
+        shopId: {
+            type: Schema.Types.ObjectId,
+            ref: "Shop",
+            default: null,
+            index: true,
+        },
+        
         title: { type: String, required: true },
         imageUrl: { type: String, required: true },
 

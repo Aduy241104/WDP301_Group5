@@ -66,6 +66,10 @@ export const addAddress = async (req, res) => {
             user.addresses.forEach(addr => addr.isDefault = false);
         }
 
+        if (user.addresses.length === 0) {
+            isDefault = true;
+        }
+
         user.addresses.push({
             fullName,
             phone,
@@ -116,13 +120,12 @@ export const updateAddress = async (req, res) => {
             isDefault
         } = req.body;
 
-        // ✅ Default logic
+
         if (isDefault === true) {
             user.addresses.forEach(addr => addr.isDefault = false);
             address.isDefault = true;
         }
 
-        // ✅ Update từng field
         if (fullName !== undefined) address.fullName = fullName;
         if (phone !== undefined) address.phone = phone;
         if (province) address.province = province;
@@ -130,7 +133,7 @@ export const updateAddress = async (req, res) => {
         if (ward) address.ward = ward;
         if (streetAddress) address.streetAddress = streetAddress;
 
-        // ✅ Rebuild fullAddress nếu đổi địa chỉ
+
         if (province || district || ward || streetAddress) {
             address.fullAddress = `${address.streetAddress}, ${address.ward}, ${address.district}, ${address.province}`;
         }
@@ -168,10 +171,8 @@ export const deleteAddress = async (req, res) => {
 
         const wasDefault = address.isDefault;
 
-        // ✅ XÓA ĐÚNG CÁCH
         user.addresses.pull(addressId);
 
-        // Nếu xóa default → set default mới
         if (wasDefault && user.addresses.length > 0) {
             user.addresses[0].isDefault = true;
         }
