@@ -36,10 +36,6 @@ import {
     AdminClassifyReportController,
 } from "../controllers/AdminReportController.js";
 
-import {
-    AdminGMVStatisticsController,
-    AdminRevenueByShopController,
-} from "../controllers/AdminRevenueAnalyticsController.js";
 
 const router = express.Router();
 
@@ -90,10 +86,6 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 router.get("/reports", AdminReportListController);
 router.get("/reports/:reportId", AdminReportDetailController);
 router.get("/reports/classify", AdminClassifyReportController);
-
-// Revenue Analytics
-router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);
-router.get("/revenue/by-shop", AdminRevenueByShopController);
 
 export default router;
 
