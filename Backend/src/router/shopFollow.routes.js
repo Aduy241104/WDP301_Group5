@@ -5,7 +5,8 @@ import {
     followShop,
     unfollowShop,
     getMyFollowingShops,
-    getShopFollowers,
+    getShopFollowersCount,
+    checkFollowShop
 } from "../controllers/shopFollowController.js";
 
 const router = express.Router();
@@ -21,6 +22,13 @@ router.get(
 );
 
 
-router.get("/:shopId/followers", getShopFollowers);
+router.get("/:shopId/followers", getShopFollowersCount);
+
+router.get(
+    "/:shopId/is-following",
+    authenticationMiddleware,
+    checkFollowShop
+);
+
 
 export default router;

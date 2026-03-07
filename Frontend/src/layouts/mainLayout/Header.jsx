@@ -37,7 +37,7 @@ export default function Header() {
                     </div>
 
                     <div className="hidden sm:flex items-center gap-4 text-slate-700">
-                        <button className="hover:opacity-80" onClick={ () => go("/support") }>
+                        {/* <button className="hover:opacity-80" onClick={ () => go("/support") }>
                             Hỗ trợ
                         </button>
 
@@ -47,7 +47,7 @@ export default function Header() {
 
                         <button className="hover:opacity-80" onClick={ () => go("/deals") }>
                             Khuyến mãi
-                        </button>
+                        </button> */}
 
                         {/* Login đưa lên đây */ }
                         { !isAuthenticated && (
@@ -80,10 +80,10 @@ export default function Header() {
 
                     {/* logo */ }
                     <button onClick={ () => go("/") } className="flex items-center gap-2 select-none">
-                        <div className="h-10 w-10 rounded-2xl bg-[rgb(119,226,242)] shadow-sm" />
+                        <div className="h-10 w-10 rounded-full bg-[rgb(119,226,242)] shadow-sm" />  
                         <div className="leading-tight text-left">
                             <div className="text-lg font-extrabold tracking-tight">
-                                Uni<span className="text-[rgb(119,226,242)]">Trade</span>
+                                GR<span className="text-[rgb(119,226,242)]">5</span>
                             </div>
                             <div className="text-xs text-slate-500 -mt-0.5">Marketplace</div>
                         </div>

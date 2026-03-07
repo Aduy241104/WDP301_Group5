@@ -22,6 +22,7 @@ import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStore
 import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
 import SellerBanners from "../pages/Seller/Banners/SellerBanners";
+import SellerInventory from "../pages/Seller/Inventory/SellerInventory";
 import TopSaleProduct from "../pages/TopSaleProduct";
 import OrderSummary from "../pages/OrderCustomer/OrderSummary";
 import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
@@ -94,6 +95,7 @@ export default function AppRoutes() {
           <Route path="products" element={ <SellerProducts /> } />
           <Route path="categories" element={ <SellerCategories /> } />
           <Route path="banners" element={ <SellerBanners /> } />
+          <Route path="inventory" element={ <SellerInventory /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
