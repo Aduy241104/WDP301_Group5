@@ -2,17 +2,22 @@ import { useMemo } from "react";
 import OrderItemRow from "./OrderItemRow";
 import OrderStatusBadge from "./OrderStatusBadge";
 import { formatVND } from "../../../../utils/money";
+import { useNavigate } from "react-router-dom";
+import CancelOrderButton from "./CancelOrderButton";
 
 export default function OrderCard({
     order,
     onRebuy,
     onReview,
     onReturn,
+    onReload
 }) {
     const firstImg = useMemo(() => {
         const first = order?.items?.[0]?.product?.images?.[0];
         return first || "https://via.placeholder.com/80x80?text=No+Image";
     }, [order]);
+
+    const navigate = useNavigate();
 
     return (
         <div className="overflow-hidden rounded-sm border border-neutral-200 bg-white shadow-sm transition hover:shadow-md">
@@ -61,6 +66,21 @@ export default function OrderCard({
                 {/* ACTION BUTTONS */ }
                 <div className="mt-4 flex flex-wrap justify-end gap-3">
 
+                    <button
+                        onClick={ () => navigate(`/order-detail/${order._id}`) }
+                        className="rounded-lg 
+                                    bg-[rgb(119,226,242)] 
+                                    px-5 py-2 
+                                    text-sm font-medium 
+                                    text-white
+                                    shadow-sm
+                                    transition 
+                                    hover:brightness-95 
+                                    active:scale-95"
+                    >
+                        Chi tiết đơn hàng
+                    </button>
+
                     {/* Mua lại */ }
                     { order?.orderStatus === "delivered" && (
                         <button
@@ -83,17 +103,13 @@ export default function OrderCard({
 
                     {/* Hủy đơn */ }
                     { order?.orderStatus === "created" && (
-                        <button
-                            className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-900 hover:text-slate-900"
-                        >
-                            Hủy đơn
-                        </button>
+                        <CancelOrderButton orderId={ order._id } onSuccess={ onReload } />
                     ) }
 
                     {/* Trả hàng */ }
                     { order?.orderStatus === "delivered" && (
                         <button
-                            onClick={ onReturn }
+                            onClick={ () => navigate(`/order-detail/${order._id}`) }
                             className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-900 hover:text-slate-900"
                         >
                             Yêu cầu trả hàng

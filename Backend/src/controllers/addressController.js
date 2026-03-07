@@ -66,6 +66,10 @@ export const addAddress = async (req, res) => {
             user.addresses.forEach(addr => addr.isDefault = false);
         }
 
+        if (user.addresses.length === 0) {
+            isDefault = true;
+        }
+
         user.addresses.push({
             fullName,
             phone,
@@ -116,7 +120,7 @@ export const updateAddress = async (req, res) => {
             isDefault
         } = req.body;
 
-        
+
         if (isDefault === true) {
             user.addresses.forEach(addr => addr.isDefault = false);
             address.isDefault = true;
@@ -129,7 +133,7 @@ export const updateAddress = async (req, res) => {
         if (ward) address.ward = ward;
         if (streetAddress) address.streetAddress = streetAddress;
 
-        
+
         if (province || district || ward || streetAddress) {
             address.fullAddress = `${address.streetAddress}, ${address.ward}, ${address.district}, ${address.province}`;
         }

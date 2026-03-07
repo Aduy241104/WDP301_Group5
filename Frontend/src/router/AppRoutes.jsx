@@ -22,6 +22,7 @@ import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStore
 import CartPage from "../pages/CartPage";
 import SellerProducts from "../pages/Seller/Products/SellerProducts";
 import SellerBanners from "../pages/Seller/Banners/SellerBanners";
+import SellerInventory from "../pages/Seller/Inventory/SellerInventory";
 import TopSaleProduct from "../pages/TopSaleProduct";
 import OrderSummary from "../pages/OrderCustomer/OrderSummary";
 import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
@@ -29,6 +30,8 @@ import SellerCategories from "../pages/Seller/Categories/SellerCategories";
 import ShopListPage from "../pages/ShopListPage";
 import ShopDetailPage from "../pages/ShopDetailPage";
 import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
+import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
+import WishlistPage from "../pages/WishlistPage";
 
 export default function AppRoutes() {
   return (
@@ -59,6 +62,8 @@ export default function AppRoutes() {
           <Route path="/my-cart" element={ <CartPage /> } />
           <Route path="/place-order" element={ <OrderSummary /> } />
           <Route path="/my-order-list" element={ <OrderListPage /> } />
+          <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
+          <Route path="/wishlist" element={<WishlistPage />} />
         </Route>
       </Route>
 
@@ -90,6 +95,7 @@ export default function AppRoutes() {
           <Route path="products" element={ <SellerProducts /> } />
           <Route path="categories" element={ <SellerCategories /> } />
           <Route path="banners" element={ <SellerBanners /> } />
+          <Route path="inventory" element={ <SellerInventory /> } />
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />

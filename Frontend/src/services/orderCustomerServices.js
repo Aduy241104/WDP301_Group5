@@ -60,3 +60,8 @@ export const getOrderDetailAPI = async (orderId) => {
     const response = await axiosInstance.get(`/api/order/order-detail/${orderId}`);
     return response.data;
 }
+
+export const cancelOrderAPI = async (orderId) => {
+    const response = await axiosInstance.delete(`/api/order/cancel-order/${orderId}`);
+    return response.data;
+}
