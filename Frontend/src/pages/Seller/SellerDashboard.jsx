@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getDashboardStatsAPI } from "../../services/sellerOrder.service";
 import { useAuth } from "../../context/AuthContext";
+import {
+  getDashboardStatTopProductAPI,
+  getProductQuantityAPI,
+} from "../../services/sellerDashboardService";
+import NotificationPanel from "../../components/notification/NotificationPanel";
 
 const EMPTY_STATS = {
   todayRevenue: 0,
@@ -18,32 +23,41 @@ function SellerDashboard() {
   const { user } = useAuth();
 
   const [stats, setStats] = useState(EMPTY_STATS);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [hasShop, setHasShop] = useState(true);
-
+  const [hasShop] = useState(true);
+  const [topProducts, setTopProducts] = useState([]);
   useEffect(() => {
-  if (!user) return;
-  fetchStats();
-}, [user?._id]);
+    if (!user) return;
+    fetchStats();
+  }, [user?._id]);
 
-const fetchStats = async () => {
-  try {
-    setLoading(true);
-    const data = await getDashboardStatsAPI(); // 👈 KHÔNG TRUYỀN ID
-    setStats(data);
-  } catch (err) {
-    console.error("Failed to load dashboard stats:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+
+      // API stats cũ
+      const data = await getDashboardStatsAPI();
+      setStats(data);
+
+      // API tổng sản phẩm
+      const productData = await getProductQuantityAPI();
+      setTotalProducts(productData.totalProducts);
+
+      // gọi API top product để tránh ESLint unused
+      const topProductsData = await getDashboardStatTopProductAPI();
+      setTopProducts(topProductsData);
+    } catch (err) {
+      console.error("Failed to load dashboard stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">
-          Tổng quan
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-6">Tổng quan</h2>
 
         {!hasShop && (
           <div className="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200">
@@ -58,7 +72,7 @@ const fetchStats = async () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <StatCard
             title="Doanh thu hôm nay"
             value={`${(stats.todayRevenue / 1_000_000).toFixed(1)}M ₫`}
@@ -72,9 +86,29 @@ const fetchStats = async () => {
           />
 
           <SimpleCard title="Đơn hàng mới" value={stats.newOrdersToday} />
-          <SimpleCard title="Đơn đang chờ xử lý" value={stats.pendingOrders} />
-        </div>
 
+          <SimpleCard title="Đơn đang chờ xử lý" value={stats.pendingOrders} />
+
+          <SimpleCard title="Tổng sản phẩm" value={totalProducts} />
+        </div>
+        {/* Top Selling Products */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border mb-8">
+          <h3 className="text-lg font-semibold mb-4">Top Selling Products</h3>
+
+          {topProducts?.length === 0 ? (
+            <Empty />
+          ) : (
+            topProducts?.map((p) => (
+              <div
+                key={p._id}
+                className="flex justify-between py-2 border-b last:border-b-0"
+              >
+                <span>{p.name}</span>
+                <span className="font-bold">{p.totalSale} sold</span>
+              </div>
+            ))
+          )}
+        </div>
         {/* Order stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -98,9 +132,7 @@ const fetchStats = async () => {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">
-              Doanh thu theo ngày
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Doanh thu theo ngày</h3>
 
             {stats.dailyRevenueLast7Days.length === 0 ? (
               <Empty />
@@ -114,7 +146,7 @@ const fetchStats = async () => {
                       style={{
                         width: `${Math.min(
                           100,
-                          (d.total / (stats.todayRevenue || 1)) * 100
+                          (d.total / (stats.todayRevenue || 1)) * 100,
                         )}%`,
                       }}
                     />
@@ -146,7 +178,7 @@ const fetchStats = async () => {
                     style={{
                       width: `${Math.min(
                         100,
-                        (m.total / (stats.monthRevenue || 1)) * 100
+                        (m.total / (stats.monthRevenue || 1)) * 100,
                       )}%`,
                     }}
                   />
