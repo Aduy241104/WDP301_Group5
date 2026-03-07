@@ -15,6 +15,7 @@ const ReviewSchema = new Schema(
     {
         productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+        orderId: { type: Schema.Types.ObjectId, ref: "Order", required: true, index: true },
 
         rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, default: "" },
@@ -27,6 +28,6 @@ const ReviewSchema = new Schema(
     { timestamps: true }
 );
 
-ReviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
+ReviewSchema.index( { userId: 1, productId: 1, orderId: 1 }, { unique: true } );
 
 export const Review = model("Review", ReviewSchema);
