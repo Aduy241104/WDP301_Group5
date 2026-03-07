@@ -22,3 +22,9 @@ export const unblockUser = async (userId) => {
     const res = await axiosInstance.post(`/api/admin/users/${userId}/unblock`);
     return res.data;
 };
+
+// User order & cancellation statistics
+export const fetchUserOrderStatistics = async (params = {}) => {
+    const res = await axiosInstance.get("/api/admin/users/order-statistics", { params });
+    return res.data;
+};

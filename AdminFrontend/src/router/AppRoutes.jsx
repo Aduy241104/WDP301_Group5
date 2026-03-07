@@ -18,6 +18,10 @@ import AdminBannerList from "../pages/AdminBannerList";
 import AdminBannerForm from "../pages/AdminBannerForm";
 import AdminReportList from "../pages/AdminReportList";
 import AdminReportDetail from "../pages/AdminReportDetail";
+import AdminRevenueAnalytics from "../pages/AdminRevenueAnalytics";
+import AdminUserOrderStatistics from "../pages/AdminUserOrderStatistics";
+import AdminProductList from "../pages/AdminProductList";
+import AdminProductDetail from "../pages/AdminProductDetail";
 
 
 export default function AppRoutes() {
@@ -47,11 +51,15 @@ export default function AppRoutes() {
                         <Route path="shops/:shopId" element={<AdminShopDetail />} />
                         <Route path="users" element={<AdminUserList />} />
                         <Route path="users/:userId" element={<AdminUserProfile />} />
+                        <Route path="users/order-statistics" element={<AdminUserOrderStatistics />} />
+                        <Route path="products" element={<AdminProductList />} />
+                        <Route path="products/:productId" element={<AdminProductDetail />} />
                         <Route path="banners" element={<AdminBannerList />} />
                         <Route path="banners/new" element={<AdminBannerForm />} />
                         <Route path="banners/:bannerId/edit" element={<AdminBannerForm />} />
                         <Route path="reports" element={<AdminReportList />} />
                         <Route path="reports/:reportId" element={<AdminReportDetail />} />
+                        <Route path="revenue-analytics" element={<AdminRevenueAnalytics />} />
                     </Route>
                 </Route>
 
