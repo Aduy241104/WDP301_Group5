@@ -1,5 +1,5 @@
 import express from "express";
-import { prepareOrdersFromCart, createOrdersFromCart, listMyOrders, getMyOrderDetail } from "../controllers/orderController.js";
+import { prepareOrdersFromCart, createOrdersFromCart, listMyOrders, getMyOrderDetail, cancelOrder } from "../controllers/orderController.js";
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { applyShopVoucherPreview, applySystemShipVoucherPreview } from "../controllers/voucherController.js";
 import { createOrdersFromCartSchema } from "../middlewares/orderMiddleware/orderValidation.js";
@@ -17,6 +17,8 @@ router.post("/place-order", authenticationMiddleware, validateBody(createOrdersF
 router.get("/my-orders", authenticationMiddleware, listMyOrders);
 
 router.get("/order-detail/:orderId", authenticationMiddleware, getMyOrderDetail);
+
+router.delete("/cancel-order/:orderId", authenticationMiddleware, cancelOrder);
 
 export default router;
 

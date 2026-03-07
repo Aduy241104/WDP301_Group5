@@ -25,6 +25,10 @@ import adminBrandRoutes from "./adminBrand.routes.js"
 import getAdminCategories from "./adminCategory.routes.js";
 import adminUserAnalyticsRoutes from "./adminUserAnalytics.routes.js";
 import adminRevenueRoutes from "./adminRevenue.routes.js"
+import reviewRoutes from "./review.routes.js";
+import wishlistRoutes from "./wishlist.routes.js";
+import shopBannerRoutes from "./shopBanner.routes.js";
+import sellerInventoryRoutes from "./sellerInventoryRoutes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -36,7 +40,9 @@ function route(app) {
     app.use("/api/order", orderRoutes);
     app.use("/api/admin", adminRoute);
     app.use("/api/voucher", voucherRoutes);
-
+    app.use("/api/reviews", reviewRoutes);
+    app.use("/api/wishlist", wishlistRoutes);
+    app.use("/api/shop-banner", shopBannerRoutes);
     // Seller routes
     app.use("/api/seller/products", sellerManageProduct);
     app.use("/api/seller/shop", sellerManageShopRoutes);
@@ -45,6 +51,7 @@ function route(app) {
     app.use("/api/seller/brands", brandRoutes)
     app.use("/api/seller/category-schemas", categorySchemaRoutes);
     app.use("/api/seller/categories", sellerManageCategoryRoutes);
+    app.use("/api/seller/inventory", sellerInventoryRoutes);
     app.use("/api/seller/reviews", sellerReviewRoutes);
     app.use("/api/shop-follow", shopFollowRoutes);
 

@@ -214,6 +214,7 @@ export const getShopProductsService = async (shopId, options = {}) => {
   const query = {
     shopId: shopId,
     isDeleted: { $ne: true },
+    activeStatus: "active",
   };
 
   const skip = (page - 1) * limit;
