@@ -1,22 +1,28 @@
 import express from "express";
-import { 
-  getBannersByPosition, 
+import {
+  getBannersByPosition,
   getPopupBanner,
   createBanner,
   updateBanner,
   deleteBanner
 } from "../controllers/bannerController.js";
-import { authenticationMiddleware, adminMiddleware } from "../middlewares/authenticationMiddlewares.js";
+
+import {
+  authenticationMiddleware,
+  adminMiddleware
+} from "../middlewares/authenticationMiddlewares.js";
 
 const router = express.Router();
 
-// Public routes
-router.get("/popup/banner", getPopupBanner);
-router.get("/:position", getBannersByPosition);
 
+router.get("/popup/banner", authenticationMiddleware, adminMiddleware, getPopupBanner);
 
-router.post("/", authenticationMiddleware, adminMiddleware, createBanner);       // Tạo banner mới
-router.put("/:id", authenticationMiddleware, adminMiddleware, updateBanner);     // Cập nhật banner
-router.delete("/:id", authenticationMiddleware, adminMiddleware, deleteBanner);  // Xóa banner
+router.get("/:position", authenticationMiddleware, adminMiddleware, getBannersByPosition);
+
+router.post("/", authenticationMiddleware, adminMiddleware, createBanner);
+
+router.put("/:id", authenticationMiddleware, adminMiddleware, updateBanner);
+
+router.delete("/:id", authenticationMiddleware, adminMiddleware, deleteBanner);
 
 export default router;
