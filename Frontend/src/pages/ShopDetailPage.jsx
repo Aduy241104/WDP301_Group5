@@ -97,123 +97,124 @@ export default function ShopDetailPage() {
       fetchShop();
       fetchCategories();
       fetchProducts("all");
+      setDiscovery(false); // thêm dòng này
     }
   }, [shopId]);
 
-  if (loadingShop) return <div style={ { padding: 20 } }>Loading shop...</div>;
-  if (!shop) return <div style={ { padding: 20 } }>Shop not found</div>;
+  if (loadingShop) return <div style={{ padding: 20 }}>Loading shop...</div>;
+  if (!shop) return <div style={{ padding: 20 }}>Shop not found</div>;
 
   return (
-    <div style={ { padding: 10, margin: "0 auto" } }>
-      {/* ================= SHOP INFO ================= */ }
+    <div style={{ padding: 10, margin: "0 auto" }}>
+      {/* ================= SHOP INFO ================= */}
       <div className="flex items-center justify-between gap-8 rounded-xl border border-slate-200 bg-white p-6 mt-5 shadow-sm">
 
-        {/* Left */ }
+        {/* Left */}
         <div className="flex items-center gap-5">
           <img
-            src={ shop.avatar || "/no-avatar.png" }
-            alt={ shop.name }
+            src={shop.avatar || "/no-avatar.png"}
+            alt={shop.name}
             className="h-[150px] w-[150px] rounded-full border border-slate-300 object-cover shadow-sm"
           />
 
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
               <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
-                <FontAwesomeIcon icon={ faStore } className="text-slate-500" />
-                { shop.name }
+                <FontAwesomeIcon icon={faStore} className="text-slate-500" />
+                {shop.name}
               </h2>
 
-              { shop.shopAddress && (
+              {shop.shopAddress && (
                 <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <FontAwesomeIcon icon={ faLocationDot } className="text-red-500" />
-                  { shop.shopAddress.fullAddress }
+                  <FontAwesomeIcon icon={faLocationDot} className="text-red-500" />
+                  {shop.shopAddress.fullAddress}
                 </div>
-              ) }
+              )}
             </div>
 
             <div className="mt-3">
-              <ShopFollowButton shopId={ shopId } />
+              <ShopFollowButton shopId={shopId} />
             </div>
           </div>
         </div>
 
-        {/* Right (để trống nếu sau này thêm stats) */ }
+        {/* Right (để trống nếu sau này thêm stats) */}
         <div className="flex items-center gap-6 text-sm text-slate-600">
 
         </div>
       </div>
 
-      {/* ================= CATEGORY FILTER ================= */ }
+      {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filter">
 
-        <button
+        {/* <button
           className={ `filter-btn ${isDiscovery ? "active" : ""}` }
           onClick={ () => setDiscovery(true) }
         >
           Dạo
-        </button>
+        </button> */}
         <button
-          className={ `filter-btn ${activeCategory === "all" ? "active" : ""}` }
-          onClick={ () => handleFilter("all") }
+          className={`filter-btn ${activeCategory === "all" ? "active" : ""}`}
+          onClick={() => handleFilter("all")}
         >
           Tất cả
         </button>
 
-        { categories.slice(0, 4).map((c) => (
+        {categories.slice(0, 4).map((c) => (
           <button
-            key={ c._id }
-            className={ `filter-btn ${activeCategory === c._id ? "active" : ""}` }
-            onClick={ () => handleFilter(c._id) }
+            key={c._id}
+            className={`filter-btn ${activeCategory === c._id ? "active" : ""}`}
+            onClick={() => handleFilter(c._id)}
           >
-            { c.name }
+            {c.name}
           </button>
-        )) }
+        ))}
 
-        { categories.length > 4 && (
+        {categories.length > 4 && (
           <div className="filter-btn more">
             Thêm ▾
             <div className="dropdown">
-              { categories.slice(4).map((c) => (
+              {categories.slice(4).map((c) => (
                 <div
-                  key={ c._id }
-                  className={ `dropdown-item ${activeCategory === c._id ? "active" : ""}` }
-                  onClick={ () => handleFilter(c._id) }
+                  key={c._id}
+                  className={`dropdown-item ${activeCategory === c._id ? "active" : ""}`}
+                  onClick={() => handleFilter(c._id)}
                 >
-                  { c.name }
+                  {c.name}
                 </div>
-              )) }
+              ))}
             </div>
           </div>
-        ) }
+        )}
       </div>
 
-      {/* ================= PRODUCT LIST ================= */ }
-      { !isDiscovery && <div className="mt-6 rounded-xl bg-slate-50 p-5">
+      {/* ================= PRODUCT LIST ================= */}
+      {!isDiscovery && <div className="mt-6 rounded-xl bg-slate-50 p-5">
         <h2 className="text-lg font-semibold mb-3">Sản phẩm của shop</h2>
 
-        { loadingProducts ? (
+        {loadingProducts ? (
           <div>Loading products...</div>
         ) : products.length === 0 ? (
           <div>Shop chưa có sản phẩm</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            { products.map((product) => (
-              <ShopProductCard key={ product._id } product={ product } />
-            )) }
+            {products.map((product) => (
+              <ShopProductCard key={product._id} product={product} />
+            ))}
           </div>
-        ) }
+        )}
 
 
-        { pagination && pagination.totalPages > 1 && (
+        {pagination && pagination.totalPages > 1 && (
           <div
-            style={ {
+            style={{
               marginTop: 30,
               display: "flex",
               justifyContent: "center",
-            } }
+            }}
           >
             <div
-              style={ {
+              style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
@@ -221,34 +222,34 @@ export default function ShopDetailPage() {
                 border: "1px solid #ddd",
                 borderRadius: 10,
                 background: "#fff",
-              } }
+              }}
             >
-              {/* Nút Prev */ }
+              {/* Nút Prev */}
               <button
-                disabled={ page === 1 }
-                onClick={ () => fetchProducts(activeCategory, page - 1) }
-                style={ {
+                disabled={page === 1}
+                onClick={() => fetchProducts(activeCategory, page - 1)}
+                style={{
                   padding: "6px 10px",
                   borderRadius: 6,
                   border: "1px solid #ccc",
                   background: page === 1 ? "#f5f5f5" : "#fff",
                   cursor: page === 1 ? "not-allowed" : "pointer",
-                } }
+                }}
               >
-                { "<" }
+                {"<"}
               </button>
 
-              {/* Số trang */ }
-              { Array.from({ length: pagination.totalPages }, (_, index) => {
+              {/* Số trang */}
+              {Array.from({ length: pagination.totalPages }, (_, index) => {
                 const pageNumber = index + 1;
 
                 return (
                   <button
-                    key={ pageNumber }
-                    onClick={ () =>
+                    key={pageNumber}
+                    onClick={() =>
                       fetchProducts(activeCategory, pageNumber)
                     }
-                    style={ {
+                    style={{
                       padding: "6px 10px",
                       borderRadius: 6,
                       border:
@@ -262,18 +263,18 @@ export default function ShopDetailPage() {
                       fontWeight:
                         page === pageNumber ? "700" : "normal",
                       cursor: "pointer",
-                    } }
+                    }}
                   >
-                    { pageNumber }
+                    {pageNumber}
                   </button>
                 );
-              }) }
+              })}
 
-              {/* Nút Next */ }
+              {/* Nút Next */}
               <button
-                disabled={ page === pagination.totalPages }
-                onClick={ () => fetchProducts(activeCategory, page + 1) }
-                style={ {
+                disabled={page === pagination.totalPages}
+                onClick={() => fetchProducts(activeCategory, page + 1)}
+                style={{
                   padding: "6px 10px",
                   borderRadius: 6,
                   border: "1px solid #ccc",
@@ -285,16 +286,16 @@ export default function ShopDetailPage() {
                     page === pagination.totalPages
                       ? "not-allowed"
                       : "pointer",
-                } }
+                }}
               >
-                { ">" }
+                {">"}
               </button>
             </div>
           </div>
-        ) }
-      </div> }
+        )}
+      </div>}
 
-      { isDiscovery && <ShopBanner shopId={ shopId } /> }
+      {isDiscovery && <ShopBanner shopId={shopId} />}
     </div>
   );
 }
