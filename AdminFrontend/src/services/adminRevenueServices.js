@@ -11,3 +11,8 @@ export const fetchRevenueByShop = async (params = {}) => {
     const res = await axiosInstance.get("/api/admin/revenue/by-shop", { params });
     return res.data;
 };
+
+export const fetchRevenueByCategory = async (params = {}) => {
+    const res = await axiosInstance.get("/api/admin/revenue/category", { params });
+    return res.data;
+};
