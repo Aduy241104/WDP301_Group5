@@ -10,6 +10,7 @@ import uploadImageRoute from "./uploadImage.routes.js";
 import sellerManageInformationRoutes from "./sellerManageInformationRoutes.js";
 import sellerRequestRoute from "./sellerRequest.routes.js";
 import bannerRoute from "./banner.routes.js";
+import sellerBannerRoutes from "./sellerBanner.routes.js";
 import cartRoutes from "./cart.routes.js";
 import shopRoutes from "./shop.routes.js";
 import sellerManageProduct from "./sellerManageProductRoutes.js";
@@ -21,6 +22,10 @@ import orderRoutes from "./order.routes.js";
 import voucherRoutes from "./voucher.routes.js";
 import sellerManageCategoryRoutes from "./sellerManageCategoryRoutes.js";
 import shopFollowRoutes from "./shopFollow.routes.js";
+import adminBrandRoutes from "./adminBrand.routes.js"
+import getAdminCategories from "./adminCategory.routes.js";
+import adminUserAnalyticsRoutes from "./adminUserAnalytics.routes.js";
+import adminRevenueRoutes from "./adminRevenue.routes.js"
 import reviewRoutes from "./review.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
 import shopBannerRoutes from "./shopBanner.routes.js";
@@ -55,8 +60,16 @@ function route(app) {
     app.use("/api/upload", uploadImageRoute);
     app.use("/api/seller-request", sellerRequestRoute);
     app.use("/api/banners", bannerRoute);
+    app.use("/api/seller/banners", sellerBannerRoutes);
     app.use("/api/cart", cartRoutes);
     app.use("/api/shops", shopRoutes);
+    app.use("/api/admin/brands", adminBrandRoutes); 
+    app.use("/api/admin/Category", getAdminCategories); 
+    app.use("/api/admin/users", adminUserAnalyticsRoutes);
+    app.use("/api/admin/revenue", adminRevenueRoutes); 
+    
+
 }
 
 export default route;
+   
