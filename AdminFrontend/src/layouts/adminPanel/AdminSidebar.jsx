@@ -156,11 +156,6 @@ export default function AdminSidebar() {
                     }
                 />
 
-                {/* <div className="pt-3 pb-1">
-                    <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wide">
-                        Khác (demo)
-                    </div>
-                </div> */}
 
                 <NavItem
                     to="/admin/users"
@@ -182,7 +177,29 @@ export default function AdminSidebar() {
                         </svg>
                     }
                 />
-                <NavPlaceholder
+                <NavItem
+                    to="/admin/users/order-statistics"
+                    label="Thống kê đơn theo User"
+                    icon={
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M4 19h16"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                            />
+                            <path
+                                d="M6 15l3-4 3 3 4-6 2 3"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    }
+                />
+                <NavItem
+                    to="/admin/products"
                     label="Quản lý Sản phẩm"
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
