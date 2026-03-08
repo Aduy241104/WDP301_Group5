@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Order } from "../models/Order.js";
 import { Shop } from "../models/Shop.js";
+import { Product } from "../models/Product.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { Inventory } from "../models/Inventory.js";
 import dayjs from "dayjs";
@@ -186,9 +187,17 @@ export const updateOrderStatus = async (req, res) => {
     // 5️⃣ delivered logic
     if (status === "delivered") {
       order.deliveredAt = new Date();
+
       if (order.paymentMethod === "cod" && order.paymentStatus !== "paid") {
         order.paymentStatus = "paid";
         order.paidAt = new Date();
+      }
+
+      // ✅ tăng totalSale cho product
+      for (const item of order.items) {
+        await mongoose.model("Product").findByIdAndUpdate(item.productId, {
+          $inc: { totalSale: item.quantity },
+        });
       }
     }
 

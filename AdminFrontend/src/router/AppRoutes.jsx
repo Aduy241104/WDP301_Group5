@@ -18,10 +18,17 @@ import AdminBannerList from "../pages/AdminBannerList";
 import AdminBannerForm from "../pages/AdminBannerForm";
 import AdminReportList from "../pages/AdminReportList";
 import AdminReportDetail from "../pages/AdminReportDetail";
+
 import AdminRevenueAnalytics from "../pages/AdminRevenueAnalytics";
 import AdminUserOrderStatistics from "../pages/AdminUserOrderStatistics";
 import AdminProductList from "../pages/AdminProductList";
 import AdminProductDetail from "../pages/AdminProductDetail";
+
+
+import AdminBrandList from "../pages/AdminBrand/AdminBrandList";
+import AdminBrandForm from "../pages/AdminBrand/AdminBrandAddForm";
+import AdminBrandEditForm from "../pages/AdminBrand/AdminBrandEditForm"
+import AdminUserAnalytics from "../pages/AdminUserAnalytics"
 
 
 export default function AppRoutes() {
@@ -59,7 +66,12 @@ export default function AppRoutes() {
                         <Route path="banners/:bannerId/edit" element={<AdminBannerForm />} />
                         <Route path="reports" element={<AdminReportList />} />
                         <Route path="reports/:reportId" element={<AdminReportDetail />} />
-                        <Route path="revenue-analytics" element={<AdminRevenueAnalytics />} />
+                        <Route path="brands" element={<AdminBrandList />} />
+                        <Route path="brands/new" element={<AdminBrandForm />} />
+                        <Route path="brands/:brandId/edit" element={<AdminBrandEditForm />} />
+                        <Route path="useranalytics" element={<AdminUserAnalytics />} />
+                        <Route path="revenueanalytics" element={<AdminRevenueAnalytics/>} />
+
                     </Route>
                 </Route>
 

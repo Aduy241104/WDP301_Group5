@@ -117,5 +117,6 @@ router.post("/products/:productId/reject", AdminRejectProductController);
 router.post("/products/:productId/activate", AdminActivateProductController);
 router.post("/products/:productId/inactivate", AdminInactivateProductController);
 
+
 export default router;
 
