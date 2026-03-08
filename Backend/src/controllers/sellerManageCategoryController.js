@@ -27,6 +27,7 @@ export const getSellerCategories = async (req, res) => {
     }
 };
 
+// restore category after main revert
 /**
  * POST /api/seller/categories
  * Seller add new category

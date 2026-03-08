@@ -8,6 +8,7 @@ import { VoucherUsage } from "../models/VoucherUsage.js";
 import { Order } from "../models/Order.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { Shop } from "../models/Shop.js";
+import { Notification } from "../models/Notification.js";
 import {
     genOrderCode,
     money,
@@ -233,6 +234,19 @@ export async function createOrdersFromCartService({
                 paymentStatus: "unpaid",
                 orderStatus: "created",
                 statusHistory: [{ status: "created", changedAt: new Date() }],
+            });
+            // ⭐ TẠO NOTIFICATION CHO SELLER
+            await Notification.create({
+                userId: shopDoc.ownerId,
+                type: "order_status",
+                title: "Bạn có đơn hàng mới",
+                message: `Đơn ${orderDoc.orderCode} vừa được tạo`,
+                orderId: orderDoc._id,
+                data: {
+                    orderCode: orderDoc.orderCode,
+                    status: "created",
+                    url: `/seller/orders/${orderDoc._id}`,
+            },
             });
 
             await OrderAddressSnapshot.create([
