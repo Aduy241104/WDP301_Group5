@@ -25,18 +25,39 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
   useEffect(() => {
     const load = async () => {
       try {
-        const [brandList, categoryList] = await Promise.all([
-          getBrandsAPI(),
-          getCategorySchemasAPI(),
-        ]);
-        setBrands(brandList || []);
+        const categoryList = await getCategorySchemasAPI();
         setCategories(categoryList || []);
+
+        // ban đầu không tải brands, chờ người dùng chọn category
       } catch (e) {
-        console.error("Load brands/categories:", e);
+        console.error("Load categories:", e);
       }
     };
     load();
   }, []);
+
+  // khi seller chọn 1 danh mục mới, cập nhật brands tương ứng và reset brandId trong form
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const list = await getBrandsAPI(form.categorySchemaId);
+        setBrands(list || []);
+        // nếu brand hiện tại không thuộc danh sách mới thì xóa đi
+        if (form.brandId && !list.find((b) => b._id === form.brandId)) {
+          setForm((p) => ({ ...p, brandId: "" }));
+        }
+      } catch (e) {
+        console.error("Failed to load brands for category", e);
+      }
+    };
+    if (form.categorySchemaId) {
+      fetchBrands();
+    } else {
+      // nếu không chọn category thì cũng reset brands
+      setBrands([]);
+      setForm((p) => ({ ...p, brandId: "" }));
+    }
+  }, [form.categorySchemaId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,12 +76,8 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
         return;
       }
 
-      // Yêu cầu mỗi phân loại phải có giá và tồn kho
+      // chỉ yêu cầu tồn kho cho mỗi phân loại, giá có thể để trống
       for (const v of form.variants || []) {
-        if (v.price === "" || v.price == null) {
-          setError("Vui lòng nhập giá cho tất cả phân loại");
-          return;
-        }
         if (v.stock === "" || v.stock == null) {
           setError("Vui lòng nhập tồn kho cho tất cả phân loại");
           return;
@@ -88,7 +105,8 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
       // Áp dụng giá mặc định cho những variant không nhập giá
       const filledVariants = (form.variants || []).map((v) => {
         if (v.price !== "" && v.price != null) return v;
-        if (!defaultPrice) return v;
+        // nếu defaultPrice thiếu (vì validation cũ), trả về as-is
+        if (defaultPrice === "" || defaultPrice == null) return v;
         return { ...v, price: defaultPrice };
       });
 
@@ -98,7 +116,7 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
         variants: filledVariants,
       });
       if (variants.length === 0) {
-        setError("Sản phẩm phải có ít nhất 1 phân loại (giá bắt buộc)");
+        setError("Sản phẩm phải có ít nhất 1 phân loại");
         return;
       }
 
@@ -129,7 +147,7 @@ export default function SellerAddProduct({ onBack, onSuccess }) {
       setForm={setForm}
       onBack={onBack}
       onSubmit={handleSubmit}
-      variantHelpText="Mỗi dòng = 1 biến thể. SKU tự động tạo, không trùng."
+      variantHelpText="Mỗi dòng = 1 biến thể. SKU tự động tạo, không trùng. Giá để trống sẽ dùng giá mặc định."
       imageFiles={imageFiles}
       onImageFilesChange={setImageFiles}
       defaultPrice={defaultPrice}
