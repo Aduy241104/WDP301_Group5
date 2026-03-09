@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { SellerRequest } from "../models/SellerRequest.js";
 import { User } from "../models/User.js";
 import { Shop } from "../models/Shop.js";
+import { sendSellerRequestStatusEmail } from "../utils/mailer.js";
 
 // ============================================
 // SELLER REGISTRATION LIST
@@ -194,6 +195,20 @@ export const AdminApproveSellerController = async (req, res) => {
             await existingShop.save();
         }
 
+        // Send notification email to user
+        try {
+            await sendSellerRequestStatusEmail({
+                to: user.email,
+                fullName: user.fullName,
+                status: "approved",
+                rejectReason: "",
+                shopName: sellerRequest.shopName,
+            });
+        } catch (mailErr) {
+            // Log mail error but don't block main flow
+            console.error("ADMIN_APPROVE_SELLER_EMAIL_ERROR:", mailErr);
+        }
+
         return res.status(StatusCodes.OK).json({
             message: "Seller request approved.",
             sellerRequest,
@@ -233,6 +248,22 @@ export const AdminRejectSellerController = async (req, res) => {
         sellerRequest.status = "rejected";
         sellerRequest.rejectReason = rejectReason;
         await sellerRequest.save();
+
+        // Try to send notification email to user
+        try {
+            const user = await User.findById(sellerRequest.userId).lean();
+            if (user && user.email) {
+                await sendSellerRequestStatusEmail({
+                    to: user.email,
+                    fullName: user.fullName,
+                    status: "rejected",
+                    rejectReason,
+                    shopName: sellerRequest.shopName,
+                });
+            }
+        } catch (mailErr) {
+            console.error("ADMIN_REJECT_SELLER_EMAIL_ERROR:", mailErr);
+        }
 
         return res.status(StatusCodes.OK).json({
             message: "Seller request rejected.",

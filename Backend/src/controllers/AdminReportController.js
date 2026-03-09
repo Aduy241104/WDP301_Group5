@@ -69,9 +69,7 @@ export const AdminClassifyReportController = async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 message: `Invalid targetType. Must be one of: ${validTargetTypes.join(", ")}`,
             });
-        }
-
-        const query = { isDeleted: false };
+        }        const query = { isDeleted: false };
         if (targetType) {
             query.targetType = targetType;
         }

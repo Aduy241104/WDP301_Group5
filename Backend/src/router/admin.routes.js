@@ -41,6 +41,17 @@ import {
     AdminRevenueByShopController,
 } from "../controllers/AdminRevenueAnalyticsController.js";
 
+import { AdminUserOrderStatisticsController } from "../controllers/AdminUserOrderStatisticsController.js";
+
+import {
+    AdminProductListController,
+    AdminProductDetailController,
+    AdminApproveProductController,
+    AdminRejectProductController,
+    AdminActivateProductController,
+    AdminInactivateProductController,
+} from "../controllers/AdminProductController.js";
+
 const router = express.Router();
 
 // Apply auth + admin guard for all admin routes
@@ -94,6 +105,18 @@ router.get("/reports/classify", AdminClassifyReportController);
 // Revenue Analytics
 router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);
 router.get("/revenue/by-shop", AdminRevenueByShopController);
+
+// User order & cancellation statistics
+router.get("/users/order-statistics", AdminUserOrderStatisticsController);
+
+// Product management (admin)
+router.get("/products", AdminProductListController);
+router.get("/products/:productId", AdminProductDetailController);
+router.post("/products/:productId/approve", AdminApproveProductController);
+router.post("/products/:productId/reject", AdminRejectProductController);
+router.post("/products/:productId/activate", AdminActivateProductController);
+router.post("/products/:productId/inactivate", AdminInactivateProductController);
+
 
 export default router;
 
