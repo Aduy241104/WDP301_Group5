@@ -223,6 +223,12 @@ export const AdminApproveProductController = async (req, res) => {
 
         product.status = "approved";
         product.rejectReason = "";
+        // Khi duyệt, tự động kích hoạt sản phẩm nếu đang ở trạng thái inactive
+        product.activeStatus = "active";
+        product.inactiveBy = null;
+        product.inactiveReason = "";
+        product.inactiveAt = null;
+        product.inactiveActorId = null;
         product.publishedAt = product.publishedAt || new Date();
 
         await product.save();
