@@ -31,14 +31,17 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
       setLoading(true);
       setError("");
       try {
-        const [brandList, categoryList, detailRes] = await Promise.all([
-          getBrandsAPI(),
+        const [categoryList, detailRes] = await Promise.all([
           getCategorySchemasAPI(),
           getSellerProductDetailAPI(productId),
         ]);
 
-        setBrands(brandList || []);
         setCategories(categoryList || []);
+
+        // after we get detail, we can fetch brands filtered by existing category
+        const currentCategory = detailRes?.data?.categorySchemaId;
+        const brandList = await getBrandsAPI(currentCategory);
+        setBrands(brandList || []);
 
         const data = detailRes?.data;
         const incomingVariants = Array.isArray(data?.variants) ? data.variants : [];
@@ -71,6 +74,27 @@ export default function SellerUpdateProduct({ productId, onBack, onSuccess }) {
     };
     load();
   }, [productId]);
+
+  // khi danh mục thay đổi, cập nhật danh sách brands
+  useEffect(() => {
+    const updateBrands = async () => {
+      try {
+        const list = await getBrandsAPI(form.categorySchemaId);
+        setBrands(list || []);
+        if (form.brandId && !list.find((b) => b._id === form.brandId)) {
+          setForm((p) => ({ ...p, brandId: "" }));
+        }
+      } catch (err) {
+        console.error("Load brands for category change", err);
+      }
+    };
+    if (form.categorySchemaId) {
+      updateBrands();
+    } else {
+      setBrands([]);
+      setForm((p) => ({ ...p, brandId: "" }));
+    }
+  }, [form.categorySchemaId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

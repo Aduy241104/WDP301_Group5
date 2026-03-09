@@ -20,8 +20,10 @@ export const updateSellerProductAPI = async (productId, payload) => {
   return res.data;
 };
 
-export const getBrandsAPI = async () => {
-  const res = await axiosInstance.get("/api/seller/brands");
+export const getBrandsAPI = async (categoryId) => {
+  const params = {};
+  if (categoryId) params.categoryId = categoryId;
+  const res = await axiosInstance.get("/api/seller/brands", { params });
   return res.data?.data || [];
 };
 
