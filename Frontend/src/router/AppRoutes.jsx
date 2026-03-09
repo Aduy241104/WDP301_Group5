@@ -32,6 +32,7 @@ import ShopDetailPage from "../pages/ShopDetailPage";
 import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
 import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
 import WishlistPage from "../pages/WishlistPage";
+import Notifications from "../pages/Seller/Notifications/Notifications";
 
 export default function AppRoutes() {
   return (
@@ -99,6 +100,7 @@ export default function AppRoutes() {
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
+          <Route path="notifications" element={<Notifications />} />
         </Route>
       </Route>
 

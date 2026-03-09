@@ -18,11 +18,18 @@ import AdminBannerList from "../pages/AdminBannerList";
 import AdminBannerForm from "../pages/AdminBannerForm";
 import AdminReportList from "../pages/AdminReportList";
 import AdminReportDetail from "../pages/AdminReportDetail";
+
+import AdminRevenueAnalytics from "../pages/AdminRevenueAnalytics";
+import AdminUserOrderStatistics from "../pages/AdminUserOrderStatistics";
+import AdminProductList from "../pages/AdminProductList";
+import AdminProductDetail from "../pages/AdminProductDetail";
+
+
 import AdminBrandList from "../pages/AdminBrand/AdminBrandList";
 import AdminBrandForm from "../pages/AdminBrand/AdminBrandAddForm";
 import AdminBrandEditForm from "../pages/AdminBrand/AdminBrandEditForm"
 import AdminUserAnalytics from "../pages/AdminUserAnalytics"
-import AdminRevenueAnalytics from "../pages/AdminRevenueAnalytics"
+
 
 export default function AppRoutes() {
     return (
@@ -51,6 +58,9 @@ export default function AppRoutes() {
                         <Route path="shops/:shopId" element={<AdminShopDetail />} />
                         <Route path="users" element={<AdminUserList />} />
                         <Route path="users/:userId" element={<AdminUserProfile />} />
+                        <Route path="users/order-statistics" element={<AdminUserOrderStatistics />} />
+                        <Route path="products" element={<AdminProductList />} />
+                        <Route path="products/:productId" element={<AdminProductDetail />} />
                         <Route path="banners" element={<AdminBannerList />} />
                         <Route path="banners/new" element={<AdminBannerForm />} />
                         <Route path="banners/:bannerId/edit" element={<AdminBannerForm />} />
@@ -61,6 +71,7 @@ export default function AppRoutes() {
                         <Route path="brands/:brandId/edit" element={<AdminBrandEditForm />} />
                         <Route path="useranalytics" element={<AdminUserAnalytics />} />
                         <Route path="revenueanalytics" element={<AdminRevenueAnalytics/>} />
+
                     </Route>
                 </Route>
 

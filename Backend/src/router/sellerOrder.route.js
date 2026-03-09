@@ -19,7 +19,7 @@ const router = express.Router();
 
 router.use(authenticationMiddleware, sellerMiddleware);
 router.get("/", getOrders);
-router.get("/dashboard/stats", getDashboardStats, authenticationMiddleware, sellerMiddleware);
+router.get("/dashboard/stats", getDashboardStats);
 router.get("/:id/pickup-addresses", getOrderPickupAddresses);
 router.get("/:id", getOrderDetail);
 
