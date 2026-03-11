@@ -7,9 +7,15 @@ const NotificationDataSchema = new Schema(
     orderCode: { type: String, default: "" },
     status: {
       type: String,
-      enum: ["created", "confirmed", "shipped", "delivered", "cancelled"],
+      enum: ["created", "confirmed", "shipped", "delivered", "cancelled", null],
+      default: null,
     },
     url: { type: String, default: "" },
+
+    // thêm cho report result
+    reportCode: { type: String, default: "" },
+    reportResult: { type: String, default: "" },
+    reportReason: { type: String, default: "" },
   },
   { _id: false },
 );
@@ -23,11 +29,32 @@ const NotificationSchema = new Schema(
       index: true,
     },
 
-    type: { type: String, enum: ["order_status"], required: true, index: true },
+    type: {
+      type: String,
+      enum: ["order_status", "system", "report_result"],
+      required: true,
+      index: true,
+    },
+
     title: { type: String, required: true },
     message: { type: String, required: true },
 
     orderId: { type: Schema.Types.ObjectId, ref: "Order", index: true },
+
+    // thêm cho report
+    reportId: { type: Schema.Types.ObjectId, ref: "Report", default: null, index: true },
+
+    // thêm để biết notification này nhắm tới ai
+    targetRole: {
+      type: String,
+      enum: ["customer", "seller", "admin", null],
+      default: null,
+      index: true,
+    },
+
+    // thêm để đánh dấu gửi hàng loạt cho seller
+    isBroadcast: { type: Boolean, default: false, index: true },
+
     data: { type: NotificationDataSchema, default: null },
 
     isRead: { type: Boolean, default: false, index: true },
