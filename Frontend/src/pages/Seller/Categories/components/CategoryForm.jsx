@@ -7,7 +7,8 @@ export default function CategoryForm({
 }) {
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit();
+    // forward the event so the parent can also prevent default if needed
+    onSubmit(e);
   };
 
   return (
