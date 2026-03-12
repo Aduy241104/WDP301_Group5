@@ -3,11 +3,21 @@ import {
     getSellerInventoryList,
     getSellerProductInventory,
     updateInventoryStock,
+    getSellerInventoryStatistics,
 } from "../controllers/sellerInventoryController.js";
 import { authenticationMiddleware, sellerMiddleware } from "../middlewares/authenticationMiddlewares.js";
 import { checkApprovedShop } from "../middlewares/checkApprovedShope.js";
 
 const router = express.Router();
+
+// statistics overview
+router.get(
+    "/statistics",
+    authenticationMiddleware,
+    sellerMiddleware,
+    checkApprovedShop,
+    getSellerInventoryStatistics
+);
 
 // view list
 router.get(

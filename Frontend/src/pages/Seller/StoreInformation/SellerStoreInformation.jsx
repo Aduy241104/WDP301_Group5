@@ -69,6 +69,8 @@ export default function SellerStoreInformation() {
   const [successMessage, setSuccessMessage] = useState('');
   const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState(mapDataToForm(null));
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   useEffect(() => {
     fetchStoreInfo();
@@ -93,6 +95,22 @@ export default function SellerStoreInformation() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // if editing avatar URL update preview
+    if (name === 'avatar') {
+      setAvatarPreview(value);
+      setAvatarFile(null);
+    }
+  };
+
+  const handleAvatarFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setFormData((prev) => ({ ...prev, avatar: '' }));
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    }
   };
 
   const handleAddressChange = (e) => {
@@ -121,9 +139,10 @@ export default function SellerStoreInformation() {
       setSaving(true);
       setError(null);
       setSuccessMessage('');
-      await updateStoreInformationAPI(formData);
+      await updateStoreInformationAPI(formData, avatarFile);
       setSuccessMessage('Cập nhật thông tin cửa hàng thành công!');
       setIsEditing(false);
+      setAvatarFile(null);
       await fetchStoreInfo();
     } catch (err) {
       setError(err.response?.data?.message || 'Không thể cập nhật thông tin cửa hàng');
@@ -134,6 +153,8 @@ export default function SellerStoreInformation() {
 
   const handleCancel = () => {
     if (originalData) setFormData(mapDataToForm(originalData));
+    setAvatarFile(null);
+    setAvatarPreview(originalData?.avatar || '');
     setIsEditing(false);
     setError(null);
   };
@@ -144,6 +165,22 @@ export default function SellerStoreInformation() {
     { name: 'ward', label: 'Phường/Xã' },
     { name: 'streetAddress', label: 'Số nhà, đường', placeholder: 'Số 123, Đường ABC' },
   ];
+
+  // keep preview in sync with original data
+  useEffect(() => {
+    if (originalData) {
+      setAvatarPreview(originalData.avatar || '');
+    }
+  }, [originalData]);
+
+  useEffect(() => {
+    return () => {
+      // revoke any object URL we created
+      if (avatarPreview && avatarFile) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview, avatarFile]);
 
   if (loading) {
     return (
@@ -246,19 +283,20 @@ export default function SellerStoreInformation() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              <FormInput
-                label="URL Ảnh đại diện"
-                name="avatar"
-                type="url"
-                value={formData.avatar}
-                onChange={handleChange}
-                placeholder="https://example.com/avatar.jpg"
-              />
-              {formData.avatar && (
+              <div className="mt-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarFileChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+              </div>
+
+              {(avatarPreview || avatarFile) && (
                 <img
-                  src={formData.avatar}
+                  src={avatarPreview}
                   alt="Preview"
-                  className="w-24 h-24 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
+                  className="w-24 h-24 rounded-lg object-cover border-2 border-gray-200 shadow-sm mt-2"
                   onError={(e) => (e.target.style.display = 'none')}
                 />
               )}

@@ -6,7 +6,6 @@ export const checkApprovedShop = async (req, res, next) => {
             ownerId: req.user.id,
             isDeleted: false,
         });
-
         if (!shop) {
             return res.status(404).json({
                 message: "Không tìm thấy cửa hàng",

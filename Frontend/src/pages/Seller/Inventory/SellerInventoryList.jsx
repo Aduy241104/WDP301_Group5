@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSellerInventoriesAPI } from "../../../services/sellerInventory.service";
+import { getSellerInventoriesAPI, getSellerInventoryStatisticsAPI } from "../../../services/sellerInventory.service";
 
 export default function SellerInventoryList({ onView }) {
   const [items, setItems] = useState([]);
@@ -13,6 +13,18 @@ export default function SellerInventoryList({ onView }) {
     totalPages: 1,
   });
   const [keyword, setKeyword] = useState("");
+  const [lowStockThreshold, setLowStockThreshold] = useState(5);
+  const [sortStock, setSortStock] = useState(""); // "asc" | "desc" or empty
+  const [stats, setStats] = useState({
+    totalStock: 0,
+    productCount: 0,
+    variantCount: 0,
+    lowStockCount: 0,
+    outOfStockVariantCount: 0,
+    outOfStockProductCount: 0,
+    inventoryValue: 0,
+    avgStockPerVariant: 0,
+  });
 
   useEffect(() => {
     const fetch = async () => {
@@ -21,6 +33,7 @@ export default function SellerInventoryList({ onView }) {
         setLoading(true);
         const params = { page, limit: pagination.limit };
         if (keyword.trim()) params.keyword = keyword.trim();
+        if (sortStock) params.sortStock = sortStock;
         const res = await getSellerInventoriesAPI(params);
 
         setItems(res?.data || []);
@@ -34,7 +47,29 @@ export default function SellerInventoryList({ onView }) {
       }
     };
     fetch();
-  }, [page, pagination.limit, keyword]);
+  }, [page, pagination.limit, keyword, sortStock]);
+
+  // statistics fetch (independent of pagination)
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await getSellerInventoryStatisticsAPI({ lowStockThreshold });
+        setStats({
+          totalStock: res.totalStock || 0,
+          productCount: res.productCount || 0,
+          variantCount: res.variantCount || 0,
+          lowStockCount: res.lowStockCount || 0,
+          outOfStockVariantCount: res.outOfStockVariantCount || 0,
+          outOfStockProductCount: res.outOfStockProductCount || 0,
+          inventoryValue: res.inventoryValue || 0,
+          avgStockPerVariant: res.avgStockPerVariant || 0,
+        });
+      } catch (e) {
+        // ignore errors silently or you could display somewhere
+      }
+    };
+    fetchStats();
+  }, [lowStockThreshold]);
 
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200">
@@ -48,6 +83,53 @@ export default function SellerInventoryList({ onView }) {
             onChange={(e) => setKeyword(e.target.value)}
             className="px-3 py-2 border rounded-lg"
           />
+          <div className="flex items-center">
+            <label className="text-sm mr-1">Ngưỡng tồn thấp:</label>
+            <input
+              type="number"
+              min="0"
+              value={lowStockThreshold}
+              onChange={(e) => setLowStockThreshold(Number(e.target.value))}
+              className="w-16 px-2 py-1 border rounded-lg"
+            />
+          </div>
+          <div className="flex items-center ml-4">
+            <label className="text-sm mr-1">Sắp xếp:</label>
+            <select
+              value={sortStock}
+              onChange={(e) => setSortStock(e.target.value)}
+              className="px-2 py-1 border rounded-lg"
+            >
+              <option value="">Mặc định</option>
+              <option value="asc">Tồn tăng</option>
+              <option value="desc">Tồn giảm</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* statistics badges */}
+      <div className="flex flex-wrap gap-4 mb-6 text-sm">
+        <div className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg">
+          Sản phẩm: <strong>{stats.productCount}</strong>
+        </div>
+        <div className="px-3 py-2 bg-green-50 text-green-700 rounded-lg">
+          Tổng tồn: <strong>{stats.totalStock}</strong>
+        </div>
+        <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg">
+          Phân loại: <strong>{stats.variantCount}</strong>
+        </div>
+        <div className="px-3 py-2 bg-red-50 text-red-700 rounded-lg">
+          Tồn thấp (&le;5): <strong>{stats.lowStockCount}</strong>
+        </div>
+        <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg">
+          Hết hàng variant: <strong>{stats.outOfStockVariantCount}</strong>
+        </div>
+        <div className="px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg">
+          Hết hàng sản phẩm: <strong>{stats.outOfStockProductCount}</strong>
+        </div>
+        <div className="px-3 py-2 bg-purple-50 text-purple-700 rounded-lg">
+          Giá trị tồn kho: <strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.inventoryValue)}</strong>
         </div>
       </div>
 
