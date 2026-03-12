@@ -234,21 +234,59 @@ export default function AdminProductDetail() {
                     <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
                         <div className="h-1.5 bg-emerald-400" />
                         <div className="p-5 sm:p-6 space-y-4">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-900 mb-1">
-                                        {product.name}
-                                    </h2>
-                                    <div className="text-sm text-slate-600">
-                                        Brand: {product.brandId?.name ?? "—"}
+                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                                {/* Left: Thumbnail / Images */}
+                                <div className="w-full max-w-xs">
+                                    <div className="aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center">
+                                        {Array.isArray(product.images) && product.images.length > 0 ? (
+                                            <img
+                                                src={product.images[0]}
+                                                alt={product.name}
+                                                className="h-full w-full object-contain"
+                                            />
+                                        ) : (
+                                            <div className="text-xs text-slate-400 text-center px-4">
+                                                Chưa có hình ảnh cho sản phẩm này
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="text-sm text-slate-600">
-                                        Shop: {product.shopId?.name ?? "—"}
-                                    </div>
+                                    {Array.isArray(product.images) && product.images.length > 1 && (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {product.images.slice(1, 5).map((img, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="w-14 h-14 rounded-xl border border-slate-200 overflow-hidden bg-slate-50"
+                                                >
+                                                    <img
+                                                        src={img}
+                                                        alt={`${product.name} - ${idx + 2}`}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                    <StatusPill status={product.status} />
-                                    <ActiveStatusPill status={product.activeStatus} />
+
+                                {/* Right: Basic info */}
+                                <div className="flex-1 space-y-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                        <div>
+                                            <h2 className="text-lg font-bold text-slate-900 mb-1">
+                                                {product.name}
+                                            </h2>
+                                            <div className="text-sm text-slate-600">
+                                                Brand: {product.brandId?.name ?? "—"}
+                                            </div>
+                                            <div className="text-sm text-slate-600">
+                                                Shop: {product.shopId?.name ?? "—"}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <StatusPill status={product.status} />
+                                            <ActiveStatusPill status={product.activeStatus} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
