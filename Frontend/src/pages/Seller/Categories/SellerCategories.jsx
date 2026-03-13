@@ -109,7 +109,11 @@ export default function SellerCategories() {
   }, []);
 
   const handleAdd = async (e) => {
-    e.preventDefault();
+    // event may or may not be passed depending on caller
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+
     if (!name.trim()) return;
     setSubmitting(true);
     setError("");
