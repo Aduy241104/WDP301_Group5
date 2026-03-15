@@ -32,7 +32,8 @@ import shopBannerRoutes from "./shopBanner.routes.js";
 import sellerInventoryRoutes from "./sellerInventoryRoutes.js";
 import sellerDashboardRoutes from "./sellerDashboardRoutes.js";
 import notificationRoutes from "./notification.routes.js";
-
+import reportRouter from "./reportRouter.js";
+import sellerReportRouter from "./sellerReport.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -71,7 +72,8 @@ function route(app) {
     app.use("/api/admin/Category", getAdminCategories); 
     app.use("/api/admin/users", adminUserAnalyticsRoutes);
     app.use("/api/admin/revenue", adminRevenueRoutes); 
-    
+    app.use("/api/report", reportRouter);
+    app.use("/api/seller/reports", sellerReportRouter);
 
 }
 

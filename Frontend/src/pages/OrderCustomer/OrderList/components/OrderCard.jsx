@@ -109,10 +109,10 @@ export default function OrderCard({
                     {/* Trả hàng */ }
                     { order?.orderStatus === "delivered" && (
                         <button
-                            onClick={ () => navigate(`/order-detail/${order._id}`) }
+                            onClick={ () => navigate(`/report/${order._id}`) }
                             className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-900 hover:text-slate-900"
                         >
-                            Yêu cầu trả hàng
+                            Khiếu nại
                         </button>
                     ) }
                 </div>
