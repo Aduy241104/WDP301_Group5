@@ -10,14 +10,20 @@ import {
   Star,
   Bell,
   Image,
+  Users,
 } from "lucide-react";
 
 const menu = [
   { label: "Dashboard", to: "/seller", icon: LayoutDashboard },
   { label: "Store Information", to: "/seller/store-information", icon: Store },
-  { label: "Manage Pickup Address", to: "/seller/pickup-addresses", icon: Store },
+  {
+    label: "Manage Pickup Address",
+    to: "/seller/pickup-addresses",
+    icon: Store,
+  },
   { label: "Categories", to: "/seller/categories", icon: Boxes },
   { label: "Products", to: "/seller/products", icon: Package },
+  { label: "Followers", to: "/seller/followers", icon: Users },
   { label: "Banners", to: "/seller/banners", icon: Image },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },

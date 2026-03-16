@@ -15,16 +15,20 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [trackingCode, setTrackingCode] = useState("");
 
   useEffect(() => {
     fetchOrders();
-  }, [status, keyword, trackingCode]);
+  }, [status, keyword]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const data = await getSellerOrdersAPI({ status, keyword, trackingCode });
+
+      const params = {};
+      if (keyword.trim()) params.keyword = keyword.trim();
+      if (status) params.status = status;
+
+      const data = await getSellerOrdersAPI(params);
       setOrders(data || []);
     } catch (err) {
       console.error(err);
@@ -34,42 +38,33 @@ export default function OrderList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white p-6 rounded-xl border border-gray-200">
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Orders</h2>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/seller/orders/cancelled"
-            className="text-sm bg-red-50 text-red-700 px-3 py-2 rounded-lg hover:bg-red-100"
-          >
-            View Cancelled Orders
-          </Link>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-800">Orders</h2>
+
+        <Link
+          to="/seller/orders/cancelled"
+          className="text-sm px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100"
+        >
+          View Cancelled Orders
+        </Link>
       </div>
 
       {/* FILTER */}
-      <div className="bg-white rounded-xl shadow p-4 flex flex-wrap gap-3">
+      <div className="flex gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search by order code..."
-          className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          placeholder="Search order code..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Search by tracking code..."
-          className="border px-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          value={trackingCode}
-          onChange={(e) => setTrackingCode(e.target.value)}
+          className="px-3 py-2 border rounded-lg w-64"
         />
 
         <select
-          className="border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
+          className="px-3 py-2 border rounded-lg"
         >
           <option value="">All status</option>
           <option value="created">Created</option>
@@ -81,64 +76,70 @@ export default function OrderList() {
       </div>
 
       {/* CONTENT */}
-      {loading && (
-        <div className="text-slate-500">Loading orders...</div>
-      )}
-
-      {!loading && orders.length === 0 && (
-        <div className="bg-white rounded-xl shadow p-6 text-slate-500">
+      {loading ? (
+        <div className="py-12 text-center text-gray-500">Loading orders...</div>
+      ) : orders.length === 0 ? (
+        <div className="py-12 text-center text-gray-500">
           No orders found
         </div>
-      )}
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left px-4 py-3 font-semibold">Order Code</th>
+                <th className="text-left px-4 py-3 font-semibold">Status</th>
+                <th className="text-left px-4 py-3 font-semibold">Payment</th>
+                <th className="text-left px-4 py-3 font-semibold">Created</th>
+                <th className="text-right px-4 py-3 font-semibold">Amount</th>
+                <th className="text-right px-4 py-3 font-semibold">Action</th>
+              </tr>
+            </thead>
 
-      {!loading && orders.length > 0 && (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div
-              key={order._id}
-              className="bg-white rounded-xl shadow p-5 flex justify-between items-center hover:shadow-md transition"
-            >
-              {/* LEFT */}
-              <div className="space-y-2">
-                <div className="font-semibold text-lg">
-                  {order.orderCode}
-                </div>
-
-                <div className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`px-3 py-1 rounded-full font-medium ${
-                      STATUS_STYLES[order.orderStatus]
-                    }`}
-                  >
-                    {order.orderStatus}
-                  </span>
-
-                  <span className="text-slate-500">
-                    {order.paymentStatus}
-                  </span>
-                </div>
-
-                <div className="text-sm text-slate-500">
-                  Created:{" "}
-                  {new Date(order.createdAt).toLocaleString()}
-                </div>
-              </div>
-
-              {/* RIGHT */}
-              <div className="text-right space-y-2">
-                <div className="text-lg font-bold">
-                  {order.totalAmount.toLocaleString()}đ
-                </div>
-
-                <Link
-                  to={`/seller/orders/${order._id}`}
-                  className="inline-block text-sm text-indigo-600 hover:underline"
+            <tbody>
+              {orders.map((order) => (
+                <tr
+                  key={order._id}
+                  className="border-b border-gray-100 hover:bg-gray-50"
                 >
-                  View detail →
-                </Link>
-              </div>
-            </div>
-          ))}
+                  <td className="px-4 py-3 font-medium">
+                    {order.orderCode}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        STATUS_STYLES[order.orderStatus]
+                      }`}
+                    >
+                      {order.orderStatus}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-600">
+                    {order.paymentStatus}
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-500">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </td>
+
+                  <td className="px-4 py-3 text-right font-semibold text-indigo-600">
+                    {order.totalAmount.toLocaleString()}đ
+                  </td>
+
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      to={`/seller/orders/${order._id}`}
+                      className="px-3 py-1.5 rounded-lg border border-indigo-300 hover:bg-indigo-50 text-sm font-medium hover:text-indigo-700"
+                    >
+                      View detail
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

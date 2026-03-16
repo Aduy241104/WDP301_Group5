@@ -35,6 +35,8 @@ import WishlistPage from "../pages/WishlistPage";
 import Notifications from "../pages/Seller/Notifications/Notifications";
 import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
 import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
+import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -105,6 +107,8 @@ export default function AppRoutes() {
           <Route path="orders/:id" element={<OrderDetail />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="reports/:reportId" element={<SellerReportDetail />} />
+          <Route path="followers" element={<SellerFollowers />} />
+        
         </Route>
       </Route>
 
