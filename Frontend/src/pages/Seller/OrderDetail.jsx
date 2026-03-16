@@ -24,7 +24,7 @@ const StatusBadge = ({ status }) => {
         map[status] || "bg-gray-100 text-gray-700"
       }`}
     >
-      {status.toUpperCase()}
+      {status?.toUpperCase()}
     </span>
   );
 };
@@ -61,12 +61,12 @@ export default function OrderDetail() {
         getSellerOrderDetailAPI(id),
         getOrderPickupAddressesAPI(id),
       ]);
-      
+
       setOrder(orderData);
-      
+
       const addresses = addressesData.pickupAddresses || [];
       setPickupAddresses(addresses);
-      
+
       const defaultAddr = addresses.find((a) => a.isDefault);
       if (defaultAddr) setSelectedPickupId(defaultAddr._id);
     } catch (err) {
@@ -78,6 +78,7 @@ export default function OrderDetail() {
 
   const updateStatus = async (status) => {
     setUpdating(true);
+
     try {
       if (status === "cancelled") {
         await cancelSellerOrderAPI(id);
@@ -107,7 +108,9 @@ export default function OrderDetail() {
   if (!order) return <p>Order not found</p>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
+
+      {/* BACK */}
       <Link to="/seller/orders" className="text-blue-600 underline">
         ← Back to orders
       </Link>
@@ -115,166 +118,262 @@ export default function OrderDetail() {
       {/* ORDER INFO */}
       <Section title={`Order ${order.orderCode}`}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+
           <div>
             <div className="text-slate-500">Status</div>
             <StatusBadge status={order.orderStatus} />
           </div>
+
           <div>
             <div className="text-slate-500">Payment</div>
             <div className="font-medium">{order.paymentStatus}</div>
           </div>
+
           <div>
             <div className="text-slate-500">Total</div>
-            <div className="font-semibold text-lg">
+            <div className="font-semibold text-lg text-indigo-600">
               {order.totalAmount.toLocaleString()}đ
             </div>
           </div>
+
           <div>
             <div className="text-slate-500">Created</div>
             <div>{new Date(order.createdAt).toLocaleString()}</div>
           </div>
+
         </div>
       </Section>
 
       {/* ITEMS */}
-      <Section title="Items">
-        {order.items.map((item, i) => (
-          <div
-            key={i}
-            className="flex justify-between items-center py-3 border-b last:border-b-0"
-          >
-            <div>
-              <div className="font-medium">{item.productName}</div>
-              <div className="text-xs text-slate-500">
-                {item.variantLabel} × {item.quantity}
+      <Section title="Order Items">
+
+        <div className="space-y-4">
+
+          {order.items.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between border rounded-xl p-4 hover:bg-gray-50"
+            >
+
+              <div className="flex items-center gap-4">
+
+                {/* IMAGE */}
+                <div className="w-20 h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0">
+                  {item.productId?.images?.[0] ? (
+                    <img
+                      src={item.productId.images[0]}
+                      alt={item.productName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                {/* PRODUCT INFO */}
+                <div>
+                  <div className="font-semibold text-gray-800">
+                    {item.productName}
+                  </div>
+
+                  {item.variantLabel && (
+                    <div className="text-sm text-gray-500">
+                      Variant: {item.variantLabel}
+                    </div>
+                  )}
+
+                  <div className="text-sm text-gray-500">
+                    Quantity: {item.quantity}
+                  </div>
+                </div>
+
               </div>
+
+              {/* PRICE */}
+              <div className="text-right">
+
+                <div className="text-sm text-gray-500">
+                  {item.price.toLocaleString()}đ
+                </div>
+
+                <div className="font-semibold text-lg text-indigo-600">
+                  {(item.price * item.quantity).toLocaleString()}đ
+                </div>
+
+              </div>
+
             </div>
-            <div className="font-semibold">
-              {(item.price * item.quantity).toLocaleString()}đ
+          ))}
+
+        </div>
+
+      </Section>
+
+      {/* ORDER SUMMARY */}
+      <Section title="Order Summary">
+
+        <div className="space-y-2 text-sm">
+
+          <div className="flex justify-between">
+            <span className="text-gray-500">Subtotal</span>
+            <span>{order.subtotal.toLocaleString()}đ</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-500">Shipping Fee</span>
+            <span>{order.shippingFee.toLocaleString()}đ</span>
+          </div>
+
+          {order.voucher && (
+            <div className="flex justify-between text-green-600">
+              <span>Voucher ({order.voucher.code})</span>
+              <span>-{order.voucher.appliedDiscountAmount.toLocaleString()}đ</span>
+            </div>
+          )}
+
+          <div className="border-t pt-2 flex justify-between font-semibold text-lg">
+            <span>Total</span>
+            <span className="text-indigo-600">
+              {order.totalAmount.toLocaleString()}đ
+            </span>
+          </div>
+
+        </div>
+
+      </Section>
+
+      {/* SHIPPING INFO */}
+      <Section title="Shipping Information">
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <div className="text-gray-500">Tracking Code</div>
+            <div className="font-medium">
+              {order.trackingCode || "Not shipped yet"}
             </div>
           </div>
-        ))}
+
+          <div>
+            <div className="text-gray-500">Payment Method</div>
+            <div className="font-medium">
+              {order.paymentMethod || "N/A"}
+            </div>
+          </div>
+
+        </div>
+
       </Section>
 
       {/* CONFIRM / CANCEL */}
       {order.orderStatus === "created" && (
-        <Section
-          title="Order Actions"
-          desc="Select pickup address, then confirm the order to proceed with shipping."
-        >
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Pickup Address</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-                value={selectedPickupId}
-                onChange={(e) => setSelectedPickupId(e.target.value)}
-              >
-                <option value="">-- Select pickup address --</option>
-                {pickupAddresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.fullAddress} {addr.isDefault ? "(Default)" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <Section title="Order Actions">
 
-            <div className="flex gap-3 pt-2">
+          <div className="space-y-3">
+
+            <select
+              className="w-full px-3 py-2 border rounded-lg"
+              value={selectedPickupId}
+              onChange={(e) => setSelectedPickupId(e.target.value)}
+            >
+              <option value="">Select pickup address</option>
+
+              {pickupAddresses.map((addr) => (
+                <option key={addr._id} value={addr._id}>
+                  {addr.fullAddress}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex gap-3">
+
               <button
                 onClick={() => updateStatus("confirmed")}
                 disabled={!selectedPickupId || updating}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                ✅ Confirm Order
+                Confirm Order
               </button>
 
               <button
                 onClick={() => updateStatus("cancelled")}
                 disabled={updating}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 disabled:opacity-50 transition"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
-                ❌ Cancel Order
+                Cancel Order
               </button>
+
             </div>
+
           </div>
+
         </Section>
       )}
 
       {/* SHIPPING */}
       {order.orderStatus === "confirmed" && (
-        <Section
-          title="Shipping Information"
-          desc="Select pickup address and enter the tracking code provided by the shipping carrier."
-        >
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Pickup Address</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-                value={selectedPickupId}
-                onChange={(e) => setSelectedPickupId(e.target.value)}
-              >
-                <option value="">-- Select pickup address --</option>
-                {pickupAddresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.fullAddress} {addr.isDefault ? "(Default)" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <Section title="Shipping">
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Tracking Code</label>
-              <input
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Tracking code (e.g. GHN123456)"
-                value={trackingCode}
-                onChange={(e) => setTrackingCode(e.target.value)}
-              />
-            </div>
+          <div className="space-y-3">
+
+            <input
+              placeholder="Tracking code"
+              className="w-full px-3 py-2 border rounded-lg"
+              value={trackingCode}
+              onChange={(e) => setTrackingCode(e.target.value)}
+            />
 
             <button
               onClick={() => updateStatus("shipped")}
-              disabled={!trackingCode || !selectedPickupId || updating}
-              className="px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 disabled:opacity-50 transition"
+              disabled={!trackingCode || updating}
+              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
             >
-              🚚 Mark as Shipped
+              Mark as Shipped
             </button>
+
           </div>
+
         </Section>
       )}
 
       {/* DELIVERY */}
       {order.orderStatus === "shipped" && (
-        <Section
-          title="Delivery Confirmation"
-          desc="Confirm that the order has been successfully delivered to the customer."
-        >
+        <Section title="Delivery Confirmation">
+
           <button
             onClick={() => updateStatus("delivered")}
             disabled={updating}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 disabled:opacity-50 transition"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
-            📦 Mark as Delivered
+            Mark as Delivered
           </button>
+
         </Section>
       )}
 
       {/* STATUS HISTORY */}
       <Section title="Status History">
+
         <ul className="space-y-2 text-sm">
+
           {order.statusHistory.map((h, i) => (
-            <li key={i} className="flex items-center justify-between text-slate-600">
-              <div className="flex items-center gap-3">
-                <StatusBadge status={h.status} />
-                <span className="text-sm text-slate-500">
-                  {new Date(h.changedAt).toLocaleString()}
-                </span>
-              </div>
+            <li key={i} className="flex justify-between">
+
+              <StatusBadge status={h.status} />
+
+              <span className="text-gray-500">
+                {new Date(h.changedAt).toLocaleString()}
+              </span>
+
             </li>
           ))}
+
         </ul>
+
       </Section>
+
     </div>
   );
 }
