@@ -147,12 +147,12 @@ export default function ShopDetailPage() {
       {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filter">
 
-        {/* <button
+        <button
           className={ `filter-btn ${isDiscovery ? "active" : ""}` }
           onClick={ () => setDiscovery(true) }
         >
           Dạo
-        </button> */}
+        </button>
         <button
           className={`filter-btn ${activeCategory === "all" ? "active" : ""}`}
           onClick={() => handleFilter("all")}

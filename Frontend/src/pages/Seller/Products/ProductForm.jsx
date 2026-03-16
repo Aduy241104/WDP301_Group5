@@ -23,6 +23,22 @@ export default function ProductForm({
 
   const setFormField = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
+  const removeImageUrl = (idx) =>
+    setForm((p) => {
+      const arr = (p.images || []).filter((_, i) => i !== idx);
+      return { ...p, images: arr };
+    });
+
+  // remove a selected file before upload
+  const removeImageFile = (idx) => {
+    if (!onImageFilesChange) return;
+    const newFiles = (imageFiles || []).filter((_, i) => i !== idx);
+    onImageFilesChange(newFiles);
+  };
+
+  // preview arrays
+  const existingUrls = (form.images || []).filter(Boolean);
+
   const addRow = (key, empty) =>
     setForm((p) => ({ ...p, [key]: [...p[key], empty] }));
   const removeRow = (key, idx) =>
@@ -90,21 +106,6 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
-            <select
-              value={form.brandId}
-              onChange={(e) => setFormField("brandId", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
-            >
-              <option value="">-- Chọn thương hiệu --</option>
-              {brands.map((b) => (
-                <option key={b._id} value={b._id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Danh mục *</label>
             <select
               value={form.categorySchemaId}
@@ -115,6 +116,22 @@ export default function ProductForm({
               {categories.map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
+            <select
+              value={form.brandId}
+              onChange={(e) => setFormField("brandId", e.target.value)}
+              disabled={!form.categorySchemaId}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+            >
+              <option value="">-- Chọn thương hiệu --</option>
+              {brands.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
                 </option>
               ))}
             </select>
@@ -135,8 +152,10 @@ export default function ProductForm({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="block text-sm font-medium text-gray-700">Ảnh (URL)</label>
+
           </div>
-          
+
+
           <div className="space-y-2 pt-2 border-t border-dashed border-gray-200 mt-4">
             <label className="block text-sm font-medium text-gray-700">
               Upload ảnh (chỉ upload khi bấm "{submitLabel}")
@@ -155,15 +174,34 @@ export default function ProductForm({
                 file:bg-indigo-50 file:text-indigo-700
                 hover:file:bg-indigo-100"
             />
-            {imageFiles?.length > 0 && (
+            {(previewUrls.length > 0 || existingUrls.length > 0) && (
               <>
                 <p className="text-xs text-gray-500">
-                  Đã chọn {imageFiles.length} ảnh. Ảnh sẽ được upload lên cloud khi bạn bấm "{submitLabel}".
+                  Đã chọn {previewUrls.length} file, {existingUrls.length} URL. Ảnh mới sẽ được upload lên cloud khi bạn bấm "{submitLabel}".
                 </p>
                 <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {existingUrls.map((url, idx) => (
+                    <div
+                      key={`url-${idx}`}
+                      className="relative w-full pb-[100%] overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+                    >
+                      <img
+                        src={url}
+                        alt={`existing-${idx}`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImageUrl(idx)}
+                        className="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 hover:bg-red-50"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                   {previewUrls.map((url, idx) => (
                     <div
-                      key={idx}
+                      key={`file-${idx}`}
                       className="relative w-full pb-[100%] overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
                     >
                       <img
@@ -171,6 +209,13 @@ export default function ProductForm({
                         alt={`preview-${idx}`}
                         className="absolute inset-0 h-full w-full object-cover"
                       />
+                      <button
+                        type="button"
+                        onClick={() => removeImageFile(idx)}
+                        className="absolute top-1 right-1 bg-white rounded-full p-1 text-red-500 hover:bg-red-50"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -275,15 +320,21 @@ export default function ProductForm({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Giá *</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Giá {enableDefaultPrice ? "(để trống sẽ dùng giá mặc định)" : "*"}
+                </label>
                 <input
                   type="number"
                   value={v.price}
                   onChange={(e) => updateRow("variants", idx, { price: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   min={0}
-                  required
                 />
+                {enableDefaultPrice && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Nếu để trống, sẽ tự dùng giá mặc định ở trên.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Tồn kho *</label>

@@ -19,6 +19,7 @@ export const getSellerInventoryList = async (req, res) => {
         const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20)));
         const skip = (page - 1) * limit;
         const keyword = String(req.query.keyword ?? "").trim();
+        const sortStock = String(req.query.sortStock ?? "").toLowerCase(); // asc or desc
 
         const pipeline = [
             // Join variant
@@ -78,9 +79,19 @@ export const getSellerInventoryList = async (req, res) => {
                     variantCount: { $sum: 1 },
                     updatedAt: { $max: "$updatedAt" },
                 },
-            },
-            { $sort: { updatedAt: -1 } },
+            }
+        );
 
+        // sort by stock if requested, otherwise default to updatedAt
+        if (sortStock === "asc") {
+            pipeline.push({ $sort: { totalStock: 1 } });
+        } else if (sortStock === "desc") {
+            pipeline.push({ $sort: { totalStock: -1 } });
+        } else {
+            pipeline.push({ $sort: { updatedAt: -1 } });
+        }
+
+        pipeline.push(
             {
                 $facet: {
                     items: [
@@ -181,7 +192,7 @@ export const updateInventoryStock = async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "stock phải là số >= 0" });
         }
 
-        const inventory = await Inventory.findById(inventoryId);
+            const inventory = await Inventory.findById(inventoryId);
         if (!inventory) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "Inventory không tồn tại" });
         }
@@ -202,6 +213,114 @@ export const updateInventoryStock = async (req, res) => {
         return res.status(StatusCodes.OK).json({ message: "Cập nhật inventory thành công", data: inventory });
     } catch (err) {
         console.error("SELLER_UPDATE_INVENTORY_ERROR:", err);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
+    }
+};
+
+/**
+ * GET /api/seller/inventory/statistics
+ * Seller xem thống kê tổng quan tồn kho (tổng stock, số sản phẩm, số variant, low stock)
+ */
+export const getSellerInventoryStatistics = async (req, res) => {
+    try {
+        const shopId = req.shop?._id;
+        if (!shopId) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Shop không tồn tại" });
+        }
+
+        // threshold for low-stock variants
+        const lowStockThreshold = Math.max(0, Number(req.query.lowStockThreshold ?? 5));
+
+        const pipeline = [
+            // lookup variant
+            {
+                $lookup: {
+                    from: "variants",
+                    localField: "variantId",
+                    foreignField: "_id",
+                    as: "variant",
+                },
+            },
+            { $unwind: "$variant" },
+
+            // lookup product
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "variant.productId",
+                    foreignField: "_id",
+                    as: "product",
+                },
+            },
+            { $unwind: "$product" },
+
+            // filter shop products
+            {
+                $match: {
+                    "product.shopId": new mongoose.Types.ObjectId(shopId),
+                    "product.isDeleted": { $ne: true },
+                    "variant.isDeleted": { $ne: true },
+                    "isDeleted": { $ne: true },
+                },
+            },
+
+            // group to compute totals
+            {
+                $group: {
+                    _id: null,
+                    totalStock: { $sum: "$stock" },
+                    variantCount: { $sum: 1 },
+                    productSet: { $addToSet: "$product._id" },
+                    lowStockCount: {
+                        $sum: {
+                            $cond: [{ $lte: ["$stock", lowStockThreshold] }, 1, 0],
+                        },
+                    },
+                    outOfStockVariantCount: {
+                        $sum: {
+                            $cond: [{ $eq: ["$stock", 0] }, 1, 0],
+                        },
+                    },
+                    outOfStockProductSet: {
+                        $addToSet: {
+                            $cond: [{ $eq: ["$stock", 0] }, "$product._id", "$$REMOVE"],
+                        },
+                    },
+                    inventoryValue: {
+                        $sum: { $multiply: ["$stock", "$variant.price"] },
+                    },
+                    avgStockPerVariant: { $avg: "$stock" },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalStock: 1,
+                    variantCount: 1,
+                    productCount: { $size: "$productSet" },
+                    lowStockCount: 1,
+                    outOfStockVariantCount: 1,
+                    outOfStockProductCount: { $size: "$outOfStockProductSet" },
+                    inventoryValue: { $round: ["$inventoryValue", 2] },
+                    avgStockPerVariant: { $round: ["$avgStockPerVariant", 2] },
+                },
+            },
+        ];
+
+        const [stats] = await Inventory.aggregate(pipeline);
+        const result = stats || {
+            totalStock: 0,
+            variantCount: 0,
+            productCount: 0,
+            lowStockCount: 0,
+        };
+
+        return res.status(StatusCodes.OK).json({
+            message: "Inventory statistics retrieved successfully",
+            ...result,
+        });
+    } catch (err) {
+        console.error("SELLER_INVENTORY_STATISTICS_ERROR:", err);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };

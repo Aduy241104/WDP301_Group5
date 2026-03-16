@@ -14,3 +14,9 @@ export const updateSellerInventoryStockAPI = async (inventoryId, payload) => {
   const res = await axiosInstance.put(`/api/seller/inventory/${inventoryId}`, payload);
   return res.data;
 };
+
+// overview statistics
+export const getSellerInventoryStatisticsAPI = async (params = {}) => {
+  const res = await axiosInstance.get(`/api/seller/inventory/statistics`, { params });
+  return res.data;
+};

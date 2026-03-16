@@ -49,7 +49,10 @@ export const getOrderDetail = async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate("userId", "name email")
     .populate("shop", "name")
-    .populate("items.productId", "name");
+    .populate({
+      path: "items.productId",
+      select: "name images",
+    });
 
   if (!order) {
     return res.status(404).json({ message: "Order not found" });

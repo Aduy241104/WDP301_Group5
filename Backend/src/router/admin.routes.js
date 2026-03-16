@@ -34,6 +34,7 @@ import {
     AdminReportListController,
     AdminReportDetailController,
     AdminClassifyReportController,
+    AdminResolveReportController,
 } from "../controllers/AdminReportController.js";
 
 import {
@@ -101,6 +102,7 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 router.get("/reports", AdminReportListController);
 router.get("/reports/:reportId", AdminReportDetailController);
 router.get("/reports/classify", AdminClassifyReportController);
+router.post("/reports/:reportId/resolve", AdminResolveReportController);
 
 // Revenue Analytics
 router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);

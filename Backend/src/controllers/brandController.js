@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Brand } from "../models/Brand.js";
 
 /**
@@ -6,10 +7,22 @@ import { Brand } from "../models/Brand.js";
  */
 export const getBrands = async (req, res) => {
   try {
-    const brands = await Brand.find({
+    const { categoryId } = req.query;
+
+    const filter = {
       isDeleted: false,
       isActive: true, // nếu bạn có field này
-    })
+    };
+
+    // nếu FE gửi categoryId, kiểm tra và thêm vào filter
+    if (categoryId) {
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        return res.status(400).json({ message: "categoryId không hợp lệ" });
+      }
+      filter.categoryId = categoryId;
+    }
+
+    const brands = await Brand.find(filter)
       .select("_id name")
       .sort({ name: 1 });
 

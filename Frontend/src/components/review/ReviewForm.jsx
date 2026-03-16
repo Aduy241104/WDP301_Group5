@@ -56,50 +56,58 @@ const ReviewForm = ({ productId, orderId, reloadReviews }) => {
   return (
 
     <form
-      onSubmit={handleSubmit}
-      className="border p-4 rounded bg-white"
+      onSubmit={ handleSubmit }
+      className="max-w-xl bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4"
     >
-
-      <h3 className="font-semibold mb-3">
+      {/* TITLE */ }
+      <h3 className="text-lg font-semibold text-gray-800">
         Đánh giá sản phẩm
       </h3>
 
-      {/* SUCCESS MESSAGE */}
-      {success && (
-        <div className="bg-green-100 text-green-700 border border-green-300 p-2 rounded mb-3 text-sm">
-          {success}
+      {/* SUCCESS MESSAGE */ }
+      { success && (
+        <div className="bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg text-sm">
+          { success }
         </div>
-      )}
+      ) }
 
-      {/* ERROR MESSAGE */}
-      {error && (
-        <div className="bg-red-100 text-red-700 border border-red-300 p-2 rounded mb-3 text-sm">
-          {error}
+      {/* ERROR MESSAGE */ }
+      { error && (
+        <div className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-lg text-sm">
+          { error }
         </div>
-      )}
+      ) }
 
-      {/* STAR */}
-      <StarRating
-        value={rating}
-        onChange={setRating}
-      />
+      {/* STAR */ }
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-gray-600">Đánh giá:</span>
+        <StarRating value={ rating } onChange={ setRating } />
+      </div>
 
-      {/* COMMENT */}
-      <textarea
-        className="border w-full p-2 mt-3 rounded"
-        placeholder="Viết đánh giá của bạn..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
+      {/* COMMENT */ }
+      <div>
+        <textarea
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm
+      focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400
+      transition resize-none"
+          rows={ 4 }
+          placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+          value={ comment }
+          onChange={ (e) => setComment(e.target.value) }
+        />
+      </div>
 
-      <button
-        className="bg-[#77E2F2] text-white px-4 py-2 rounded mt-3 hover:opacity-90"
-      >
-        Gửi đánh giá
-      </button>
-
+      {/* BUTTON */ }
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium
+      px-5 py-2.5 rounded-lg transition shadow-sm"
+        >
+          Gửi đánh giá
+        </button>
+      </div>
     </form>
-
   );
 };
 
