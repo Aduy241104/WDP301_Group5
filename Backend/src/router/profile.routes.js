@@ -1,9 +1,12 @@
 import express from "express";
+import multer from "multer"; 
 import { authenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
-import { viewProfile, updateProfile, changePassword } from "../controllers/profileController.js";
+import { viewProfile, updateProfile, changePassword, uploadAvatar } from "../controllers/profileController.js";
 import { viewAddressList, addAddress, updateAddress, deleteAddress } from "../controllers/addressController.js";
 
 const router = express.Router();
+
+const upload = multer({ dest: "uploads/" });
 
 /**
  * VIEW PROFILE
@@ -11,6 +14,7 @@ const router = express.Router();
 router.get("/", authenticationMiddleware, viewProfile);
 router.put("/", authenticationMiddleware, updateProfile);
 router.put("/change-password", authenticationMiddleware, changePassword);
+router.post("/upload-avatar", authenticationMiddleware, upload.single("image"), uploadAvatar);
 
 
 /** 

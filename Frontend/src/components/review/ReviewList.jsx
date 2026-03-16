@@ -18,38 +18,67 @@ const ReviewList = ({ productId, reload }) => {
   const [editingReview, setEditingReview] = useState(null);
   const [editRating, setEditRating] = useState(5);
   const [editComment, setEditComment] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  const loadReviews = async () => {
+  const PAGE_SIZE = 5;
+
+  const loadReviews = async (pageNumber = 1) => {
+    setLoading(true);
+
     const data = await getProductReviewsAPI(productId, {
-      page: 1,
+      page: pageNumber,
       rating: ratingFilter,
     });
 
-    setReviews(data.data.reviews || []);
+    const newReviews = data.data.reviews || [];
+    const totalReviews = data.data.pagination.total || 0;
+
+    if (pageNumber === 1) {
+      setReviews(newReviews);
+    } else {
+      setReviews(prev => [...prev, ...newReviews]);
+    }
+
+    setHasMore(totalReviews > pageNumber * PAGE_SIZE);
+
+    setLoading(false);
   };
 
   useEffect(() => {
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   }, [reload, ratingFilter]);
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadReviews(nextPage);
+  };
 
   const handleDelete = async (reviewId) => {
     await deleteReviewAPI(reviewId);
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   };
 
   const handleUpdate = async () => {
-
     await updateReviewAPI(editingReview._id, {
       rating: editRating,
       comment: editComment
     });
 
     setEditingReview(null);
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   };
+
 
 
   return (
@@ -99,7 +128,7 @@ const ReviewList = ({ productId, reload }) => {
       {/* REVIEW LIST */}
       {reviews.map((review) => {
 
-        const isOwner = review.userId?._id === currentUserId;
+        const isOwner = review.userId?._id?.toString() === currentUserId?.toString();
 
         return (
 
@@ -155,6 +184,7 @@ const ReviewList = ({ productId, reload }) => {
 
               </div>
             )}
+
 
 
             {/* USER INFO */}
@@ -214,6 +244,19 @@ const ReviewList = ({ productId, reload }) => {
 
         );
       })}
+
+      {/* LOAD MORE */}
+      {hasMore && reviews.length > 0 && (
+        <div className="text-center mt-6">
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            className="border px-4 py-2 rounded hover:bg-gray-100"
+          >
+            {loading ? "Đang tải..." : "Xem thêm bình luận"}
+          </button>
+        </div>
+      )}
 
 
 
