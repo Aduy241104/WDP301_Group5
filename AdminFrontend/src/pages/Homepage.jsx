@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
 import AdminUserAnalytics from "./AdminUserAnalytics";
 import AdminRevenueAnalytics from "./AdminRevenueAnalytics";
+import AdminCategoryAnalytics from "./AdminCategoryAnalytics";
 
 export default function Homepage() {
     const { user } = useAuth();
@@ -41,9 +43,9 @@ export default function Homepage() {
                         </button>
 
                         <button
-                            onClick={() => setActiveTab("analytics")}
+                            onClick={() => setActiveTab("revenue")}
                             className={`pb-3 px-4 font-medium text-sm transition ${
-                                activeTab === "analytics"
+                                activeTab === "revenue"
                                     ? "text-blue-600 border-b-2 border-blue-600"
                                     : "text-slate-600 hover:text-slate-900"
                             }`}
@@ -52,9 +54,20 @@ export default function Homepage() {
                         </button>
 
                         <button
-                            onClick={() => setActiveTab("useranalytics")}
+                            onClick={() => setActiveTab("category")}
                             className={`pb-3 px-4 font-medium text-sm transition ${
-                                activeTab === "useranalytics"
+                                activeTab === "category"
+                                    ? "text-blue-600 border-b-2 border-blue-600"
+                                    : "text-slate-600 hover:text-slate-900"
+                            }`}
+                        >
+                            Category Analytics
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab("user")}
+                            className={`pb-3 px-4 font-medium text-sm transition ${
+                                activeTab === "user"
                                     ? "text-blue-600 border-b-2 border-blue-600"
                                     : "text-slate-600 hover:text-slate-900"
                             }`}
@@ -71,7 +84,7 @@ export default function Homepage() {
                             <QuickCard
                                 to="/admin/seller-requests"
                                 title="Duyệt yêu cầu Seller"
-                                desc="Xem và duyệt các yêu cầu đăng ký seller đang chờ xử lý."
+                                desc="Xem và duyệt các yêu cầu đăng ký seller."
                                 icon="📩"
                             />
 
@@ -92,15 +105,22 @@ export default function Homepage() {
                         </div>
                     )}
 
-                    {/* REVENUE ANALYTICS */}
-                    {activeTab === "analytics" && (
+                    {/* REVENUE */}
+                    {activeTab === "revenue" && (
                         <div className="bg-white rounded-xl border border-slate-200 p-6">
                             <AdminRevenueAnalytics />
                         </div>
                     )}
 
-                    {/* USER ANALYTICS */}
-                    {activeTab === "useranalytics" && (
+                    {/* CATEGORY */}
+                    {activeTab === "category" && (
+                        <div className="bg-white rounded-xl border border-slate-200 p-6">
+                            <AdminCategoryAnalytics />
+                        </div>
+                    )}
+
+                    {/* USER */}
+                    {activeTab === "user" && (
                         <div className="bg-white rounded-xl border border-slate-200 p-6">
                             <AdminUserAnalytics />
                         </div>
