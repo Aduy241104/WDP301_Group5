@@ -9,7 +9,6 @@ import { Order } from "../models/Order.js";
 import { OrderAddressSnapshot } from "../models/OrderAddressSnapshot.js";
 import { Shop } from "../models/Shop.js";
 import { createOrderStatusNotification } from "../services/notificationService.js";
-
 import {
   genOrderCode,
   money,
@@ -18,7 +17,7 @@ import {
   allocateEqualCappedByShip,
   groupByShop,
   makeVoucherSnapshot,
-  loadAndValidateVoucherNoTxn,
+  loadAndValidateVoucher,
 } from "../utils/orderHelper.js";
 
 const oid = (id) => new Types.ObjectId(id);
@@ -41,6 +40,7 @@ export async function createOrdersFromCartService({
   const shopCodes = vouchers?.shopCodes || {};
 
   // 1) cart
+  // If cart is empty return error
   const cart = await Cart.findOne({ userId: userObjectId }).lean();
   if (!cart?.items?.length) throwE(400, "CART_EMPTY");
 
@@ -51,12 +51,15 @@ export async function createOrdersFromCartService({
   const selected = [];
   const missingInCart = [];
 
+  // access variant from user request
   for (const vid of variantObjectIds) {
     const qty = qtyMap.get(String(vid));
     if (!qty) missingInCart.push(String(vid));
     else selected.push({ variantId: vid, quantity: Math.max(1, qty) });
   }
 
+
+  // if selected product from cart == 0 return error
   if (!selected.length)
     throwE(400, "NO_SELECTED_ITEMS_IN_CART", { missingInCart });
 
@@ -90,9 +93,10 @@ export async function createOrdersFromCartService({
   );
 
   // 3) validate items & lines
-  const invalidItems = [];
-  const lines = [];
+  const invalidItems = []; // Item đéo hợp lệ để tạo order
+  const lines = []; // item hợp lệ để tạo order
 
+  // duyệt product để check hợp lệ
   for (const s of selected) {
     const v = variantById.get(String(s.variantId));
     if (!v) {
@@ -134,9 +138,11 @@ export async function createOrdersFromCartService({
       lineTotal: money(price * s.quantity),
     });
   }
+
+  // nếu không có item nào valid sau khi lọc qua thì trả về lỗi lun <3
   if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems });
 
-  // 4) group shops
+  // 4) group ptoduct theo shops
   const groups = groupByShop(lines);
 
   // 5) load shops
@@ -152,7 +158,7 @@ export async function createOrdersFromCartService({
     g.shippingFee = money(calcShippingFeePerShop());
     const shopVoucherCode = (shopCodes[g.shopId] || "").trim();
 
-    const { voucher, discountAmount } = await loadAndValidateVoucherNoTxn({
+    const { voucher, discountAmount } = await loadAndValidateVoucher({
       code: shopVoucherCode,
       scope: "shop",
       shopId: oid(g.shopId),
@@ -169,20 +175,20 @@ export async function createOrdersFromCartService({
 
   grandBeforeSystem = money(grandBeforeSystem);
 
-  // ✅ ship total across shops
-  const shipTotal = money(groups.reduce((s, g) => s + money(g.shippingFee), 0));
+  // ship total across shops
+//   const shipTotal = money(groups.reduce((s, g) => s + money(g.shippingFee), 0));
 
   // 7) system voucher (FIX: if ship voucher, base should be shipTotal)
   let systemVoucher = null;
   let systemDiscount = 0;
 
   if (systemCode) {
-    const systemR = await loadAndValidateVoucherNoTxn({
+    const systemR = await loadAndValidateVoucher({
       code: systemCode,
       scope: "system",
       shopId: null,
       userId: userObjectId,
-      baseAmount: grandBeforeSystem, // ✅ luôn dùng shipTotal
+      baseAmount: grandBeforeSystem, //luôn dùng shipTotal
     });
 
     systemVoucher = systemR.voucher;
@@ -194,7 +200,7 @@ export async function createOrdersFromCartService({
   // 8) allocate system discount
   let allocs = [];
   if (systemVoucher?.discountType === "ship") {
-    // ✅ evenly split across shops, capped by shippingFee each
+    // evenly split across shops, capped by shippingFee each
     allocs = allocateEqualCappedByShip(
       systemDiscount,
       groups.map((g) => g.shippingFee),
@@ -268,7 +274,7 @@ export async function createOrdersFromCartService({
         orderStatus: "created",
         statusHistory: [{ status: "created", changedAt: new Date() }],
       });
-      // ⭐ TẠO NOTIFICATION CHO SELLER
+      // TẠO NOTIFICATION CHO SELLER
       await createOrderStatusNotification({
         userId: shopDoc.ownerId,
         orderId: orderDoc._id,
@@ -308,7 +314,7 @@ export async function createOrdersFromCartService({
         }
       }
 
-      // ✅ system voucher usage: attach to EVERY order (multi-shop), use upsert
+      // system voucher usage: attach to EVERY order (multi-shop), use upsert
       if (systemVoucher) {
         await VoucherUsage.updateOne(
           {
