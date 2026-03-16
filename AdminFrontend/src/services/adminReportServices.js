@@ -10,3 +10,7 @@ export const fetchReportDetail = async (reportId) => {
     const res = await axiosInstance.get(`/api/admin/reports/${reportId}`);
     return res.data;
 };
+export const resolveReport = async (reportId, data) => {
+    const res = await axiosInstance.post(`/api/admin/reports/${reportId}/resolve`, data);
+    return res.data;
+};
