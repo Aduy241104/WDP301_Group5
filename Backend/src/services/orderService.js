@@ -139,7 +139,7 @@ export async function createOrdersFromCartService({
     });
   }
 
-  // nếu không có item nào valid sau khi lọc qua thì trả về lỗi lun <3
+  // nếu không có item nào valid sau khi lọc qua thì trả về lỗi lun 
   if (!lines.length) throwE(400, "ALL_ITEMS_INVALID", { invalidItems });
 
   // 4) group ptoduct theo shops

@@ -10,8 +10,8 @@ function isValidObjectId(id) {
 
 /**
  * GET /shops/:shopId/banners
- * slider -> carousel
- * single -> banner đơn (top) hiển thị từ trên xuống
+ * home_mid -> slider
+ * home_top -> single
  */
 export async function getShopBanners(req, res) {
     try {
@@ -27,7 +27,7 @@ export async function getShopBanners(req, res) {
 
         const banners = await Banner.find({
             shopId,
-            position: { $in: ["slider", "top"] },
+            position: { $in: ["home_mid", "home_top"] },
             isDeleted: false,
             isActive: true,
             $and: [
@@ -35,17 +35,17 @@ export async function getShopBanners(req, res) {
                 { $or: [{ endAt: null }, { endAt: { $gte: now } }] }
             ]
         })
-            .select("title imageUrl linkUrl linkType linkTargetId position order priority")
-            .sort({ order: 1, priority: -1 })
+            .select("title imageUrl linkUrl linkType linkTargetId position priority")
+            .sort({ priority: -1, createdAt: -1 })
             .lean();
 
         const slider = [];
         const single = [];
 
         for (const b of banners) {
-            if (b.position === "slider") {
+            if (b.position === "home_mid") {
                 slider.push(b);
-            } else if (b.position === "top") {
+            } else if (b.position === "home_top") {
                 single.push(b);
             }
         }
