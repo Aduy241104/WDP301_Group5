@@ -1,12 +1,14 @@
 import { useMemo, useState, useContext } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom"; 
 
 export default function Header() {
     const { isAuthenticated, user, logout } = useAuth();
 
     const role = user?.role ?? "guest";
     const [query, setQuery] = useState("");
-    const cartCount = 3; // TODO: lấy từ store/API
+    const cartCount = 3; 
+    const navigate = useNavigate();
 
     const greeting = useMemo(() => {
         if (!isAuthenticated) return "Xin chào!";
@@ -14,14 +16,16 @@ export default function Header() {
     }, [isAuthenticated, user]);
 
     const go = (path) => {
-        // Tnếu dùng react-router thì thay bằng navigate(path)
-        window.location.href = path;
+        navigate(path); // Thay window.location.href bằng navigate
     };
 
     const onSearch = (e) => {
         e.preventDefault();
-        console.log("Search:", query);
-        // TODO: go(`/search?q=${encodeURIComponent(query)}`)
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) return; // Nếu không nhập gì thì không search
+
+        // Chuyển hướng sang trang search kèm query param
+        navigate(`/search?keyword=${encodeURIComponent(trimmedQuery)}`);
     };
 
     return (
@@ -37,19 +41,7 @@ export default function Header() {
                     </div>
 
                     <div className="hidden sm:flex items-center gap-4 text-slate-700">
-                        {/* <button className="hover:opacity-80" onClick={ () => go("/support") }>
-                            Hỗ trợ
-                        </button>
-
-                        <button className="hover:opacity-80" onClick={ () => go("/orders") }>
-                            Theo dõi đơn
-                        </button>
-
-                        <button className="hover:opacity-80" onClick={ () => go("/deals") }>
-                            Khuyến mãi
-                        </button> */}
-
-                        {/* Login đưa lên đây */ }
+                        {/* Login */ }
                         { !isAuthenticated && (
                             <button
                                 onClick={ () => go("/login") }

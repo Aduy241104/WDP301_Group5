@@ -2,18 +2,18 @@ import mongoose from "mongoose";
 import { Product } from "../models/Product.js";
 import { Banner } from "../models/Banner.js";
 import { StatusCodes } from "http-status-codes";
-import { getTopSale } from "../services/productDisCoveryService.js";
+import { getTopSale, searchFilterProducts } from "../services/productDisCoveryService.js";
 import { getRecommendedProductsService } from "../services/recommenService.js"
 
 
 export const getProductDiscovery = async (req, res) => {
     try {
         const userId = req.user?.id ?? undefined;
-        const topSaleProductsDoc = await getTopSale(0, 8);
+        const topSaleProductsDoc = await getTopSale(0, 12);
         const topSaleProducts = topSaleProductsDoc.items;
         const recommendProductDoc = await getRecommendedProductsService({
             userId,
-            limit: 8,
+            limit: 12,
         });
         const suggestProducts = recommendProductDoc.items;
         // Get active banners for home_top position
@@ -146,7 +146,7 @@ export const getProductDetailById = async (req, res) => {
             },
             { $unwind: "$shop" },
 
-           
+
             // variants active
             {
                 $lookup: {
@@ -266,95 +266,6 @@ export const getProductDetailById = async (req, res) => {
     }
 };
 
-export const searchProducts = async (req, res) => {
-    try {
-        const qRaw = req.query.q ?? "";
-        const q = String(qRaw).trim();
-
-        const page = Math.max(parseInt(req.query.page || "1", 10), 1);
-        const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 50);
-        const skip = (page - 1) * limit;
-
-        // Base constraints: chỉ lấy hàng đang hiển thị
-        const base = {
-            isDeleted: false,
-            status: "approved",
-            activeStatus: "active",
-        };
-
-        // Nếu không có q thì trả về list mới nhất (hoặc bạn có thể trả [] tuỳ UX)
-        if (!q) {
-            const [items, total] = await Promise.all([
-                Product.find(base)
-                    .sort({ publishedAt: -1, createdAt: -1 })
-                    .skip(skip)
-                    .limit(limit)
-                    .select("name slug images defaultPrice ratingAvg totalSale shopId brandId shopCategoryId publishedAt")
-                    .lean(),
-                Product.countDocuments(base),
-            ]);
-
-            return res.status(StatusCodes.OK).json({
-                query: q,
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-                items,
-            });
-        }
-
-        // Có q: dùng $text + textScore
-        const query = {
-            ...base,
-            $text: { $search: q },
-        };
-
-        // projection lấy score ra để sort theo relevance + trả về nếu muốn debug
-        const projection = {
-            score: { $meta: "textScore" },
-            name: 1,
-            slug: 1,
-            images: 1,
-            defaultPrice: 1,
-            ratingAvg: 1,
-            totalSale: 1,
-            shopId: 1,
-            brandId: 1,
-            shopCategoryId: 1,
-            publishedAt: 1,
-        };
-
-        const [items, total] = await Promise.all([
-            Product.find(query, projection)
-                .sort({
-                    score: { $meta: "textScore" },
-                    totalSale: -1,       // tie-breaker “bán chạy”
-                    ratingAvg: -1,       // tie-breaker “đánh giá”
-                    publishedAt: -1,     // tie-breaker “mới”
-                })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            Product.countDocuments(query),
-        ]);
-
-        return res.status(StatusCodes.OK).json({
-            query: q,
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit),
-            items,
-        });
-    } catch (err) {
-        console.error("SEARCH_PRODUCTS_ERROR:", err);
-        return res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ message: "Search failed." });
-    }
-};
-
 export async function getRecommendedProducts(req, res, next) {
     try {
         const result = await getRecommendedProductsService({
@@ -367,3 +278,52 @@ export async function getRecommendedProducts(req, res, next) {
         return next(err);
     }
 }
+
+export const getSearchedProducts = async (req, res) => {
+    try {
+        // Lấy từ req.validatedBody
+        const {
+            keyword,
+            minPrice,
+            maxPrice,
+            categoryIds,
+            minRating,
+            page,
+            limit,
+            sortBy,
+            order
+        } = req.validatedBody;
+
+        const skip = (page - 1) * limit;
+
+        const filters = {
+            keyword,
+            minPrice,
+            maxPrice,
+            categoryIds, // Truyền mảng ID xuống
+            minRating,
+            sortBy,
+            order
+        };
+
+        const { items, total } = await searchFilterProducts(filters, skip, limit);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return res.status(200).json({
+            success: true,
+            message: "Lấy danh sách sản phẩm thành công",
+            data: {
+                page,
+                limit,
+                total,
+                totalPages,
+                items,
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi API getSearchedProducts:", error);
+        return res.status(500).json({ success: false, message: "Lỗi Server nội bộ" });
+    }
+};
