@@ -12,13 +12,6 @@ export const unfollowShopAPI = async (shopId) => {
     return res.data;
 };
 
-// GET /api/shop-follow/me/following/shops
-export const getMyFollowingShopsAPI = async (params = {}) => {
-    // params có thể dùng cho pagination/search nếu backend hỗ trợ
-    const res = await axiosInstance.get(`/api/shop-follow/me/following/shops`, { params });
-    return res.data;
-};
-
 
 // GET /api/shop-follow/:shopId/is-following
 export const checkFollowShopAPI = async (shopId) => {
@@ -30,3 +23,12 @@ export const getShopFollowersCountAPI = async (shopId) => {
     const res = await axiosInstance.get(`/api/shop-follow/${shopId}/followers`);
     return res.data;
 }
+
+
+
+export const getMyFollowingShopsAPI = async (page = 1, limit = 12) => {
+    // Gọi method GET và truyền page, limit qua query
+    const res = await axiosInstance.get(`/api/shop-follow/me/following/shops?page=${page}&limit=${limit}`);
+    return res.data;
+};
+
