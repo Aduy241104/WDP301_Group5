@@ -7,12 +7,13 @@ import {
 
 import {
   authenticationMiddleware,
+  sellerMiddleware,
 } from "../middlewares/authenticationMiddlewares.js";
 
 const router = express.Router();
 
 // apply middleware giống order
-router.use(authenticationMiddleware);
+router.use(authenticationMiddleware, sellerMiddleware);
 
 // routes
 router.get("/", SellerReportListController);

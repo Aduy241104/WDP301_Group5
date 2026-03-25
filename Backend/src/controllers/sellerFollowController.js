@@ -30,7 +30,7 @@ export const getMyShopFollowers = async (req, res, next) => {
           select: "_id fullname email avatar",
         })
         .lean(),
-    ]);
+    ]); 
 
     const items = followers.map((f) => ({
       followedAt: f.createdAt,
