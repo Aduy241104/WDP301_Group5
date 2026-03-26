@@ -22,52 +22,52 @@ export default function OrderCard({
     return (
         <div className="overflow-hidden rounded-sm border border-neutral-200 bg-white shadow-sm transition hover:shadow-md">
 
-            {/* HEADER */ }
+            {/* HEADER */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-4">
 
                 <div className="flex items-center gap-4">
                     <img
-                        src={ order?.shop?.avatar || "https://via.placeholder.com/40" }
-                        alt={ order?.shop?.name || "Shop" }
+                        src={order?.shop?.avatar || "https://via.placeholder.com/40"}
+                        alt={order?.shop?.name || "Shop"}
                         className="h-10 w-10 rounded-full border border-neutral-300 object-cover"
                     />
 
                     <div className="text-base font-semibold text-black">
-                        { order?.shop?.name || "Shop" }
+                        {order?.shop?.name || "Shop"}
                     </div>
                 </div>
 
-                <OrderStatusBadge orderStatus={ order?.orderStatus } />
+                <OrderStatusBadge orderStatus={order?.orderStatus} />
             </div>
 
 
-            {/* ITEMS */ }
+            {/* ITEMS */}
             <div className="divide-y divide-neutral-100">
-                { (order?.items || []).map((it) => (
+                {(order?.items || []).map((it) => (
                     <OrderItemRow
-                        key={ String(it.variantId) }
-                        item={ it }
-                        fallbackImg={ firstImg }
+                        key={String(it.variantId)}
+                        item={it}
+                        fallbackImg={firstImg}
                     />
-                )) }
+                ))}
             </div>
 
             <div className="px-5 py-4">
-                {/* TOTAL */ }
+                {/* TOTAL */}
                 <div className="flex justify-end">
                     <div className="text-sm text-slate-600">
                         Thành tiền:&nbsp;
                         <span className="text-xl font-semibold text-slate-900">
-                            { formatVND(order?.totalAmount || 0) }
+                            {formatVND(order?.totalAmount || 0)}
                         </span>
                     </div>
                 </div>
 
-                {/* ACTION BUTTONS */ }
+                {/* ACTION BUTTONS */}
                 <div className="mt-4 flex flex-wrap justify-end gap-3">
 
                     <button
-                        onClick={ () => navigate(`/order-detail/${order._id}`) }
+                        onClick={() => navigate(`/order-detail/${order._id}`)}
                         className="rounded-lg 
                                     bg-[rgb(119,226,242)] 
                                     px-5 py-2 
@@ -81,40 +81,37 @@ export default function OrderCard({
                         Chi tiết đơn hàng
                     </button>
 
-                    {/* Mua lại */ }
-                    { order?.orderStatus === "delivered" && (
+                    {/* Mua lại */}
+                    {order?.orderStatus === "delivered" && (
                         <button
-                            onClick={ onRebuy }
+                            onClick={onRebuy}
                             className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                         >
                             Mua lại
                         </button>
-                    ) }
+                    )}
 
-                    {/* Đánh giá */ }
-                    { order?.orderStatus === "delivered" && (
-                        <button
-                            onClick={ onReview }
-                            className="rounded-lg border border-slate-900 px-5 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-900 hover:text-white"
-                        >
+                    {/* Đánh giá */}
+                    {order?.orderStatus === "delivered" && !order?.hasReviewed && (
+                        <button onClick={() => onReview(order._id)}>
                             Đánh giá
                         </button>
-                    ) }
+                    )}
 
-                    {/* Hủy đơn */ }
-                    { order?.orderStatus === "created" && (
-                        <CancelOrderButton orderId={ order._id } onSuccess={ onReload } />
-                    ) }
+                    {/* Hủy đơn */}
+                    {order?.orderStatus === "created" && (
+                        <CancelOrderButton orderId={order._id} onSuccess={onReload} />
+                    )}
 
-                    {/* Trả hàng */ }
-                    { order?.orderStatus === "delivered" && (
+                    {/* Trả hàng */}
+                    {order?.orderStatus === "delivered" && (
                         <button
-                            onClick={ () => navigate(`/report/${order._id}`) }
+                            onClick={() => navigate(`/report/${order._id}`)}
                             className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-900 hover:text-slate-900"
                         >
                             Khiếu nại
                         </button>
-                    ) }
+                    )}
                 </div>
             </div>
         </div>

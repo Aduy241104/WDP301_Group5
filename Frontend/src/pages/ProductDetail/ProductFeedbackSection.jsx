@@ -13,9 +13,7 @@ export default function ProductFeedbackSection({ productId }) {
   return (
     <div className="bg-white rounded-xl shadow p-6">
 
-      <h2 className="text-xl font-semibold mb-6">
-        Đánh giá sản phẩm
-      </h2>
+
 
       {/* Form review */}
       {/* <ReviewForm

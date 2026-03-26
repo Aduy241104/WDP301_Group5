@@ -45,6 +45,15 @@ export default function ProfilePage() {
         ...prev,
         user: normalizedUser,
       }));
+
+      setEditData({
+      fullName: normalizedUser.fullName || "",
+      email: normalizedUser.email || "",
+      phone: normalizedUser.phone || "",
+      avatar: normalizedUser.avatar || "",
+      gender: normalizedUser.gender || "",
+      dateOfBirth: normalizedUser.dateOfBirth || "",
+    });
     } catch (err) {
       console.error("Reload profile failed", err);
     }

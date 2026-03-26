@@ -2,15 +2,77 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, Package, MapPin, Shirt } from "lucide-react";
+import { Heart } from "lucide-react";
+import {
+    getWishlistAPI,
+    addWishlistAPI,
+    removeWishlistAPI
+} from "../../services/wishlistUserService";
 
 export default function ProductInfo({ product, currentPrice }) {
     const images = useMemo(() => product?.images ?? [], [product]);
     const [activeImg, setActiveImg] = useState(images[0] || "");
     const navigate = useNavigate();
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [loadingWishlist, setLoadingWishlist] = useState(false);
+    const [wishlistIds, setWishlistIds] = useState([]);
+
+    const handleToggleWishlist = async () => {
+        if (loadingWishlist) return;
+
+        try {
+            setLoadingWishlist(true);
+
+            if (isWishlisted) {
+                await removeWishlistAPI(product._id);
+
+                setIsWishlisted(false);
+
+                // 🔥 FIX: update list local
+                setWishlistIds(prev => prev.filter(id => id !== product._id));
+
+            } else {
+                await addWishlistAPI(product._id);
+
+                setIsWishlisted(true);
+
+                // 🔥 FIX: update list local
+                setWishlistIds(prev => [...prev, product._id]);
+            }
+        } catch (error) {
+            console.log(error);
+            alert("Có lỗi xảy ra");
+        } finally {
+            setLoadingWishlist(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchWishlist = async () => {
+            try {
+                // 🔥 FIX: lấy toàn bộ wishlist (không bị pagination)
+                const res = await getWishlistAPI(1, 1000);
+
+                const ids = res.data.map(item => item._id);
+
+                setWishlistIds(ids);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchWishlist();
+    }, []);
 
     useEffect(() => {
         setActiveImg(images[0] || "");
     }, [product?._id, images]);
+
+    useEffect(() => {
+        if (!product?._id) return;
+
+        setIsWishlisted(wishlistIds.includes(product._id));
+    }, [wishlistIds, product?._id]);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden font-sans">
@@ -134,14 +196,31 @@ export default function ProductInfo({ product, currentPrice }) {
                                         {product.shop?.description}
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate(`/shop/${product.shopId}`)}
-                                    className="ml-auto rounded-xl border border-blue-200 px-3 py-2 
-  text-sm font-semibold text-blue-700 hover:bg-blue-50 transition"
-                                >
-                                    Xem shop
-                                </button>
+                                <div className="ml-auto flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/shop/${product.shopId}`)}
+                                        className="rounded-xl border border-blue-200 px-3 py-2 
+        text-sm font-semibold text-blue-700 hover:bg-blue-50 transition"
+                                    >
+                                        Xem shop
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleToggleWishlist}
+                                        disabled={loadingWishlist}
+                                        className="p-2 rounded-full border border-slate-200 
+        hover:bg-pink-50 transition"
+                                    >
+                                        <Heart
+                                            className={`w-5 h-5 transition ${isWishlisted
+                                                ? "text-red-500 fill-red-500"
+                                                : "text-slate-400"
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

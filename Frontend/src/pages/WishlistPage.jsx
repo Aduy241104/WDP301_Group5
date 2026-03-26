@@ -10,13 +10,15 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const loadWishlist = async () => {
     try {
 
-      const res = await getWishlistAPI();
+      const res = await getWishlistAPI(page, LIMIT);
 
       setWishlist(res.data || []);
+      setTotalPages(res.pagination?.totalPages || 1);
 
     } catch (err) {
       console.error("Wishlist error", err);
@@ -27,15 +29,7 @@ export default function WishlistPage() {
 
   useEffect(() => {
     loadWishlist();
-  }, []);
-
-  // pagination logic
-  const start = (page - 1) * LIMIT;
-  const end = start + LIMIT;
-
-  const currentProducts = wishlist.slice(start, end);
-
-  const totalPages = Math.ceil(wishlist.length / LIMIT);
+  }, [page]); // 🔥 load lại khi đổi trang
 
   if (loading) {
     return (
@@ -61,7 +55,7 @@ export default function WishlistPage() {
       {/* PRODUCT GRID */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
-        {currentProducts.map((product) => (
+        {wishlist.map((product) => (
           <ProductCard
             key={product._id}
             product={product}
@@ -71,24 +65,52 @@ export default function WishlistPage() {
       </div>
 
       {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
+      {totalPages >= 1 && (
 
+        <div className="flex justify-center items-center gap-2 mt-8">
+
+          {/* 🔙 Previous */}
+          <button
+            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+            className={`px-3 py-1 border rounded
+      ${page === 1
+                ? "text-gray-300 border-gray-200 cursor-not-allowed"
+                : "hover:bg-gray-100"}
+    `}
+          >
+             {"<"}
+          </button>
+
+          {/* Page numbers */}
           {[...Array(totalPages)].map((_, i) => (
 
             <button
               key={i}
               onClick={() => setPage(i + 1)}
               className={`px-3 py-1 border rounded
-              ${page === i + 1
+        ${page === i + 1
                   ? "bg-[#77E2F2] text-white border-[#77E2F2]"
                   : "hover:bg-gray-100"}
-            `}
+      `}
             >
               {i + 1}
             </button>
 
           ))}
+
+          {/* 🔜 Next */}
+          <button
+            onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={page === totalPages}
+            className={`px-3 py-1 border rounded
+      ${page === totalPages
+                ? "text-gray-300 border-gray-200 cursor-not-allowed"
+                : "hover:bg-gray-100"}
+    `}
+          >
+             {">"}
+          </button>
 
         </div>
       )}
