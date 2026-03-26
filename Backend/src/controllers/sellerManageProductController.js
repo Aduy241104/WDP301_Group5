@@ -246,7 +246,7 @@ export const updateProduct = async (req, res) => {
         if (attributes) product.attributes = attributesMap;
 
         product.defaultPrice = Math.min(...variants.map(v => v.price));
-        product.status = "pending"; // update lại thì chờ duyệt lại
+        // product.status = "pending"; // update lại thì chờ duyệt lại
 
         await product.save();
 
@@ -331,7 +331,7 @@ export const updateProduct = async (req, res) => {
 
 /**
  * GET /seller/products/:productId
- * Seller xem chi tiết 1 sản phẩm của shop mình (kèm variants + stock)
+ * Seller xem chi tiết 1 sản phẩm của shop mình (kèm variants + stock + rejectReason)
  */
 export const getSellerProductDetail = async (req, res) => {
   try {
@@ -384,6 +384,7 @@ export const getSellerProductDetail = async (req, res) => {
       data: {
         ...product,
         variants: variantsWithStock,
+        rejectReason: product.rejectReason || "",
       },
     });
   } catch (error) {

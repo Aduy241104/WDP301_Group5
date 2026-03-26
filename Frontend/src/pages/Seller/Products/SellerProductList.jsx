@@ -5,7 +5,7 @@ import {
   toggleSellerProductActiveAPI,
 } from "../../../services/sellerManageProduct.service";
 
-export default function SellerProductList({ onAdd, onEdit }) {
+export default function SellerProductList({ onAdd, onEdit, onView }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -187,8 +187,15 @@ export default function SellerProductList({ onAdd, onEdit }) {
                     <td className="px-4 py-3 text-right">
                       <button
                         type="button"
+                        onClick={() => onView?.(p._id)}
+                        className="px-3 py-1.5 rounded-lg border border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-sm"
+                      >
+                        Chi tiết
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => onEdit?.(p._id)}
-                        className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                        className="ml-2 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
                       >
                         Sửa
                       </button>
