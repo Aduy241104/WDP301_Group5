@@ -27,7 +27,7 @@ export default function Footer() {
                     </div>
 
                     <FooterCol
-                        title="Về UniTrade"
+                        title="Về GR5"
                         items={ [
                             { label: "Giới thiệu", href: "/about" },
                             { label: "Tuyển dụng", href: "/careers" },
@@ -67,14 +67,14 @@ export default function Footer() {
                         <div className="mt-5 rounded-2xl border border-slate-200 p-4 bg-[rgb(119,226,242)]/15">
                             <div className="text-sm font-bold">Hotline</div>
                             <div className="text-sm text-slate-700 mt-1">1900 0000 (08:00 - 22:00)</div>
-                            <div className="text-sm text-slate-700">support@unitrade.vn</div>
+                            <div className="text-sm text-slate-700">support@GR5.vn</div>
                             <div className="text-xs text-slate-500 mt-2">Địa chỉ: TP.HCM (demo)</div>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-t border-slate-100 pt-6">
-                    <div className="text-sm text-slate-600">© { new Date().getFullYear() } UniTrade. All rights reserved.</div>
+                    <div className="text-sm text-slate-600">© { new Date().getFullYear() } GR5. All rights reserved.</div>
                     <div className="flex flex-wrap gap-2 text-sm">
                         <a className="hover:underline text-slate-600" href="/payment">
                             Phương thức thanh toán

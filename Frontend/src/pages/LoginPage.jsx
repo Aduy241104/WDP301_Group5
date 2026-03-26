@@ -64,13 +64,13 @@ export default function LoginPage() {
                     <div className="p-6 sm:p-8">
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-2 rounded-full bg-[#77E2F2]/15 px-3 py-1 text-xs font-semibold text-slate-700">
-                                UniTrade
+                                GR5
                                 <span className="h-1 w-1 rounded-full bg-[#77E2F2]" />
                                 Sign in
                             </div>
 
                             <h1 className="mt-3 text-2xl font-bold text-slate-900">Đăng nhập</h1>
-                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại UniTrade.</p>
+                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại GR5.</p>
                         </div>
 
                         { isAuthenticated ? (
@@ -99,7 +99,7 @@ export default function LoginPage() {
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">Email</label>
                                     <input
-                                        placeholder="buyer@unitrade.dev"
+                                        placeholder="buyer@GR5.dev"
                                         autoComplete="email"
                                         className={ [
                                             "mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none",
