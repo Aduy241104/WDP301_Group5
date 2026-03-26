@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchReportDetail } from "../services/adminReportServices";
+import { notifySellerReportResult } from "../services/adminNotificationServices";
 
 function StatusPill({ status }) {
     const map = {
@@ -88,6 +89,10 @@ export default function AdminReportDetail() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [report, setReport] = useState(null);
+    const [notifyTitle, setNotifyTitle] = useState("Kết quả xử lý khiếu nại");
+    const [notifyMessage, setNotifyMessage] = useState("");
+    const [notifySubmitting, setNotifySubmitting] = useState(false);
+    const [notifyOk, setNotifyOk] = useState("");
 
     useEffect(() => {
         loadReport();
@@ -100,10 +105,36 @@ export default function AdminReportDetail() {
             setError("");
             const res = await fetchReportDetail(reportId);
             setReport(res?.report);
+            setNotifyOk("");
         } catch (err) {
             setError(err?.response?.data?.message || err?.message || "Không thể tải chi tiết khiếu nại.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleNotifySeller = async (e) => {
+        e.preventDefault();
+        const msg = notifyMessage.trim();
+        if (!msg) {
+            alert("Nhập nội dung thông báo gửi seller.");
+            return;
+        }
+        try {
+            setNotifySubmitting(true);
+            setNotifyOk("");
+            await notifySellerReportResult(reportId, {
+                title: notifyTitle.trim() || "Kết quả xử lý khiếu nại",
+                message: msg,
+                reportResult: report?.status ?? "",
+                reportReason: report?.reason ?? "",
+            });
+            setNotifyOk("Đã gửi thông báo tới seller liên quan.");
+            setNotifyMessage("");
+        } catch (err) {
+            alert(err?.response?.data?.message || err?.message || "Gửi thông báo thất bại.");
+        } finally {
+            setNotifySubmitting(false);
         }
     };
 
@@ -239,6 +270,46 @@ export default function AdminReportDetail() {
                                 <div className="mt-1 text-slate-900">{report.reporterId?.fullName || "—"}</div>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-slate-900 mb-3">Gửi kết quả cho Seller</h2>
+                        <p className="text-xs text-slate-500 mb-4">
+                            Hệ thống xác định seller từ shop / sản phẩm / tài khoản seller bị báo cáo.
+                        </p>
+                        {notifyOk && (
+                            <div className="mb-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm px-3 py-2">
+                                {notifyOk}
+                            </div>
+                        )}
+                        <form onSubmit={handleNotifySeller} className="space-y-3">
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500">Tiêu đề</label>
+                                <input
+                                    type="text"
+                                    value={notifyTitle}
+                                    onChange={(e) => setNotifyTitle(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500">Nội dung</label>
+                                <textarea
+                                    value={notifyMessage}
+                                    onChange={(e) => setNotifyMessage(e.target.value)}
+                                    rows={4}
+                                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm resize-y"
+                                    placeholder="Mô tả kết quả xử lý khiếu nại cho seller..."
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={notifySubmitting}
+                                className="w-full rounded-xl bg-violet-600 text-white text-sm font-semibold py-2.5 hover:bg-violet-500 disabled:opacity-60"
+                            >
+                                {notifySubmitting ? "Đang gửi..." : "Gửi thông báo tới seller"}
+                            </button>
+                        </form>
                     </div>
 
                     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
