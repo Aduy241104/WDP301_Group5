@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
+import { Shop } from "../models/Shop.js";
 
 // ============================================
 // USER LIST (with search by keyword)
@@ -83,6 +84,14 @@ export const AdminBlockUserController = async (req, res) => {
         user.status = "blocked";
         await user.save();
 
+        // If blocking a seller account, also block all shops owned by that seller.
+        if (user.role === "seller") {
+            await Shop.updateMany(
+                { ownerId: userId, isDeleted: false },
+                { $set: { status: "blocked", isBlockedByAdmin: true } }
+            );
+        }
+
         return res.status(StatusCodes.OK).json({
             message: "User blocked.",
             user: { id: user._id, role: user.role, status: user.status },
@@ -107,6 +116,14 @@ export const AdminUnblockUserController = async (req, res) => {
 
         user.status = "active";
         await user.save();
+
+        // If unblocking a seller account, also unblock shops blocked by admin.
+        if (user.role === "seller") {
+            await Shop.updateMany(
+                { ownerId: userId, isDeleted: false },
+                { $set: { status: "approved", isBlockedByAdmin: false } }
+            );
+        }
 
         return res.status(StatusCodes.OK).json({
             message: "User unblocked.",

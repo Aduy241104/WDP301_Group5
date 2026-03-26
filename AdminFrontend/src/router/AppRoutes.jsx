@@ -29,6 +29,9 @@ import AdminBrandList from "../pages/AdminBrand/AdminBrandList";
 import AdminBrandForm from "../pages/AdminBrand/AdminBrandAddForm";
 import AdminBrandEditForm from "../pages/AdminBrand/AdminBrandEditForm"
 import AdminUserAnalytics from "../pages/AdminUserAnalytics"
+import AdminCategoryList from "../pages/AdminCategory/AdminCategoryList";
+import AdminCategoryForm from "../pages/AdminCategory/AdminCategoryForm";
+import AdminSystemNotifications from "../pages/AdminSystemNotifications";
 
 
 export default function AppRoutes() {
@@ -71,6 +74,10 @@ export default function AppRoutes() {
                         <Route path="brands/:brandId/edit" element={<AdminBrandEditForm />} />
                         <Route path="useranalytics" element={<AdminUserAnalytics />} />
                         <Route path="revenueanalytics" element={<AdminRevenueAnalytics/>} />
+                        <Route path="categories" element={<AdminCategoryList />} />
+                        <Route path="categories/new" element={<AdminCategoryForm />} />
+                        <Route path="categories/:categoryId/edit" element={<AdminCategoryForm />} />
+                        <Route path="notifications/broadcast" element={<AdminSystemNotifications />} />
 
                     </Route>
                 </Route>

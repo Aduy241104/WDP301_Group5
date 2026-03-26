@@ -53,6 +53,19 @@ import {
     AdminInactivateProductController,
 } from "../controllers/AdminProductController.js";
 
+import {
+    AdminNotifySellerReportResultController,
+    AdminBroadcastSellersNotificationController,
+    AdminNotifySelectedSellersController,
+    AdminSellerNotifyCandidatesController,
+} from "../controllers/AdminNotificationController.js";
+
+import {
+    AdminReviewListController,
+    AdminProductReviewsController,
+    AdminDeleteReviewController,
+} from "../controllers/AdminReviewController.js";
+
 const router = express.Router();
 
 // Apply auth + admin guard for all admin routes
@@ -66,6 +79,8 @@ router.get("/seller-registrations/by-status", AdminFilterSellerByStatusControlle
 
 // View list of sellers (approved sellers)
 router.get("/sellers", AdminSellerListController);
+// Seller active — chọn gửi thông báo (phải đặt trước /sellers/:userId/...)
+router.get("/sellers/notify-candidates", AdminSellerNotifyCandidatesController);
 
 // View detailed seller profile
 router.get("/sellers/:userId/profile", AdminViewSellerProfileController);
@@ -100,9 +115,19 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 
 // Report management
 router.get("/reports", AdminReportListController);
-router.get("/reports/:reportId", AdminReportDetailController);
 router.get("/reports/classify", AdminClassifyReportController);
+router.get("/reports/:reportId", AdminReportDetailController);
 router.post("/reports/:reportId/resolve", AdminResolveReportController);
+router.post("/reports/:reportId/notify-seller", AdminNotifySellerReportResultController);
+
+// System notifications (admin → sellers)
+router.post("/notifications/broadcast-sellers", AdminBroadcastSellersNotificationController);
+router.post("/notifications/selected-sellers", AdminNotifySelectedSellersController);
+
+// Review management (admin)
+router.get("/reviews", AdminReviewListController);
+router.delete("/reviews/:reviewId", AdminDeleteReviewController);
+router.get("/products/:productId/reviews", AdminProductReviewsController);
 
 // Revenue Analytics
 router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);
