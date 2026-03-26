@@ -14,6 +14,9 @@ export default function AdminSystemNotifications() {
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
 
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingRequest, setPendingRequest] = useState(null);
+
     const [candidates, setCandidates] = useState([]);
     const [candidatesLoading, setCandidatesLoading] = useState(false);
     const [keyword, setKeyword] = useState("");
@@ -78,20 +81,8 @@ export default function AdminSystemNotifications() {
         }
 
         if (mode === "all") {
-            if (!window.confirm("Gửi thông báo này tới TẤT CẢ tài khoản seller đang hoạt động (active)?")) return;
-            try {
-                setSubmitting(true);
-                setError("");
-                setResult(null);
-                const res = await broadcastSellersNotification({ title: t, message: m });
-                setResult({ ...res, mode: "all" });
-                setMessage("");
-                setTitle("");
-            } catch (err) {
-                setError(err?.response?.data?.message || err?.message || "Gửi thất bại.");
-            } finally {
-                setSubmitting(false);
-            }
+            setPendingRequest({ kind: "all", title: t, message: m });
+            setConfirmOpen(true);
             return;
         }
 
@@ -100,27 +91,49 @@ export default function AdminSystemNotifications() {
             alert("Chọn ít nhất một seller trong danh sách bên dưới.");
             return;
         }
-        if (
-            !window.confirm(
-                `Gửi thông báo tới ${ids.length} seller đã chọn? (chỉ tài khoản seller active mới nhận được.)`
-            )
-        )
-            return;
+        setPendingRequest({
+            kind: "selected",
+            title: t,
+            message: m,
+            ids,
+        });
+        setConfirmOpen(true);
+    };
 
+    const runConfirmed = async () => {
+        if (!pendingRequest) return;
         try {
             setSubmitting(true);
             setError("");
             setResult(null);
+
+            if (pendingRequest.kind === "all") {
+                const res = await broadcastSellersNotification({
+                    title: pendingRequest.title,
+                    message: pendingRequest.message,
+                });
+                setResult({ ...res, mode: "all" });
+                setMessage("");
+                setTitle("");
+                return;
+            }
+
             const res = await notifySelectedSellers({
-                title: t,
-                message: m,
-                sellerUserIds: ids,
+                title: pendingRequest.title,
+                message: pendingRequest.message,
+                sellerUserIds: pendingRequest.ids,
             });
             setResult({ ...res, mode: "selected" });
         } catch (err) {
-            setError(err?.response?.data?.message || err?.message || "Gửi thất bại.");
+            setError(
+                err?.response?.data?.message ||
+                    err?.message ||
+                    "Gửi thất bại."
+            );
         } finally {
             setSubmitting(false);
+            setConfirmOpen(false);
+            setPendingRequest(null);
         }
     };
 
@@ -307,6 +320,49 @@ export default function AdminSystemNotifications() {
                           : `Gửi ${selectedCount} seller`}
                 </button>
             </form>
+
+            {confirmOpen && pendingRequest && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-xl p-6">
+                        <div className="text-lg font-bold text-slate-900">
+                            Xác nhận gửi thông báo
+                        </div>
+                        <div className="text-sm text-slate-600 mt-2">
+                            {pendingRequest.kind === "all"
+                                ? "Bạn có chắc chắn muốn gửi thông báo này đến toàn bộ seller không?"
+                                : `Bạn có chắc chắn muốn gửi thông báo cho ${pendingRequest.ids.length} seller đã chọn không?`}
+                        </div>
+
+                        {error && (
+                            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="mt-5 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setConfirmOpen(false);
+                                    setPendingRequest(null);
+                                }}
+                                className="rounded-xl px-4 py-2 bg-white border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                                disabled={submitting}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="button"
+                                onClick={runConfirmed}
+                                disabled={submitting}
+                                className="rounded-xl px-4 py-2 bg-violet-600 text-white text-sm font-semibold hover:bg-violet-500 disabled:opacity-60"
+                            >
+                                {submitting ? "Đang gửi..." : "Xác nhận"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

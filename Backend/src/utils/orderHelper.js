@@ -114,7 +114,7 @@ export const makeVoucherSnapshot = (v, { scope, shopId, appliedDiscountAmount })
     };
 };
 
-export async function loadAndValidateVoucherNoTxn({ code, scope, shopId, userId, baseAmount }) {
+export async function loadAndValidateVoucher({ code, scope, shopId, userId, baseAmount }) {
     if (!code) return { voucher: null, discountAmount: 0 };
 
     const filter = { code: String(code).trim(), scope, isDeleted: false };

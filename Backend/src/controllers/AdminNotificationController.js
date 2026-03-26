@@ -131,7 +131,8 @@ export const AdminNotifySellerReportResultController = async (req, res) => {
                 reportCode,
                 reportResult: reportResult || report.status || "",
                 reportReason: reportReason || report.reason || "",
-                url: "",
+                // Seller system route for report detail
+                url: `/seller/reports/${report._id}`,
             },
         });
 

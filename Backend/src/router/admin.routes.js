@@ -34,6 +34,7 @@ import {
     AdminReportListController,
     AdminReportDetailController,
     AdminClassifyReportController,
+    AdminResolveReportController,
 } from "../controllers/AdminReportController.js";
 
 import {
@@ -116,6 +117,7 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 router.get("/reports", AdminReportListController);
 router.get("/reports/classify", AdminClassifyReportController);
 router.get("/reports/:reportId", AdminReportDetailController);
+router.post("/reports/:reportId/resolve", AdminResolveReportController);
 router.post("/reports/:reportId/notify-seller", AdminNotifySellerReportResultController);
 
 // System notifications (admin → sellers)

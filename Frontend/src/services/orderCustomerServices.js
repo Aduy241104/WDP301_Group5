@@ -65,3 +65,8 @@ export const cancelOrderAPI = async (orderId) => {
     const response = await axiosInstance.delete(`/api/order/cancel-order/${orderId}`);
     return response.data;
 }
+
+export const createReportAPI = async (data) => {
+    const response = await axiosInstance.post("/api/report/create-report", data);
+    return response.data;
+};

@@ -9,26 +9,22 @@ import { useToast } from "../../../context/ToastContext.jsx";
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("orders");
 
   const prevCount = useRef(0);
-
   const navigate = useNavigate();
-
-  const { toast } = useToast(); // ⭐ QUAN TRỌNG
+  const { toast } = useToast();
 
   const fetchNotifications = async (showToast = false) => {
     try {
       const data = await getNotificationsAPI();
 
-      // kiểm tra notification mới
       if (showToast && data.length > prevCount.current) {
         const newest = data[0];
-
-        toast.success(`🛒 ${newest.title}`);
+        toast.success(`🔔 ${newest.title}`);
       }
 
       prevCount.current = data.length;
-
       setNotifications(data || []);
     } catch (err) {
       console.error(err);
@@ -38,16 +34,24 @@ export default function Notifications() {
   };
 
   useEffect(() => {
-    // load lần đầu
     fetchNotifications();
 
-    // polling mỗi 5s
     const interval = setInterval(() => {
       fetchNotifications(true);
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Nếu không có order notifications thì mặc định mở tab Reports
+  useEffect(() => {
+    if (loading) return;
+    const orderCount = notifications.filter((n) => n.type?.startsWith("order")).length;
+    const nonOrderCount = notifications.filter((n) => !n.type?.startsWith("order")).length;
+    if (orderCount === 0 && nonOrderCount > 0) {
+      setActiveTab("reports");
+    }
+  }, [loading, notifications]);
 
   const handleClick = async (n) => {
     try {
@@ -69,23 +73,94 @@ export default function Notifications() {
     }
   };
 
+  // ===== Filter Notifications =====
+
+  const orderNotifications = notifications.filter((n) =>
+    n.type?.startsWith("order")
+  );
+
+  // Reports tab hiển thị tất cả notification không phải order_status
+  // để tránh trường hợp type không khớp bộ lọc cũ khiến danh sách trống.
+  const reportNotifications = notifications.filter(
+    (n) => !n.type?.startsWith("order")
+  );
+
+  const currentList =
+    activeTab === "orders" ? orderNotifications : reportNotifications;
+
+  // ===== Render =====
+
   return (
     <div className="space-y-6">
+
       <h2 className="text-2xl font-semibold">Notifications</h2>
 
+      {/* ===== Tabs ===== */}
+
+      <div className="flex gap-4">
+
+        <button
+          onClick={() => setActiveTab("orders")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "orders"
+              ? "bg-indigo-600 text-white"
+              : "bg-white border hover:bg-slate-50"
+          }`}
+        >
+          🛒 Orders
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full ${
+              activeTab === "orders"
+                ? "bg-white text-indigo-600"
+                : "bg-slate-200"
+            }`}
+          >
+            {orderNotifications.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("reports")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "reports"
+              ? "bg-indigo-600 text-white"
+              : "bg-white border hover:bg-slate-50"
+          }`}
+        >
+          🚨 Reports
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full ${
+              activeTab === "reports"
+                ? "bg-white text-indigo-600"
+                : "bg-slate-200"
+            }`}
+          >
+            {reportNotifications.length}
+          </span>
+        </button>
+
+      </div>
+
+      {/* ===== Loading ===== */}
+
       {loading && (
-        <div className="text-slate-500">Loading notifications...</div>
+        <div className="text-slate-500">
+          Loading notifications...
+        </div>
       )}
 
-      {!loading && notifications.length === 0 && (
+      {/* ===== Notification List ===== */}
+
+      {!loading && currentList.length === 0 && (
         <div className="bg-white rounded-xl shadow p-6 text-slate-500">
           No notifications
         </div>
       )}
 
-      {!loading && notifications.length > 0 && (
+      {!loading && currentList.length > 0 && (
         <div className="space-y-4">
-          {notifications.map((n) => (
+
+          {currentList.map((n) => (
             <div
               key={n._id}
               onClick={() => handleClick(n)}
@@ -93,10 +168,15 @@ export default function Notifications() {
                 !n.isRead ? "border-l-4 border-indigo-500" : ""
               }`}
             >
-              <div>
-                <div className="font-semibold">{n.title}</div>
 
-                <div className="text-sm text-slate-600">{n.message}</div>
+              <div>
+                <div className="font-semibold">
+                  {n.title}
+                </div>
+
+                <div className="text-sm text-slate-600">
+                  {n.message}
+                </div>
 
                 <div className="text-xs text-slate-400 mt-1">
                   {new Date(n.createdAt).toLocaleString()}
@@ -108,10 +188,13 @@ export default function Notifications() {
                   New
                 </div>
               )}
+
             </div>
           ))}
+
         </div>
       )}
+
     </div>
   );
 }

@@ -33,6 +33,10 @@ import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
 import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
 import WishlistPage from "../pages/WishlistPage";
 import Notifications from "../pages/Seller/Notifications/Notifications";
+import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
+import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
+import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
+import SearchResultPage from "../pages/Search/SearchResultPage";
 
 export default function AppRoutes() {
   return (
@@ -45,6 +49,7 @@ export default function AppRoutes() {
         <Route path="/order-success" element={ <OrderSuccess /> } />
         <Route path="/shops/:productId" element={ <ShopListPage /> } />
         <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
+        <Route path="/search" element={ <SearchResultPage /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
@@ -64,17 +69,16 @@ export default function AppRoutes() {
           <Route path="/place-order" element={ <OrderSummary /> } />
           <Route path="/my-order-list" element={ <OrderListPage /> } />
           <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
-          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/wishlist" element={ <WishlistPage /> } />
+          <Route path="/report/:orderId" element={ <ReportPage /> } />
         </Route>
       </Route>
-
 
       <Route element={ <MainLayoutRoute /> }>
         <Route element={ <PrivateRoute /> }>
           <Route path="/request-seller" element={ <SellerRegisterPage /> } />
         </Route>
       </Route>
-
 
       {/* Seller routes */ }
       <Route element={ <SellerRoute /> }>
@@ -91,7 +95,10 @@ export default function AppRoutes() {
           <Route path="orders/:id" element={ <OrderDetail /> } />
           {/* ROUTE RÕ RÀNG */ }
           <Route path="dashboard" element={ <SellerDashboard /> } />
-          <Route path="store-information" element={ <SellerStoreInformation /> } />
+          <Route
+            path="store-information"
+            element={ <SellerStoreInformation /> }
+          />
           <Route path="pickup-addresses" element={ <SellerManageStore /> } />
           <Route path="products" element={ <SellerProducts /> } />
           <Route path="categories" element={ <SellerCategories /> } />
@@ -100,7 +107,10 @@ export default function AppRoutes() {
           <Route path="orders" element={ <OrderList /> } />
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
-          <Route path="notifications" element={<Notifications />} />
+          <Route path="notifications" element={ <Notifications /> } />
+          <Route path="reports/:reportId" element={ <SellerReportDetail /> } />
+          <Route path="followers" element={ <SellerFollowers /> } />
+
         </Route>
       </Route>
 
