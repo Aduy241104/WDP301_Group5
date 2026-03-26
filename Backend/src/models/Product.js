@@ -2,14 +2,6 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-const ProductAttributeSchema = new Schema(
-    {
-        key: { type: String, required: true },
-        value: { type: Schema.Types.Mixed, required: true },
-    },
-    { _id: false }
-);
-
 const ProductSchema = new Schema(
     {
         shopId: { type: Schema.Types.ObjectId, ref: "Shop", required: true, index: true },

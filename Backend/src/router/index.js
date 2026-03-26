@@ -23,9 +23,9 @@ import voucherRoutes from "./voucher.routes.js";
 import sellerManageCategoryRoutes from "./sellerManageCategoryRoutes.js";
 import shopFollowRoutes from "./shopFollow.routes.js";
 import adminBrandRoutes from "./adminBrand.routes.js"
-import getAdminCategories from "./adminCategory.routes.js";
+import adminCategoryRoutes from "./adminCategory.routes.js";
 import adminUserAnalyticsRoutes from "./adminUserAnalytics.routes.js";
-import adminRevenueRoutes from "./adminRevenue.routes.js"
+import adminCategoryAnalyticsRoutes from "./adminCategoryAnalytics.routes.js"
 import reviewRoutes from "./review.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
 import shopBannerRoutes from "./shopBanner.routes.js";
@@ -70,9 +70,9 @@ function route(app) {
     app.use("/api/cart", cartRoutes);
     app.use("/api/shops", shopRoutes);
     app.use("/api/admin/brands", adminBrandRoutes); 
-    app.use("/api/admin/Category", getAdminCategories); 
+    app.use("/api/admin/Category", adminCategoryRoutes); 
     app.use("/api/admin/users", adminUserAnalyticsRoutes);
-    app.use("/api/admin/revenue", adminRevenueRoutes); 
+    app.use("/api/admin/revenue", adminCategoryAnalyticsRoutes); 
     app.use("/api/report", reportRouter);
     app.use("/api/seller/reports", sellerReportRouter);
     app.use("/api/seller/followers", SellerFollowers);

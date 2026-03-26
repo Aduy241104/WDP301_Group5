@@ -10,6 +10,7 @@ import ChangePasswordForm from "../components/profile/ChangePasswordForm";
 import AddressForm from "../components/address/AddressForm";
 import AddressList from "../components/address/AddressList";
 import AddressPage from "./AddressPage";
+import FollowingShopsPage from "./myFollowShopPage";
 
 
 export default function ProfilePage() {
@@ -86,7 +87,7 @@ export default function ProfilePage() {
   if (!editData) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pt-10">
       <div className="flex gap-3">
 
         {/* Sidebar bên trái */ }
@@ -133,6 +134,10 @@ export default function ProfilePage() {
 
           { activeView === "address" && (
             <AddressPage />
+          ) }
+
+          { activeView === "myFollow" && (
+            <FollowingShopsPage />
           ) }
 
 

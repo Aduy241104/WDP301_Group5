@@ -19,3 +19,9 @@ export const getTopSaleProductAPI = async ({ page, limit }) => {
     });
     return res.data;
 }
+
+export const searchProductsAPI = async (filters) => {
+    // Dùng POST và truyền filters vào body
+    const res = await axiosInstance.post("/api/discovery/search", filters);
+    return res.data;
+};

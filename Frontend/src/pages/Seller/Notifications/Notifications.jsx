@@ -43,6 +43,16 @@ export default function Notifications() {
     return () => clearInterval(interval);
   }, []);
 
+  // Nếu không có order notifications thì mặc định mở tab Reports
+  useEffect(() => {
+    if (loading) return;
+    const orderCount = notifications.filter((n) => n.type?.startsWith("order")).length;
+    const nonOrderCount = notifications.filter((n) => !n.type?.startsWith("order")).length;
+    if (orderCount === 0 && nonOrderCount > 0) {
+      setActiveTab("reports");
+    }
+  }, [loading, notifications]);
+
   const handleClick = async (n) => {
     try {
       if (!n.isRead) {
@@ -69,8 +79,10 @@ export default function Notifications() {
     n.type?.startsWith("order")
   );
 
-  const reportNotifications = notifications.filter((n) =>
-    n.type?.includes("report")
+  // Reports tab hiển thị tất cả notification không phải order_status
+  // để tránh trường hợp type không khớp bộ lọc cũ khiến danh sách trống.
+  const reportNotifications = notifications.filter(
+    (n) => !n.type?.startsWith("order")
   );
 
   const currentList =

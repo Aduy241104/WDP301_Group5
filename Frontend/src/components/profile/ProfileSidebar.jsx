@@ -78,13 +78,25 @@ const ProfileSidebar = ({ activeView, setActiveView }) => {
             <span>Quản lý địa chỉ</span>
           </div>
 
-          {/* NOTIFICATION */ }
           <div
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer
-                           text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
+            onClick={ () => setActiveView("myFollow") }
+            className={ [
+              "flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer",
+              "transition-all",
+              activeView === "myFollow"
+                ? "bg-[rgba(119,226,242,0.18)] text-slate-900 font-semibold"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+            ].join(" ") }
           >
-            <span className="h-2 w-2 rounded-full bg-slate-300" />
-            <span>Thông báo</span>
+            <span
+              className={ [
+                "h-2 w-2 rounded-full",
+                activeView === "myFollow"
+                  ? "bg-[rgb(119,226,242)]"
+                  : "bg-slate-300",
+              ].join(" ") }
+            />
+            <span>Đang theo dõi</span>
           </div>
         </div>
         

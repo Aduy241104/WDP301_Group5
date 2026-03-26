@@ -88,13 +88,6 @@ export default function AdminRevenueAnalytics() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
           <StatCard
-            title="Category Revenue"
-            value={formatCurrency(revenueByCategory?.totals?.totalRevenue)}
-            subtext={`${revenueByCategory?.totals?.totalOrders || 0} orders`}
-            icon="🗂️"
-          />
-
-          <StatCard
             title="Total GMV"
             value={formatCurrency(gmvData?.totals?.totalGMV)}
             subtext={`${gmvData?.totals?.totalOrders || 0} đơn hàng`}
