@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { User } from "../models/User.js";
+import { Product } from "../models/Product.js";
 
 
 // xem wishlist (có phân trang)
@@ -59,16 +60,10 @@ export const getWishlist = async (req, res) => {
 export const addToWishlist = async (req, res) => {
   try {
 
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
-    }
-
     const userId = req.user.id;
     const { productId } = req.params;
 
+    // ✔ validate id
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
         success: false,
@@ -76,10 +71,23 @@ export const addToWishlist = async (req, res) => {
       });
     }
 
+    // 🔥 convert sang ObjectId
+    const productObjectId = new mongoose.Types.ObjectId(productId);
+
+    // ✔ check product tồn tại
+    const product = await Product.findById(productObjectId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    // ✔ add wishlist (không duplicate + đúng kiểu)
     await User.findByIdAndUpdate(
       userId,
-      { $addToSet: { wishlist: productId } }, // tránh duplicate
-      { new: true }
+      { $addToSet: { wishlist: productObjectId } }
     );
 
     return res.json({
@@ -88,21 +96,16 @@ export const addToWishlist = async (req, res) => {
     });
 
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message
     });
-
   }
 };
-
-
-
 // xóa wishlist
 export const removeFromWishlist = async (req, res) => {
   try {
-
+    // ✔ check auth
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -113,10 +116,23 @@ export const removeFromWishlist = async (req, res) => {
     const userId = req.user.id;
     const { productId } = req.params;
 
+    // ✔ validate productId
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid productId"
+      });
+    }
+
+    // 🔥 convert sang ObjectId (QUAN TRỌNG)
+    const productObjectId = new mongoose.Types.ObjectId(productId);
+
+    // ✔ remove wishlist
     await User.findByIdAndUpdate(
       userId,
-      { $pull: { wishlist: productId } },
-      { new: true }
+      {
+        $pull: { wishlist: productObjectId }
+      }
     );
 
     return res.json({
@@ -125,11 +141,9 @@ export const removeFromWishlist = async (req, res) => {
     });
 
   } catch (error) {
-
     return res.status(500).json({
       success: false,
       message: error.message
     });
-
   }
 };

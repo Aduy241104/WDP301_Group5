@@ -1,6 +1,7 @@
 import { Review } from "../models/Review.js";
 import { Order } from "../models/Order.js";
 import { User } from "../models/User.js";
+import { Product } from "../models/Product.js";
 import mongoose from "mongoose";
 
 export const getProductReviews = async ({
@@ -11,13 +12,12 @@ export const getProductReviews = async ({
 }) => {
 
     const skip = (page - 1) * limit;
-
+    const product = await Product.findById(productId).select("ratingAvg");
     const matchCondition = {
         productId: new mongoose.Types.ObjectId(productId),
         isDeleted: false
     };
 
-    // 🔥 filter rating
     if (rating) {
         matchCondition.rating = Number(rating);
     }
@@ -39,6 +39,7 @@ export const getProductReviews = async ({
 
     return {
         reviews,
+        avgRating: product?.ratingAvg || 0,
         pagination: {
             total,
             page,
@@ -47,7 +48,6 @@ export const getProductReviews = async ({
         }
     };
 };
-
 
 export const createReview = async ({
     userId,
@@ -65,7 +65,6 @@ export const createReview = async ({
         throw new Error("Invalid orderId");
     }
 
-    // 🔥 tìm order đúng của user
     const order = await Order.findOne({
         _id: orderId,
         userId: userId,
@@ -76,7 +75,6 @@ export const createReview = async ({
         throw new Error("Order not found or not delivered");
     }
 
-    // 🔥 kiểm tra product có trong order không
     const item = order.items.find(
         item => item.productId.toString() === productId
     );
@@ -85,7 +83,6 @@ export const createReview = async ({
         throw new Error("Product not found in this order");
     }
 
-    // 🔥 check đã review chưa
     const existingReview = await Review.findOne({
         userId,
         productId,
@@ -97,7 +94,6 @@ export const createReview = async ({
         throw new Error("You already reviewed this product in this order");
     }
 
-    // 🔥 tạo review
     const review = await Review.create({
         userId,
         productId,
@@ -105,6 +101,9 @@ export const createReview = async ({
         rating,
         comment
     });
+
+    // 🔥 UPDATE RATING
+    await updateProductRating(productId);
 
     return review;
 };
@@ -129,7 +128,6 @@ export const updateReviewService = async ({
         throw new Error("Review not found");
     }
 
-    // 🔥 chỉ chủ review mới sửa được
     if (review.userId.toString() !== userId) {
         throw new Error("You can only edit your own review");
     }
@@ -138,6 +136,9 @@ export const updateReviewService = async ({
     review.comment = comment ?? review.comment;
 
     await review.save();
+
+    // 🔥 UPDATE RATING
+    await updateProductRating(review.productId);
 
     return review;
 };
@@ -157,8 +158,37 @@ export const deleteReviewService = async ({ reviewId, userId }) => {
         throw new Error("Review not found or you are not the owner");
     }
 
-    // 🔥 Hard delete (xóa khỏi DB)
+    const productId = review.productId; // 🔥 lưu trước khi xóa
+
     await Review.findByIdAndDelete(reviewId);
 
+    // 🔥 UPDATE RATING
+    await updateProductRating(productId);
+
     return true;
+};
+
+export const updateProductRating = async (productId) => {
+    const result = await Review.aggregate([
+        {
+            $match: {
+                productId: new mongoose.Types.ObjectId(productId),
+                isDeleted: false
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                avgRating: { $avg: "$rating" }
+            }
+        }
+    ]);
+
+    const avgRating = result.length > 0
+        ? Number(result[0].avgRating.toFixed(1))
+        : 0;
+
+    await Product.findByIdAndUpdate(productId, {
+        ratingAvg: avgRating
+    });
 };

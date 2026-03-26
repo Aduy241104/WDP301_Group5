@@ -47,9 +47,48 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
 
   // Edit mode
   useEffect(() => {
-    if (editingAddress) setForm(editingAddress);
-    else setForm(emptyForm);
-  }, [editingAddress]);
+    const initEdit = async () => {
+      if (!editingAddress) {
+        setForm(emptyForm);
+        setDistricts([]);
+        setWards([]);
+        return;
+      }
+
+      setForm(editingAddress);
+
+      // 🔥 tìm province theo name
+      const province = provinces.find(
+        (p) => p.name === editingAddress.province
+      );
+
+      if (province) {
+        try {
+          setLoadingDistrict(true);
+          const d = await getDistrictsByProvinceAPI(province.code);
+          setDistricts(d);
+
+          // 🔥 tìm district theo name
+          const district = d.find(
+            (x) => x.name === editingAddress.district
+          );
+
+          if (district) {
+            setLoadingWard(true);
+            const w = await getWardsByDistrictAPI(district.code);
+            setWards(w);
+          }
+        } finally {
+          setLoadingDistrict(false);
+          setLoadingWard(false);
+        }
+      }
+    };
+
+    if (provinces.length > 0) {
+      initEdit();
+    }
+  }, [editingAddress, provinces]);
 
   // Province change (LƯU NAME)
   const handleProvinceChange = async (e) => {
@@ -114,8 +153,11 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
     const newErrors = {};
     if (!form.fullName.trim())
       newErrors.fullName = "Vui lòng nhập họ và tên";
-    if (!form.phone.trim())
+    if (!form.phone.trim()) {
       newErrors.phone = "Vui lòng nhập số điện thoại";
+    } else if (!/^0\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Số điện thoại phải 10 số và bắt đầu bằng 0";
+    }
     if (!form.province)
       newErrors.province = "Vui lòng chọn Tỉnh / Thành phố";
     if (!form.district)
@@ -194,11 +236,15 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
         </div>
 
         {/* PROVINCE */}
+        {/* PROVINCE */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">
             Tỉnh / Thành phố
           </label>
           <select
+            value={
+              provinces.find((p) => p.name === form.province)?.code || ""
+            }
             onChange={handleProvinceChange}
             className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
           >
@@ -222,6 +268,9 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
             Quận / Huyện
           </label>
           <select
+            value={
+              districts.find((d) => d.name === form.district)?.code || ""
+            }
             onChange={handleDistrictChange}
             disabled={!form.province}
             className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
@@ -246,6 +295,9 @@ const AddressForm = ({ editingAddress, onSubmit }) => {
             Phường / Xã
           </label>
           <select
+            value={
+              wards.find((w) => w.name === form.ward)?.code || ""
+            }
             disabled={!form.district}
             onChange={(e) => {
               const wardCode = e.target.value;
