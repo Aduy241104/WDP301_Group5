@@ -1,5 +1,6 @@
 import { User } from "../models/User.js";
 import bcrypt from "bcrypt";
+import cloudinary from "../config/cloudinaryConfig.js";
 
 export const viewProfile = async (req, res) => {
     try {
@@ -26,6 +27,7 @@ export const viewProfile = async (req, res) => {
     }
 };
 
+
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -39,29 +41,24 @@ export const updateProfile = async (req, res) => {
             avatar
         } = req.body;
 
+        const updateData = {
+            fullName,
+            phone,
+            gender,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+            addresses,
+        };
+
+        // 🔥 chỉ update avatar nếu là string
+        if (avatar && typeof avatar === "string") {
+            updateData.avatar = avatar;
+        }
+
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            {
-                $set: {
-                    fullName,
-                    phone,
-                    gender,
-                    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-                    addresses,
-                    avatar
-                }
-            },
-            {
-                new: true,
-                runValidators: true
-            }
+            { $set: updateData },
+            { new: true, runValidators: true }
         ).select("-password");
-
-        if (!updatedUser) {
-            return res.status(404).json({
-                message: "User profile not found"
-            });
-        }
 
         return res.status(200).json({
             message: "Update profile successfully",
@@ -72,6 +69,31 @@ export const updateProfile = async (req, res) => {
         console.error("UPDATE_PROFILE_ERROR:", error);
         return res.status(500).json({
             message: "Internal server error"
+        });
+    }
+};
+
+export const uploadAvatar = async (req, res) => {
+    try {
+
+        if (!req.file) {
+            return res.status(400).json({
+                message: "No image uploaded"
+            });
+        }
+
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "avatars"
+        });
+
+        return res.status(200).json({
+            url: result.secure_url
+        });
+
+    } catch (error) {
+        console.error("UPLOAD AVATAR ERROR:", error);
+        return res.status(500).json({
+            message: "Upload failed"
         });
     }
 };

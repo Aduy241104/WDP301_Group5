@@ -38,9 +38,14 @@ export default function VoucherModal({
             setLoadingList(true);
             const response = await getVoucherByShopAPI(sid);
 
-            // ✅ response.vouchers là array
             const list = Array.isArray(response?.vouchers) ? response.vouchers : [];
             setVoucherList(list);
+
+            // Tự động tick chọn nếu mã defaultCode đã được áp từ trước
+            if (defaultCode) {
+                const found = list.find(v => v.code === defaultCode);
+                if (found) setSelectedVoucherId(found._id);
+            }
         } catch (error) {
             console.log(error);
             setVoucherList([]);
@@ -217,39 +222,12 @@ export default function VoucherModal({
                         ) }
                     </div>
 
-                    {/* Code input */ }
-                    <div className="space-y-2">
-                        <div className="text-xs font-medium text-slate-600">Mã voucher</div>
-
-                        <div className="flex gap-2">
-                            <input
-                                value={ code }
-                                onChange={ (e) => {
-                                    setCode(e.target.value);
-                                    setSelectedVoucherId(null);
-                                    setResult(null);
-                                    setErr("");
-                                } }
-                                placeholder="VD: UNI20"
-                                className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-                                disabled={ loading || !!selectedVoucherId }
-                            />
-                            <button
-                                className="rounded-xl bg-sky-500 px-3 py-2 text-sm text-white hover:bg-sky-600 disabled:opacity-60"
-                                onClick={ handleApply }
-                                disabled={ !canSubmit }
-                                type="button"
-                            >
-                                { loading ? "..." : "Áp" }
-                            </button>
+                    {/* Bỏ phần input code thủ công, chỉ giữ lại hiển thị lỗi (nếu có) */ }
+                    { err && (
+                        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            { err }
                         </div>
-
-                        { err && (
-                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                                { err }
-                            </div>
-                        ) }
-                    </div>
+                    ) }
                 </div>
 
                 {/* Footer */ }

@@ -35,6 +35,7 @@ import notificationRoutes from "./notification.routes.js";
 import reportRouter from "./reportRouter.js";
 import sellerReportRouter from "./sellerReport.routes.js";
 import SellerFollowers from "./sellerFollowRoutes.js";
+import sellerVoucherRoutes from "./sellerVoucher.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -76,6 +77,7 @@ function route(app) {
     app.use("/api/report", reportRouter);
     app.use("/api/seller/reports", sellerReportRouter);
     app.use("/api/seller/followers", SellerFollowers);
+    app.use("/api/seller/vouchers", sellerVoucherRoutes);
 
 }
 

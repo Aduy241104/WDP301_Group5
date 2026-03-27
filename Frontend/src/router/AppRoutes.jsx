@@ -36,6 +36,7 @@ import Notifications from "../pages/Seller/Notifications/Notifications";
 import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
 import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
+import SellerVouchers from "../pages/Seller/Vouchers/SellerVouchers";
 import SearchResultPage from "../pages/Search/SearchResultPage";
 
 export default function AppRoutes() {
@@ -99,18 +100,20 @@ export default function AppRoutes() {
             path="store-information"
             element={ <SellerStoreInformation /> }
           />
-          <Route path="pickup-addresses" element={ <SellerManageStore /> } />
-          <Route path="products" element={ <SellerProducts /> } />
-          <Route path="categories" element={ <SellerCategories /> } />
-          <Route path="banners" element={ <SellerBanners /> } />
-          <Route path="inventory" element={ <SellerInventory /> } />
-          <Route path="orders" element={ <OrderList /> } />
-          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
-          <Route path="orders/:id" element={ <OrderDetail /> } />
-          <Route path="notifications" element={ <Notifications /> } />
-          <Route path="reports/:reportId" element={ <SellerReportDetail /> } />
-          <Route path="followers" element={ <SellerFollowers /> } />
 
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
+          <Route path="products" element={<SellerProducts />} />
+          <Route path="categories" element={<SellerCategories />} />
+          <Route path="banners" element={<SellerBanners />} />
+          <Route path="inventory" element={<SellerInventory />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/cancelled" element={<SellerCancelledOrders />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="reports/:reportId" element={<SellerReportDetail />} />
+          <Route path="followers" element={<SellerFollowers />} />
+          <Route path="vouchers" element={<SellerVouchers />} />
+      
         </Route>
       </Route>
 

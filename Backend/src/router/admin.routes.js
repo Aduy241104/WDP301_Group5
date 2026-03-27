@@ -52,6 +52,14 @@ import {
     AdminActivateProductController,
     AdminInactivateProductController,
 } from "../controllers/AdminProductController.js";
+import {
+    adminCreateSystemVoucher,
+    adminGetSystemVoucherDetail,
+    adminDeleteSystemVoucher,
+    adminGetSystemVoucherList,
+    adminToggleSystemVoucher,
+    adminUpdateSystemVoucher,
+} from "../controllers/AdminVoucherController.js";
 
 import {
     AdminNotifySellerReportResultController,
@@ -143,6 +151,14 @@ router.post("/products/:productId/approve", AdminApproveProductController);
 router.post("/products/:productId/reject", AdminRejectProductController);
 router.post("/products/:productId/activate", AdminActivateProductController);
 router.post("/products/:productId/inactivate", AdminInactivateProductController);
+
+// System voucher management (admin)
+router.get("/vouchers", adminGetSystemVoucherList);
+router.post("/vouchers", adminCreateSystemVoucher);
+router.get("/vouchers/:voucherId", adminGetSystemVoucherDetail);
+router.put("/vouchers/:voucherId", adminUpdateSystemVoucher);
+router.put("/vouchers/:voucherId/toggle", adminToggleSystemVoucher);
+router.delete("/vouchers/:voucherId", adminDeleteSystemVoucher);
 
 
 export default router;

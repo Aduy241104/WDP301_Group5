@@ -89,11 +89,14 @@ const ProfileForm = ({ editData, setEditData, setMessage, reloadProfile }) => {
         }
 
         try {
+
+
             await updateProfileAPI({
                 fullName: editData.fullName,
                 phone: editData.phone,
                 gender: editData.gender,
                 dateOfBirth: editData.dateOfBirth,
+                avatar: editData.avatar
             });
 
             await reloadProfile?.();
@@ -129,7 +132,7 @@ const ProfileForm = ({ editData, setEditData, setMessage, reloadProfile }) => {
 
     return (
         <div className="w-full lg:w-2/3 rounded-lg border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            {/* Header */ }
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 p-6">
                 <div>
                     <h2 className="text-lg font-semibold text-slate-900">Thông tin cá nhân</h2>
@@ -144,77 +147,77 @@ const ProfileForm = ({ editData, setEditData, setMessage, reloadProfile }) => {
                 </div>
             </div>
 
-            {/* Form */ }
+            {/* Form */}
             <div className="p-6 sm:p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {/* FULL NAME */ }
+                    {/* FULL NAME */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700">Họ và tên</label>
                         <input
-                            className={ [
+                            className={[
                                 "w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400",
                                 "outline-none transition",
                                 errors.fullName
                                     ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                     : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                            ].join(" ") }
-                            value={ editData.fullName }
-                            onChange={ (e) => {
+                            ].join(" ")}
+                            value={editData.fullName}
+                            onChange={(e) => {
                                 setEditData({ ...editData, fullName: e.target.value });
                                 setErrors((p) => ({ ...p, fullName: "" }));
                                 setIsEditing(true);
-                            } }
+                            }}
                             placeholder="Nhập họ và tên"
                         />
-                        { errors.fullName && <p className="text-sm text-rose-600">{ errors.fullName }</p> }
+                        {errors.fullName && <p className="text-sm text-rose-600">{errors.fullName}</p>}
                     </div>
 
-                    {/* PHONE */ }
+                    {/* PHONE */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700">Số điện thoại</label>
                         <input
-                            className={ [
+                            className={[
                                 "w-full rounded-xl border bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400",
                                 "outline-none transition",
                                 errors.phone
                                     ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                     : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                            ].join(" ") }
-                            value={ editData.phone }
-                            onChange={ handlePhoneChange }
+                            ].join(" ")}
+                            value={editData.phone}
+                            onChange={handlePhoneChange}
                             placeholder="Nhập số điện thoại"
                         />
-                        { errors.phone && <p className="text-sm text-rose-600">{ errors.phone }</p> }
+                        {errors.phone && <p className="text-sm text-rose-600">{errors.phone}</p>}
                     </div>
 
-                    {/* EMAIL - READ ONLY (span 2 columns) */ }
+                    {/* EMAIL - READ ONLY (span 2 columns) */}
                     <div className="space-y-2 lg:col-span-2">
                         <label className="text-sm font-medium text-slate-700">Email</label>
                         <input
                             className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600"
-                            value={ editData.email }
+                            value={editData.email}
                             disabled
                         />
                         <p className="text-xs text-slate-500">Email không thể thay đổi.</p>
                     </div>
 
-                    {/* GENDER */ }
+                    {/* GENDER */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700">Giới tính</label>
                         <select
-                            className={ [
+                            className={[
                                 "w-full rounded-xl border bg-white px-4 py-3 text-slate-900",
                                 "outline-none transition",
                                 errors.gender
                                     ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                     : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                            ].join(" ") }
-                            value={ editData.gender || "" }
-                            onChange={ (e) => {
+                            ].join(" ")}
+                            value={editData.gender || ""}
+                            onChange={(e) => {
                                 setEditData({ ...editData, gender: e.target.value });
                                 setErrors((p) => ({ ...p, gender: "" }));
                                 setIsEditing(true);
-                            } }
+                            }}
                         >
                             <option value="" disabled>
                                 Chọn giới tính
@@ -223,57 +226,58 @@ const ProfileForm = ({ editData, setEditData, setMessage, reloadProfile }) => {
                             <option value="female">Nữ</option>
                             <option value="other">Khác</option>
                         </select>
-                        { errors.gender && <p className="text-sm text-rose-600">{ errors.gender }</p> }
+                        {errors.gender && <p className="text-sm text-rose-600">{errors.gender}</p>}
                     </div>
 
-                    {/* DATE OF BIRTH */ }
+                    {/* DATE OF BIRTH */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700">Ngày sinh</label>
                         <input
                             type="date"
-                            className={ [
+                            max={new Date(new Date().setFullYear(new Date().getFullYear() - 13)).toISOString().split("T")[0]}
+                            className={[
                                 "w-full rounded-xl border bg-white px-4 py-3 text-slate-900",
                                 "outline-none transition",
                                 errors.dateOfBirth
                                     ? "border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
                                     : "border-slate-200 focus:border-[rgb(119,226,242)] focus:ring-4 focus:ring-[rgba(119,226,242,0.25)]",
-                            ].join(" ") }
-                            value={ editData.dateOfBirth || "" }
-                            onChange={ (e) => {
+                            ].join(" ")}
+                            value={editData.dateOfBirth || ""}
+                            onChange={(e) => {
                                 setEditData({ ...editData, dateOfBirth: e.target.value });
                                 setErrors((p) => ({ ...p, dateOfBirth: "" }));
                                 setIsEditing(true);
-                            } }
+                            }}
                         />
-                        { errors.dateOfBirth && (
-                            <p className="text-sm text-rose-600">{ errors.dateOfBirth }</p>
-                        ) }
+                        {errors.dateOfBirth && (
+                            <p className="text-sm text-rose-600">{errors.dateOfBirth}</p>
+                        )}
                     </div>
 
-                    {/* ACTION BUTTONS (span 2 columns) */ }
+                    {/* ACTION BUTTONS (span 2 columns) */}
                     <div className="lg:col-span-2 pt-1">
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
-                                onClick={ handleUpdateProfile }
-                                className={ [
+                                onClick={handleUpdateProfile}
+                                className={[
                                     "flex-1 rounded-xl px-4 py-3 font-semibold text-white",
                                     "bg-[rgb(119,226,242)] shadow-sm",
                                     "hover:brightness-95 active:brightness-90",
                                     "focus:outline-none focus:ring-4 focus:ring-[rgba(119,226,242,0.35)]",
                                     "transition",
-                                ].join(" ") }
+                                ].join(" ")}
                             >
                                 Cập nhật
                             </button>
 
                             <button
-                                onClick={ handleCancel }
-                                className={ [
+                                onClick={handleCancel}
+                                className={[
                                     "flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700",
                                     "hover:bg-slate-50 active:bg-slate-100",
                                     "focus:outline-none focus:ring-4 focus:ring-slate-200",
                                     "transition",
-                                ].join(" ") }
+                                ].join(" ")}
                             >
                                 Hủy
                             </button>
