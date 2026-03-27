@@ -3,6 +3,13 @@ import mongoose from "mongoose";
 import { ShopCategory } from "../models/ShopCategory.js";
 import { Product } from "../models/Product.js";
 
+const normalizeCategoryName = (value = "") =>
+    value
+        .normalize("NFKC")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLocaleLowerCase("vi-VN");
+
 /**
  * GET /api/seller/categories
  * Seller view categories of their shop
@@ -37,17 +44,28 @@ export const createCategory = async (req, res) => {
         const shopId = req.shop._id;
         const { name } = req.body;
 
-        if (!name || !name.trim()) {
+        const cleanedName = (name || "")
+            .normalize("NFKC")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!cleanedName) {
             return res.status(400).json({
                 message: "Category name is required",
             });
         }
 
-        const existed = await ShopCategory.findOne({
+        const normalizedInputName = normalizeCategoryName(cleanedName);
+        const existingCategories = await ShopCategory.find({
             shopId,
-            name: name.trim(),
             isDeleted: { $ne: true },
-        });
+        })
+            .select("name")
+            .lean();
+
+        const existed = existingCategories.some(
+            (category) => normalizeCategoryName(category?.name || "") === normalizedInputName
+        );
 
         if (existed) {
             return res.status(400).json({
@@ -57,7 +75,7 @@ export const createCategory = async (req, res) => {
 
         const newCategory = await ShopCategory.create({
             shopId,
-            name: name.trim(),
+            name: cleanedName,
         });
 
         return res.status(201).json({
