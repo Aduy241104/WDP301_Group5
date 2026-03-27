@@ -386,16 +386,18 @@ export default function AdminProductList() {
                                                             </IconButton>
                                                         </>
                                                     ) : (
-                                                        <IconButton
-                                                            title={isActive ? "Ẩn sản phẩm" : "Kích hoạt"}
-                                                            tone={isActive ? "danger" : "success"}
-                                                            disabled={submitting}
-                                                            onClick={() =>
-                                                                handleActiveToggle(p, isActive)
-                                                            }
-                                                        >
-                                                            {isActive ? <HideIcon /> : <ShowIcon />}
-                                                        </IconButton>
+                                                        p.status !== "rejected" && (
+                                                            <IconButton
+                                                                title={isActive ? "Ẩn sản phẩm" : "Kích hoạt"}
+                                                                tone={isActive ? "danger" : "success"}
+                                                                disabled={submitting}
+                                                                onClick={() =>
+                                                                    handleActiveToggle(p, isActive)
+                                                                }
+                                                            >
+                                                                {isActive ? <HideIcon /> : <ShowIcon />}
+                                                            </IconButton>
+                                                        )
                                                     )}
                                                 </div>
                                             </td>
