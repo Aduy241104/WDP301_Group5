@@ -8,6 +8,7 @@ import ProductFeedbackSection from "./ProductFeedbackSection";
 import { useAuth } from "../../context/AuthContext";
 import { userTrackingAPI } from "../../services/userTrackingService";
 import SimilarShopList from "./SimilarShopList";
+import { saveToRecentlyViewed } from "../../utils/recentlyViewed";
 
 export default function ProductDetail() {
     const { productId } = useParams();
@@ -22,6 +23,8 @@ export default function ProductDetail() {
                 const data = await getProductDetailAPI(productId);
                 setProduct(data.item);
                 setCurrentPrice(data?.item?.variants?.[0]?.price ?? 0)
+
+                saveToRecentlyViewed(productId);
             } finally {
                 setLoading(false);
             }

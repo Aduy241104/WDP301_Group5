@@ -38,6 +38,9 @@ import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
 import SellerVouchers from "../pages/Seller/Vouchers/SellerVouchers";
 import SearchResultPage from "../pages/Search/SearchResultPage";
+import RecentlyViewedPage from "../pages/recentlyViewed";
+
+<Route path="/recently-viewed" element={<RecentlyViewedPage />} />
 
 export default function AppRoutes() {
   return (
@@ -72,6 +75,7 @@ export default function AppRoutes() {
           <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
           <Route path="/wishlist" element={ <WishlistPage /> } />
           <Route path="/report/:orderId" element={ <ReportPage /> } />
+          <Route path="/recently-viewed" element={<RecentlyViewedPage />} />
         </Route>
       </Route>
 
