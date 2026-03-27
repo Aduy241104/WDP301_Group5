@@ -23,6 +23,7 @@ const VoucherSchema = new Schema(
         usageLimitTotal: { type: Number, default: 0, min: 0 },
         usedCount: { type: Number, default: 0, min: 0 },
         usageLimitPerUser: { type: Number, default: 0, min: 0 },
+        isActive: { type: Boolean, default: true, index: true },
 
         createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
         createdByRole: { type: String, enum: ["admin", "seller"], required: true },

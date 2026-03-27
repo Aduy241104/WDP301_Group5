@@ -71,6 +71,7 @@ export const applyShopVoucherPreview = async (req, res, next) => {
             scope: "shop",
             shopId: new Types.ObjectId(shopId),
             isDeleted: false,
+            isActive: true,
         }).lean();
 
         const basePayload = { shopId, code, subTotal, totalBeforeDiscount: subTotal };
@@ -139,6 +140,7 @@ export const applySystemShipVoucherPreview = async (req, res, next) => {
             code,
             scope: "system",
             isDeleted: false,
+            isActive: true,
         }).lean();
 
         const basePayload = {
@@ -189,6 +191,7 @@ export const getVoucherByShop = async (req, res) => {
             scope: "shop",
             shopId: shopId,
             isDeleted: false,
+            isActive: true,
             startAt: { $lte: new Date() },
             endAt: { $gte: new Date() }
         }).lean();
