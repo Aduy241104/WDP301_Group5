@@ -29,6 +29,9 @@ import AdminBrandList from "../pages/AdminBrand/AdminBrandList";
 import AdminBrandForm from "../pages/AdminBrand/AdminBrandAddForm";
 import AdminBrandEditForm from "../pages/AdminBrand/AdminBrandEditForm"
 import AdminUserAnalytics from "../pages/AdminUserAnalytics"
+import AdminVoucherManagement from "../pages/AdminVoucherManagement";
+import AdminVoucherAdd from "../pages/AdminVoucherAdd";
+import AdminVoucherEdit from "../pages/AdminVoucherEdit";
 
 
 export default function AppRoutes() {
@@ -71,6 +74,9 @@ export default function AppRoutes() {
                         <Route path="brands/:brandId/edit" element={<AdminBrandEditForm />} />
                         <Route path="useranalytics" element={<AdminUserAnalytics />} />
                         <Route path="revenueanalytics" element={<AdminRevenueAnalytics/>} />
+                        <Route path="vouchers" element={<AdminVoucherManagement />} />
+                        <Route path="vouchers/new" element={<AdminVoucherAdd />} />
+                        <Route path="vouchers/:voucherId/edit" element={<AdminVoucherEdit />} />
 
                     </Route>
                 </Route>
