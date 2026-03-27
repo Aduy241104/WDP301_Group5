@@ -245,20 +245,33 @@ export default function AdminProductDetail() {
                                     </button>
                                 </>
                             )}
-                            <button
-                                onClick={handleActiveToggle}
-                                disabled={submitting}
-                                className={[
-                                    "inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60",
-                                    product.activeStatus === "active"
-                                        ? "bg-rose-600 hover:bg-rose-500"
-                                        : "bg-emerald-600 hover:bg-emerald-500",
-                                ].join(" ")}
-                            >
-                                {product.activeStatus === "active"
-                                    ? "Ẩn sản phẩm"
-                                    : "Kích hoạt sản phẩm"}
-                            </button>
+                            {product.status === "rejected" && (
+                                <button
+                                    onClick={handleApprove}
+                                    disabled={submitting}
+                                    className="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition disabled:opacity-60"
+                                >
+                                    Chấp nhận lại
+                                </button>
+                            )}
+
+                            {/* Nếu sản phẩm đã bị từ chối thì ẩn nút kích hoạt/ẩn */}
+                            {product.status !== "rejected" && (
+                                <button
+                                    onClick={handleActiveToggle}
+                                    disabled={submitting}
+                                    className={[
+                                        "inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60",
+                                        product.activeStatus === "active"
+                                            ? "bg-rose-600 hover:bg-rose-500"
+                                            : "bg-emerald-600 hover:bg-emerald-500",
+                                    ].join(" ")}
+                                >
+                                    {product.activeStatus === "active"
+                                        ? "Ẩn sản phẩm"
+                                        : "Kích hoạt sản phẩm"}
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
