@@ -25,3 +25,11 @@ export const searchProductsAPI = async (filters) => {
     const res = await axiosInstance.post("/api/discovery/search", filters);
     return res.data;
 };
+
+export const getProductsByIdsAPI = async (ids) => {
+    const res = await axiosInstance.post("/api/discovery/by-ids", {
+        ids,
+    });
+
+    return res.data;
+};
