@@ -15,6 +15,11 @@ export const updateSellerVoucherAPI = async (voucherId, payload) => {
     return res.data;
 };
 
+export const getSellerVoucherDetailAPI = async (voucherId) => {
+    const res = await axiosInstance.get(`/api/seller/vouchers/${voucherId}`);
+    return res.data;
+};
+
 export const deleteSellerVoucherAPI = async (voucherId) => {
     const res = await axiosInstance.delete(`/api/seller/vouchers/${voucherId}`);
     return res.data;

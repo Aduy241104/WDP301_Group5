@@ -193,7 +193,11 @@ export const getVoucherByShop = async (req, res) => {
             isDeleted: false,
             isActive: true,
             startAt: { $lte: new Date() },
-            endAt: { $gte: new Date() }
+            endAt: { $gte: new Date() },
+            $or: [
+                { usageLimitTotal: 0 },
+                { $expr: { $lt: ["$usedCount", "$usageLimitTotal"] } }
+            ]
         }).lean();
 
         const voucherIds = shopVouchers.map((v) => v._id);
@@ -204,12 +208,9 @@ export const getVoucherByShop = async (req, res) => {
         const voucherUseage = await VoucherUsage.find({ voucherId: { $in: voucherIds }, userId }).lean();
 
         for (const vu of voucherUseage) {
-
-
-
             const key = vu.voucherId.toString();
-
             const shopVou = shopVouchersMap.get(key);
+            if (!shopVou) continue;
 
             if (shopVou.usageLimitPerUser === 0) {
                 continue;
