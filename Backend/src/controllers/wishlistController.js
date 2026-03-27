@@ -147,3 +147,42 @@ export const removeFromWishlist = async (req, res) => {
     });
   }
 };
+
+// check product có trong wishlist không
+export const checkWishlist = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const userId = req.user.id;
+    const { productId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid productId"
+      });
+    }
+
+    // 🔥 FIX QUAN TRỌNG
+    const exists = await User.exists({
+      _id: userId,
+      wishlist: productId // ❗ KHÔNG cần ObjectId
+    });
+
+    return res.json({
+      success: true,
+      isInWishlist: !!exists
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
