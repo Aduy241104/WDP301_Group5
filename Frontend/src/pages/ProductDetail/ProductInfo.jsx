@@ -1,12 +1,13 @@
 // components/product/ProductInfo.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { Star, Package, MapPin, Shirt } from "lucide-react";
 import { Heart } from "lucide-react";
 import {
-    getWishlistAPI,
     addWishlistAPI,
-    removeWishlistAPI
+    removeWishlistAPI,
+    checkWishlistAPI
 } from "../../services/wishlistUserService";
 
 export default function ProductInfo({ product, currentPrice }) {
@@ -15,64 +16,61 @@ export default function ProductInfo({ product, currentPrice }) {
     const navigate = useNavigate();
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [loadingWishlist, setLoadingWishlist] = useState(false);
-    const [wishlistIds, setWishlistIds] = useState([]);
+    const { isAuthenticated } = useAuth();
 
     const handleToggleWishlist = async () => {
-        if (loadingWishlist) return;
+    if (!isAuthenticated) {
+        navigate("/login");
+        return;
+    }
 
-        try {
-            setLoadingWishlist(true);
+    if (loadingWishlist) return;
 
-            if (isWishlisted) {
-                await removeWishlistAPI(product._id);
+    try {
+        setLoadingWishlist(true);
 
-                setIsWishlisted(false);
-
-                // 🔥 FIX: update list local
-                setWishlistIds(prev => prev.filter(id => id !== product._id));
-
-            } else {
-                await addWishlistAPI(product._id);
-
-                setIsWishlisted(true);
-
-                // 🔥 FIX: update list local
-                setWishlistIds(prev => [...prev, product._id]);
-            }
-        } catch (error) {
-            console.log(error);
-            alert("Có lỗi xảy ra");
-        } finally {
-            setLoadingWishlist(false);
+        if (isWishlisted) {
+            await removeWishlistAPI(product._id);
+        } else {
+            await addWishlistAPI(product._id);
         }
-    };
+
+        // 🔥 sync lại từ server
+        const res = await checkWishlistAPI(product._id);
+        setIsWishlisted(res.isInWishlist);
+
+    } catch (error) {
+        console.log(error);
+        alert("Có lỗi xảy ra");
+    } finally {
+        setLoadingWishlist(false);
+    }
+};
+
 
     useEffect(() => {
-        const fetchWishlist = async () => {
+        if (!product?._id || !isAuthenticated) return;
+
+        const checkWishlist = async () => {
             try {
-                // 🔥 FIX: lấy toàn bộ wishlist (không bị pagination)
-                const res = await getWishlistAPI(1, 1000);
+                const res = await checkWishlistAPI(product._id);
 
-                const ids = res.data.map(item => item._id);
+                console.log("CHECK:", res);
 
-                setWishlistIds(ids);
+                setIsWishlisted(res.isInWishlist);
+
             } catch (error) {
                 console.log(error);
             }
         };
 
-        fetchWishlist();
-    }, []);
+        checkWishlist();
+    }, [product?._id, isAuthenticated]); // ✅ chuẩn // ✅ có user
 
     useEffect(() => {
         setActiveImg(images[0] || "");
     }, [product?._id, images]);
 
-    useEffect(() => {
-        if (!product?._id) return;
-
-        setIsWishlisted(wishlistIds.includes(product._id));
-    }, [wishlistIds, product?._id]);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden font-sans">
