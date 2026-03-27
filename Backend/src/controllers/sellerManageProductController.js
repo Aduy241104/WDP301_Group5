@@ -476,6 +476,30 @@ export const updateProductActiveStatus = async (req, res) => {
       });
     }
 
+    // Nếu admin đã inactive thì seller không được phép bật active lại
+    // và không được ghi đè metadata inactiveBy/inactiveActorId của admin.
+    if (product.inactiveBy === "admin" && product.activeStatus === "inactive") {
+      const adminReason = product.inactiveReason || "Không có lý do cụ thể";
+
+      if (activeStatus === "active") {
+        return res.status(403).json({
+          message: `Sản phẩm đang bị admin tạm ngưng. Lý do: ${adminReason}`,
+          data: {
+            activeStatus: product.activeStatus,
+            inactiveReason: product.inactiveReason || "",
+          },
+        });
+      }
+
+      return res.status(200).json({
+        message: `Sản phẩm đang bị admin tạm ngưng. Lý do: ${adminReason}`,
+        data: {
+          activeStatus: product.activeStatus,
+          inactiveReason: product.inactiveReason || "",
+        },
+      });
+    }
+
     product.activeStatus = activeStatus;
     if (activeStatus === "inactive") {
       product.inactiveBy = "seller";

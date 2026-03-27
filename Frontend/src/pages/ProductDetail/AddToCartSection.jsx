@@ -6,6 +6,7 @@ import { useModal } from "@/context/ModalContext";
 import { ShoppingCart, Zap, Minus, Plus } from "lucide-react";
 import { addToCartAPI } from "../../services/cartService";
 import { useToast } from "../../context/ToastContext";
+import { userTrackingAPI } from "../../services/userTrackingService";
 
 export default function AddToCartSection({ product, setCurrentPrice }) {
     const [variant, setVariant] = useState(product.variants.find((v) => v.stock > 0) || null);
@@ -41,6 +42,7 @@ export default function AddToCartSection({ product, setCurrentPrice }) {
         try {
             await addToCartAPI({ variantId: variant._id, quantity });
             toast.success("Đã thêm vào giỏ hàng.");
+            await userTrackingAPI(product._id, "add_to_cart");
         } catch (error) {
             const msg = error?.response?.data?.message || "Không thể thêm vào giỏ hàng.";
             toast.error(msg);
@@ -175,7 +177,7 @@ export default function AddToCartSection({ product, setCurrentPrice }) {
                     Thêm vào giỏ hàng
                 </button>
 
-                <button
+                {/* <button
                     type="button"
                     onClick={ handleBuyNow }
                     className="
@@ -190,7 +192,7 @@ export default function AddToCartSection({ product, setCurrentPrice }) {
                 >
                     <Zap className="w-5 h-5" />
                     Mua ngay
-                </button>
+                </button> */}
             </div>
         </div>
     );

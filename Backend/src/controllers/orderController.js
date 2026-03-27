@@ -9,7 +9,6 @@ import { Inventory } from "../models/Inventory.js";
 import { Product } from "../models/Product.js";
 import { sumById, bulkInc } from "../utils/orderHelper.js";
 
-
 const ALLOWED_STATUSES = ["created", "confirmed", "shipped", "delivered", "cancelled"];
 
 export const prepareOrdersFromCart = async (req, res, next) => {
@@ -267,121 +266,121 @@ export const createOrdersFromCart = async (req, res) => {
     }
 };
 
-export const listMyOrders = async (req, res) => {
-    try {
-        const userId = req.user.id;
+// export const listMyOrders = async (req, res) => {
+//     try {
+//         const userId = req.user.id;
 
-        const status = String(req.query.status || "created").trim();
-        if (status && !ALLOWED_STATUSES.includes(status)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "Invalid status",
-                allowed: ALLOWED_STATUSES,
-            });
-        }
+//         const status = String(req.query.status || "created").trim();
+//         if (status && !ALLOWED_STATUSES.includes(status)) {
+//             return res.status(StatusCodes.BAD_REQUEST).json({
+//                 message: "Invalid status",
+//                 allowed: ALLOWED_STATUSES,
+//             });
+//         }
 
-        // pagination
-        const pageRaw = Number(req.query.page || 1);
-        const limitRaw = Number(req.query.limit || 10);
+//         // pagination
+//         const pageRaw = Number(req.query.page || 1);
+//         const limitRaw = Number(req.query.limit || 10);
 
-        const page = Number.isInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1;
-        const limit = Number.isInteger(limitRaw) && limitRaw > 0 && limitRaw <= 50 ? limitRaw : 10;
-        const skip = (page - 1) * limit;
+//         const page = Number.isInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+//         const limit = Number.isInteger(limitRaw) && limitRaw > 0 && limitRaw <= 50 ? limitRaw : 10;
+//         const skip = (page - 1) * limit;
 
-        const filter = {
-            userId,
-            ...(status ? { orderStatus: status } : {}),
-        };
+//         const filter = {
+//             userId,
+//             ...(status ? { orderStatus: status } : {}),
+//         };
 
-        // chạy song song: count + list
-        const [total, orders] = await Promise.all([
-            Order.countDocuments(filter),
-            Order.find(filter)
-                .sort({ createdAt: -1, _id: -1 })
-                .skip(skip)
-                .limit(limit)
+//         // chạy song song: count + list
+//         const [total, orders] = await Promise.all([
+//             Order.countDocuments(filter),
+//             Order.find(filter)
+//                 .sort({ createdAt: -1, _id: -1 })
+//                 .skip(skip)
+//                 .limit(limit)
 
-                // shop info (nếu cần list theo shop)
-                .populate({
-                    path: "shop",
-                    select: "_id name avatar",
-                })
+//                 // shop info (nếu cần list theo shop)
+//                 .populate({
+//                     path: "shop",
+//                     select: "_id name avatar",
+//                 })
 
-                // join product
-                .populate({
-                    path: "items.productId",
-                    select: "_id name images",
-                })
+//                 // join product
+//                 .populate({
+//                     path: "items.productId",
+//                     select: "_id name images",
+//                 })
 
-                // join variant
-                .populate({
-                    path: "items.variantId",
-                    select: "_id sku size price status",
-                })
+//                 // join variant
+//                 .populate({
+//                     path: "items.variantId",
+//                     select: "_id sku size price status",
+//                 })
 
-                .select("-trackingCode -createdAt -updatedAt")
-                // tối ưu: trả object thuần
-                .lean(),
-        ]);
+//                 .select("-trackingCode -createdAt -updatedAt")
+//                 // tối ưu: trả object thuần
+//                 .lean(),
+//         ]);
 
-        const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+//         const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
 
-        // optional: map lại items cho FE dễ dùng (giữ snapshot + thêm joined)
-        const mapped = (orders || []).map((o) => ({
-            _id: o._id,
-            orderCode: o.orderCode,
-            shop: o.shop,
-            orderStatus: o.orderStatus,
-            paymentStatus: o.paymentStatus,
-            paymentMethod: o.paymentMethod,
-            trackingCode: o.trackingCode,
+//         // optional: map lại items cho FE dễ dùng (giữ snapshot + thêm joined)
+//         const mapped = (orders || []).map((o) => ({
+//             _id: o._id,
+//             orderCode: o.orderCode,
+//             shop: o.shop,
+//             orderStatus: o.orderStatus,
+//             paymentStatus: o.paymentStatus,
+//             paymentMethod: o.paymentMethod,
+//             trackingCode: o.trackingCode,
 
-            subtotal: o.subtotal,
-            shippingFee: o.shippingFee,
-            voucher: o.voucher,
-            totalAmount: o.totalAmount,
+//             subtotal: o.subtotal,
+//             shippingFee: o.shippingFee,
+//             voucher: o.voucher,
+//             totalAmount: o.totalAmount,
 
-            statusHistory: o.statusHistory,
-            deliveredAt: o.deliveredAt,
-            cancelledAt: o.cancelledAt,
-            createdAt: o.createdAt,
-            updatedAt: o.updatedAt,
+//             statusHistory: o.statusHistory,
+//             deliveredAt: o.deliveredAt,
+//             cancelledAt: o.cancelledAt,
+//             createdAt: o.createdAt,
+//             updatedAt: o.updatedAt,
 
-            items: (o.items || []).map((it) => ({
-                productId: it.productId?._id || it.productId, // khi populate fail vẫn còn id
-                variantId: it.variantId?._id || it.variantId,
+//             items: (o.items || []).map((it) => ({
+//                 productId: it.productId?._id || it.productId, // khi populate fail vẫn còn id
+//                 variantId: it.variantId?._id || it.variantId,
 
-                // snapshot fields (nguồn “chuẩn” của order history)
-                productName: it.productName,
-                variantLabel: it.variantLabel,
-                price: it.price,
-                quantity: it.quantity,
+//                 // snapshot fields (nguồn “chuẩn” của order history)
+//                 productName: it.productName,
+//                 variantLabel: it.variantLabel,
+//                 price: it.price,
+//                 quantity: it.quantity,
 
-                // joined info cho UI
-                product: it.productId && typeof it.productId === "object" ? it.productId : null,
-                variant: it.variantId && typeof it.variantId === "object" ? it.variantId : null,
-            })),
-        }));
+//                 // joined info cho UI
+//                 product: it.productId && typeof it.productId === "object" ? it.productId : null,
+//                 variant: it.variantId && typeof it.variantId === "object" ? it.variantId : null,
+//             })),
+//         }));
 
-        return res.status(StatusCodes.OK).json({
-            message: "Get orders success",
-            filter: { status },
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
-            orders: mapped,
-        });
-    } catch (err) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: "Server error",
-            error: err?.message || null,
-        });
-    }
-};
+//         return res.status(StatusCodes.OK).json({
+//             message: "Get orders success",
+//             filter: { status },
+//             pagination: {
+//                 page,
+//                 limit,
+//                 total,
+//                 totalPages,
+//                 hasNextPage: page < totalPages,
+//                 hasPrevPage: page > 1,
+//             },
+//             orders: mapped,
+//         });
+//     } catch (err) {
+//         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+//             message: "Server error",
+//             error: err?.message || null,
+//         });
+//     }
+// };
 
 export const getMyOrderDetail = async (req, res) => {
     try {
@@ -532,3 +531,119 @@ export const cancelOrder = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
     }
 };
+
+export const listMyOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1. Lấy và kiểm tra Status
+        const status = String(req.query.status || "").trim();
+        if (status && !ALLOWED_STATUSES.includes(status)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Invalid status",
+                allowed: ALLOWED_STATUSES,
+            });
+        }
+
+        // 2. Lấy keyword search (q)
+        const keyword = String(req.query.q || "").trim();
+
+        // 3. Pagination logic
+        const pageRaw = Number(req.query.page || 1);
+        const limitRaw = Number(req.query.limit || 10);
+        const page = Number.isInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+        const limit = Number.isInteger(limitRaw) && limitRaw > 0 && limitRaw <= 50 ? limitRaw : 10;
+        const skip = (page - 1) * limit;
+
+        // 4. Xây dựng Filter
+        const filter = { userId };
+
+        // Lọc theo status nếu có truyền vào
+        if (status) {
+            filter.orderStatus = status;
+        }
+
+        // Search logic: Tìm theo orderCode HOẶC productName trong items
+        if (keyword) {
+            filter.$or = [
+                { orderCode: { $regex: keyword, $options: "i" } },
+                { "items.productName": { $regex: keyword, $options: "i" } }
+            ];
+        }
+
+        // 5. Chạy song song: count + list
+        const [total, orders] = await Promise.all([
+            Order.countDocuments(filter),
+            Order.find(filter)
+                .sort({ createdAt: -1, _id: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate({
+                    path: "shop",
+                    select: "_id name avatar",
+                })
+                .populate({
+                    path: "items.productId",
+                    select: "_id name images",
+                })
+                .populate({
+                    path: "items.variantId",
+                    select: "_id sku size price status",
+                })
+                .lean(),
+        ]);
+
+        const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+        // 6. Map lại data cho FE (giữ nguyên cấu trúc snapshot + joined)
+        const mapped = (orders || []).map((o) => ({
+            _id: o._id,
+            orderCode: o.orderCode,
+            shop: o.shop,
+            orderStatus: o.orderStatus,
+            paymentStatus: o.paymentStatus,
+            paymentMethod: o.paymentMethod,
+            trackingCode: o.trackingCode,
+            subtotal: o.subtotal,
+            shippingFee: o.shippingFee,
+            voucher: o.voucher,
+            totalAmount: o.totalAmount,
+            statusHistory: o.statusHistory,
+            deliveredAt: o.deliveredAt,
+            cancelledAt: o.cancelledAt,
+            createdAt: o.createdAt,
+            updatedAt: o.updatedAt,
+            items: (o.items || []).map((it) => ({
+                productId: it.productId?._id || it.productId,
+                variantId: it.variantId?._id || it.variantId,
+                productName: it.productName,
+                variantLabel: it.variantLabel,
+                price: it.price,
+                quantity: it.quantity,
+                product: it.productId && typeof it.productId === "object" ? it.productId : null,
+                variant: it.variantId && typeof it.variantId === "object" ? it.variantId : null,
+            })),
+        }));
+
+        // 7. Response
+        return res.status(StatusCodes.OK).json({
+            message: "Get orders success",
+            filter: { status, keyword }, // Trả về filter để FE biết đang search gì
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+            },
+            orders: mapped,
+        });
+    } catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Server error",
+            error: err?.message || null,
+        });
+    }
+};
+

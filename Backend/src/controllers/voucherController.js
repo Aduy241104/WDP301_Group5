@@ -212,7 +212,6 @@ export const getVoucherByShop = async (req, res) => {
             const shopVou = shopVouchersMap.get(key);
 
             if (shopVou.usageLimitPerUser === 0) {
-                console.log("HHEHEHEEHEH");
                 continue;
             }
             shopVouchersMap.delete(key);
@@ -220,6 +219,63 @@ export const getVoucherByShop = async (req, res) => {
 
         const shopVouchersArr = [...shopVouchersMap.values()];
         res.status(StatusCodes.OK).json({ message: "get voucher by shop success", vouchers: shopVouchersArr })
+
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
+}
+
+export const getSystemVouchers = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        //Tìm các voucher của hệ thống đang còn hiệu lực
+        const systemVouchers = await Voucher.find({
+            scope: "system", // Chỉ lấy voucher hệ thống
+            isDeleted: false,
+            startAt: { $lte: new Date() },
+            endAt: { $gte: new Date() }
+        }).lean();
+
+        const voucherIds = systemVouchers.map((v) => v._id);
+        const systemVouchersMap = new Map(
+            systemVouchers.map(v => [v._id.toString(), v])
+        );
+
+        // Lấy lịch sử sử dụng của user hiện tại với các voucher này
+        const voucherUsage = await VoucherUsage.find({
+            voucherId: { $in: voucherIds },
+            userId
+        }).lean();
+
+        // Đếm số lần user đã dùng cho từng voucher
+        const userUsageCount = {};
+        for (const vu of voucherUsage) {
+            const key = vu.voucherId.toString();
+            userUsageCount[key] = (userUsageCount[key] || 0) + 1;
+        }
+
+        // Lọc bỏ các voucher đã hết lượt
+        for (const [key, vou] of systemVouchersMap.entries()) {
+            // Kiểm tra giới hạn tổng của voucher (nếu usageLimitTotal > 0)
+            if (vou.usageLimitTotal > 0 && vou.usedCount >= vou.usageLimitTotal) {
+                systemVouchersMap.delete(key);
+                continue;
+            }
+
+            // Kiểm tra giới hạn của từng user (nếu usageLimitPerUser > 0)
+            const userUsed = userUsageCount[key] || 0;
+            if (vou.usageLimitPerUser > 0 && userUsed >= vou.usageLimitPerUser) {
+                systemVouchersMap.delete(key);
+            }
+        }
+
+        const systemVouchersArr = [...systemVouchersMap.values()];
+
+        res.status(StatusCodes.OK).json({
+            message: "Get system vouchers success",
+            vouchers: systemVouchersArr
+        });
 
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });

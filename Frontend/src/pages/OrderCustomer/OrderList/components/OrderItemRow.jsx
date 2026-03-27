@@ -1,8 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom"; // 1. Import Link
 import { formatVND } from "../../../../utils/money";
 
 export default function OrderItemRow({ item, fallbackImg }) {
     const img = item?.product?.images?.[0] || fallbackImg;
+
+    // Lấy productId từ item hoặc item.product tùy vào cấu trúc data của bạn
+    const productId = item?.productId || item?.product?._id || item?.product?.id;
 
     const variantText = [
         item?.variant?.sku ? `SKU: ${item.variant.sku}` : null,
@@ -15,16 +19,24 @@ export default function OrderItemRow({ item, fallbackImg }) {
 
     return (
         <div className="flex gap-4 p-4">
-            <img
-                src={ img }
-                alt={ item?.productName || item?.product?.name || "Product" }
-                className="h-20 w-20 rounded-xl border border-slate-200 object-cover"
-            />
+            {/* Thêm link cho cả ảnh nếu bạn muốn */ }
+            <Link to={ `/products-detail/${productId}` }>
+                <img
+                    src={ img }
+                    alt={ item?.productName || item?.product?.name || "Product" }
+                    className="h-20 w-20 rounded-xl border border-slate-200 object-cover hover:opacity-80 transition-opacity"
+                />
+            </Link>
 
             <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-slate-900">
+                {/* 2. Bọc tên sản phẩm bằng thẻ Link */ }
+                <Link
+                    to={ `/products-detail/${productId}` }
+                    className="truncate font-semibold text-slate-900 hover:text-blue-600 transition-colors block"
+                >
                     { item?.productName || item?.product?.name }
-                </div>
+                </Link>
+
                 <div className="mt-1 text-sm text-slate-500">{ variantText }</div>
                 <div className="mt-2 text-sm text-slate-600">
                     Đơn giá: <span className="font-medium">{ formatVND(item?.price || 0) }</span>

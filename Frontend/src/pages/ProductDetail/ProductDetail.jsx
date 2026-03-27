@@ -35,8 +35,6 @@ export default function ProductDetail() {
         if (isAuthenticated) {
             const handleTrackingUserEvent = async () => {
                 try {
-                    console.log("HÊLLOLOEO");
-
                     const response = await userTrackingAPI(productId, "view_detail");
                 } catch (error) {
                     console.log("ERROR WHEN TRACKING USER EVENT: ", error.message);
