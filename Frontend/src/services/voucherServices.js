@@ -5,3 +5,8 @@ export const getVoucherByShopAPI = async (shopId) => {
     return response.data;
 }
 
+export const getSystemVouchersAPI = async () => {
+    const response = await axiosInstance.get(`/api/voucher/system-voucher`);
+    return response.data;
+}
+

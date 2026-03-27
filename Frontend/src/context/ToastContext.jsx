@@ -9,11 +9,11 @@ export const ToastProvider = ({ children }) => {
         open: false,
         type: "success", // success | error | info
         message: "",
-        duration: 2200,
+        duration: 500,
     });
 
     const show = useCallback((type, message, options = {}) => {
-        const duration = options.duration ?? 2200;
+        const duration = options.duration ?? 500;
 
         setToastState({
             open: true,

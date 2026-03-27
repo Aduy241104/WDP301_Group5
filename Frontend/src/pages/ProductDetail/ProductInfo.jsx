@@ -8,6 +8,7 @@ import {
     addWishlistAPI,
     removeWishlistAPI
 } from "../../services/wishlistUserService";
+import { userTrackingAPI } from "../../services/userTrackingService";
 
 export default function ProductInfo({ product, currentPrice }) {
     const images = useMemo(() => product?.images ?? [], [product]);
@@ -27,16 +28,12 @@ export default function ProductInfo({ product, currentPrice }) {
                 await removeWishlistAPI(product._id);
 
                 setIsWishlisted(false);
-
-                // 🔥 FIX: update list local
                 setWishlistIds(prev => prev.filter(id => id !== product._id));
 
             } else {
                 await addWishlistAPI(product._id);
-
+                await userTrackingAPI(product._id, "wishlist")
                 setIsWishlisted(true);
-
-                // 🔥 FIX: update list local
                 setWishlistIds(prev => [...prev, product._id]);
             }
         } catch (error) {
@@ -50,9 +47,7 @@ export default function ProductInfo({ product, currentPrice }) {
     useEffect(() => {
         const fetchWishlist = async () => {
             try {
-                // 🔥 FIX: lấy toàn bộ wishlist (không bị pagination)
                 const res = await getWishlistAPI(1, 1000);
-
                 const ids = res.data.map(item => item._id);
 
                 setWishlistIds(ids);
@@ -60,7 +55,6 @@ export default function ProductInfo({ product, currentPrice }) {
                 console.log(error);
             }
         };
-
         fetchWishlist();
     }, []);
 

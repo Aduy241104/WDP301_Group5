@@ -14,7 +14,7 @@ export default function OrderSuccess() {
 
                 {/* TITLE */ }
                 <h1 className="mt-4 text-2xl font-bold text-slate-900">
-                    Đặt hàng thành công 🎉
+                    Đặt hàng thành công
                 </h1>
 
                 {/* DESCRIPTION */ }
@@ -27,7 +27,7 @@ export default function OrderSuccess() {
                 {/* ACTIONS */ }
                 <div className="mt-8 space-y-3">
                     <button
-                        onClick={ () => navigate("/orders", { replace: true }) }
+                        onClick={ () => navigate("/my-order-list", { replace: true }) }
                         className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition"
                     >
                         Xem đơn hàng của tôi
