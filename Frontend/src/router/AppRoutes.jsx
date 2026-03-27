@@ -37,67 +37,70 @@ import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
 import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
 import SellerVouchers from "../pages/Seller/Vouchers/SellerVouchers";
+import SearchResultPage from "../pages/Search/SearchResultPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public pages */}
-      <Route element={<MainLayoutRoute />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products-detail/:productId" element={<ProductDetail />} />
-        <Route path="/top-sale" element={<TopSaleProduct />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/shops/:productId" element={<ShopListPage />} />
-        <Route path="/shop/:shopId" element={<ShopDetailPage />} />
+      {/* Public pages */ }
+      <Route element={ <MainLayoutRoute /> }>
+        <Route path="/" element={ <HomePage /> } />
+        <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
+        <Route path="/top-sale" element={ <TopSaleProduct /> } />
+        <Route path="/order-success" element={ <OrderSuccess /> } />
+        <Route path="/shops/:productId" element={ <ShopListPage /> } />
+        <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
+        <Route path="/search" element={ <SearchResultPage /> } />
       </Route>
 
-      {/* Public-only (đã login thì không vào /login) */}
-      <Route element={<PublicRoute />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* Public-only (đã login thì không vào /login) */ }
+      <Route element={ <PublicRoute /> }>
+        <Route path="/login" element={ <LoginPage /> } />
+        <Route path="/register" element={ <RegisterPage /> } />
+        <Route path="/forgot-password" element={ <ForgotPasswordPage /> } />
+        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
       </Route>
 
-      {/* Private routes */}
-      <Route element={<MainLayoutRoute />}>
-        <Route element={<PrivateRoute />}>
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/addresses" element={<AddressPage />} />
-          <Route path="/my-cart" element={<CartPage />} />
-          <Route path="/place-order" element={<OrderSummary />} />
-          <Route path="/my-order-list" element={<OrderListPage />} />
-          <Route path="/order-detail/:orderId" element={<OrderDetailPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/report/:orderId" element={<ReportPage />} />
+      {/* Private routes */ }
+      <Route element={ <MainLayoutRoute /> }>
+        <Route element={ <PrivateRoute /> }>
+          <Route path="/profile" element={ <ProfilePage /> } />
+          <Route path="/addresses" element={ <AddressPage /> } />
+          <Route path="/my-cart" element={ <CartPage /> } />
+          <Route path="/place-order" element={ <OrderSummary /> } />
+          <Route path="/my-order-list" element={ <OrderListPage /> } />
+          <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
+          <Route path="/wishlist" element={ <WishlistPage /> } />
+          <Route path="/report/:orderId" element={ <ReportPage /> } />
         </Route>
       </Route>
 
-      <Route element={<MainLayoutRoute />}>
-        <Route element={<PrivateRoute />}>
-          <Route path="/request-seller" element={<SellerRegisterPage />} />
+      <Route element={ <MainLayoutRoute /> }>
+        <Route element={ <PrivateRoute /> }>
+          <Route path="/request-seller" element={ <SellerRegisterPage /> } />
         </Route>
       </Route>
 
-      {/* Seller routes */}
-      <Route element={<SellerRoute />}>
-        <Route path="/seller" element={<SellerLayout />}>
-          {/* ROUTE MẶC ĐỊNH */}
-          <Route index element={<SellerDashboard />} />
+      {/* Seller routes */ }
+      <Route element={ <SellerRoute /> }>
+        <Route path="/seller" element={ <SellerLayout /> }>
+          {/* ROUTE MẶC ĐỊNH */ }
+          <Route index element={ <SellerDashboard /> } />
 
-          {/* ROUTE RÕ RÀNG */}
-          <Route path="dashboard" element={<SellerDashboard />} />
-          <Route path="store" element={<SellerManageStore />} />
-          <Route path="reviews" element={<SellerReviews />} />
-          <Route path="orders" element={<OrderList />} />
-          <Route path="orders/cancelled" element={<SellerCancelledOrders />} />
-          <Route path="orders/:id" element={<OrderDetail />} />
-          {/* ROUTE RÕ RÀNG */}
-          <Route path="dashboard" element={<SellerDashboard />} />
+          {/* ROUTE RÕ RÀNG */ }
+          <Route path="dashboard" element={ <SellerDashboard /> } />
+          <Route path="store" element={ <SellerManageStore /> } />
+          <Route path="reviews" element={ <SellerReviews /> } />
+          <Route path="orders" element={ <OrderList /> } />
+          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
+          <Route path="orders/:id" element={ <OrderDetail /> } />
+          {/* ROUTE RÕ RÀNG */ }
+          <Route path="dashboard" element={ <SellerDashboard /> } />
           <Route
             path="store-information"
-            element={<SellerStoreInformation />}
+            element={ <SellerStoreInformation /> }
           />
+
           <Route path="pickup-addresses" element={<SellerManageStore />} />
           <Route path="products" element={<SellerProducts />} />
           <Route path="categories" element={<SellerCategories />} />
@@ -110,12 +113,12 @@ export default function AppRoutes() {
           <Route path="reports/:reportId" element={<SellerReportDetail />} />
           <Route path="followers" element={<SellerFollowers />} />
           <Route path="vouchers" element={<SellerVouchers />} />
-        
+      
         </Route>
       </Route>
 
-      {/* 404 */}
-      <Route path="*" element={<NotFound />} />
+      {/* 404 */ }
+      <Route path="*" element={ <NotFound /> } />
     </Routes>
   );
 }

@@ -18,42 +18,92 @@ const ReviewList = ({ productId, reload }) => {
   const [editingReview, setEditingReview] = useState(null);
   const [editRating, setEditRating] = useState(5);
   const [editComment, setEditComment] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  const loadReviews = async () => {
-    const data = await getProductReviewsAPI(productId, {
-      page: 1,
+  // 🔥 THÊM
+  const [avgRating, setAvgRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+
+  const PAGE_SIZE = 5;
+
+  const loadReviews = async (pageNumber = 1) => {
+    setLoading(true);
+
+    const res = await getProductReviewsAPI(productId, {
+      page: pageNumber,
       rating: ratingFilter,
     });
 
-    setReviews(data.data.reviews || []);
+    const data = res.data; // ✅ FIX đúng structure
+
+    const newReviews = data.reviews || [];
+    const total = data.pagination?.total || 0;
+
+    // 🔥 THÊM
+    setTotalReviews(total);
+    setAvgRating(data.avgRating || 0);
+
+    if (pageNumber === 1) {
+      setReviews(newReviews);
+    } else {
+      setReviews(prev => [...prev, ...newReviews]);
+    }
+
+    setHasMore(total > pageNumber * PAGE_SIZE);
+
+    setLoading(false);
   };
 
   useEffect(() => {
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   }, [reload, ratingFilter]);
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadReviews(nextPage);
+  };
 
   const handleDelete = async (reviewId) => {
     await deleteReviewAPI(reviewId);
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   };
 
   const handleUpdate = async () => {
-
     await updateReviewAPI(editingReview._id, {
       rating: editRating,
       comment: editComment
     });
 
     setEditingReview(null);
-    loadReviews();
+    setPage(1);
+    setHasMore(true);
+    loadReviews(1);
   };
-
 
   return (
     <div>
+
+      {/* 🔥 THÊM HIỂN THỊ SAO TRUNG BÌNH */}
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-3">
+        Đánh giá sản phẩm
+
+        <span className="text-yellow-500 font-bold">
+          ⭐ {avgRating.toFixed(1)}
+        </span>
+
+        <span className="text-gray-500 text-sm font-normal">
+          / 5 • {totalReviews} đánh giá
+        </span>
+      </h2>
 
       {/* FILTER */}
       <div className="flex gap-2 mb-6">
@@ -87,7 +137,6 @@ const ReviewList = ({ productId, reload }) => {
 
       </div>
 
-
       {/* NO REVIEW */}
       {reviews.length === 0 && (
         <div className="text-center py-10 text-gray-400">
@@ -95,11 +144,10 @@ const ReviewList = ({ productId, reload }) => {
         </div>
       )}
 
-
       {/* REVIEW LIST */}
       {reviews.map((review) => {
 
-        const isOwner = review.userId?._id === currentUserId;
+        const isOwner = review.userId?._id?.toString() === currentUserId?.toString();
 
         return (
 
@@ -108,11 +156,9 @@ const ReviewList = ({ productId, reload }) => {
             className="relative border-b py-6"
           >
 
-            {/* ACTION BUTTON */}
             {isOwner && (
               <div className="absolute top-2 right-2">
 
-                {/* THREE DOT BUTTON */}
                 <button
                   onClick={() =>
                     setOpenMenuId(openMenuId === review._id ? null : review._id)
@@ -122,7 +168,6 @@ const ReviewList = ({ productId, reload }) => {
                   ⋮
                 </button>
 
-                {/* DROPDOWN */}
                 {openMenuId === review._id && (
 
                   <div className="absolute right-0 mt-1 w-28 bg-white border rounded shadow-lg z-10">
@@ -156,8 +201,6 @@ const ReviewList = ({ productId, reload }) => {
               </div>
             )}
 
-
-            {/* USER INFO */}
             <div className="flex items-start gap-4">
 
               <img
@@ -171,25 +214,20 @@ const ReviewList = ({ productId, reload }) => {
                   {review.userId?.fullName}
                 </p>
 
-                {/* STAR */}
                 <div className="text-red-500 text-sm">
                   {"⭐".repeat(review.rating)}
                 </div>
 
-                {/* DATE */}
                 {new Date(review.createdAt).toLocaleString("sv-SE", {
                   timeZone: "Asia/Ho_Chi_Minh",
                 }).replace("T", " ").slice(0, 16)}
 
-                {/* COMMENT */}
                 <div className="mt-3 bg-gray-200 p-3 rounded-md">
                   <p className="text-gray-800">
                     {review.comment}
                   </p>
                 </div>
 
-
-                {/* SELLER REPLY */}
                 {review.sellerReply && (
 
                   <div className="bg-gray-200 p-4 rounded mt-4 ml-12">
@@ -215,70 +253,16 @@ const ReviewList = ({ productId, reload }) => {
         );
       })}
 
-
-
-      {/* EDIT MODAL */}
-      {editingReview && (
-
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
-          <div className="bg-white p-6 rounded-lg w-[400px]">
-
-            <h3 className="font-semibold mb-4">
-              Chỉnh sửa đánh giá
-            </h3>
-
-            {/* STAR */}
-            <div className="flex gap-1 text-2xl mb-4">
-
-              {[1, 2, 3, 4, 5].map(star => (
-
-                <span
-                  key={star}
-                  onClick={() => setEditRating(star)}
-                  className={`cursor-pointer ${editRating >= star
-                    ? "text-yellow-500"
-                    : "text-gray-300"
-                    }`}
-                >
-                  ★
-                </span>
-
-              ))}
-
-            </div>
-
-
-            {/* COMMENT */}
-            <textarea
-              value={editComment}
-              onChange={(e) => setEditComment(e.target.value)}
-              className="border w-full p-2 rounded"
-            />
-
-
-            <div className="flex justify-end gap-3 mt-4">
-
-              <button
-                onClick={() => setEditingReview(null)}
-                className="border px-4 py-2 rounded"
-              >
-                Hủy
-              </button>
-
-              <button
-                onClick={handleUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Lưu
-              </button>
-
-            </div>
-
-          </div>
-
+      {hasMore && reviews.length > 0 && (
+        <div className="text-center mt-6">
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            className="border px-4 py-2 rounded hover:bg-gray-100"
+          >
+            {loading ? "Đang tải..." : "Xem thêm bình luận"}
+          </button>
         </div>
-
       )}
 
     </div>

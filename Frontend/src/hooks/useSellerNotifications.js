@@ -5,8 +5,7 @@ import { getNotificationsAPI } from "../services/notificationService";
 export default function useSellerNotifications() {
 
   const [popup, setPopup] = useState(null);
-
-  const prevCount = useRef(0);
+  const lastNewestId = useRef(null);
   const isFirstLoad = useRef(true);
 
   const navigate = useNavigate();
@@ -19,23 +18,21 @@ export default function useSellerNotifications() {
 
         const data = await getNotificationsAPI();
 
-        // lần load đầu → chỉ lưu count
+        const newest = data?.[0] || null;
+
+        // lần load đầu → chỉ lưu id của notification mới nhất
         if (isFirstLoad.current) {
-          prevCount.current = data.length;
+          lastNewestId.current = newest?._id ?? null;
           isFirstLoad.current = false;
           return;
         }
 
-        // nếu có notification mới
-        if (data.length > prevCount.current) {
-
-          const newest = data[0];
-
+        // notification mới nhất đổi (dù list bị limit 20 vẫn phát hiện được)
+        if (newest?._id && newest._id !== lastNewestId.current) {
+          lastNewestId.current = newest._id;
           setPopup(newest);
 
         }
-
-        prevCount.current = data.length;
 
       } catch (err) {
         console.error(err);
