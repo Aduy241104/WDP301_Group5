@@ -36,7 +36,9 @@ import Notifications from "../pages/Seller/Notifications/Notifications";
 import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
 import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
-import SellerVouchers from "../pages/Seller/Vouchers/SellerVouchers";
+import SellerVoucherList from "../pages/Seller/Vouchers/SellerVoucherList";
+import SellerVoucherAdd from "../pages/Seller/Vouchers/SellerVoucherAdd";
+import SellerVoucherEdit from "../pages/Seller/Vouchers/SellerVoucherEdit";
 import SearchResultPage from "../pages/Search/SearchResultPage";
 
 export default function AppRoutes() {
@@ -112,7 +114,9 @@ export default function AppRoutes() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="reports/:reportId" element={<SellerReportDetail />} />
           <Route path="followers" element={<SellerFollowers />} />
-          <Route path="vouchers" element={<SellerVouchers />} />
+          <Route path="vouchers" element={<SellerVoucherList />} />
+          <Route path="vouchers/new" element={<SellerVoucherAdd />} />
+          <Route path="vouchers/:voucherId/edit" element={<SellerVoucherEdit />} />
       
         </Route>
       </Route>

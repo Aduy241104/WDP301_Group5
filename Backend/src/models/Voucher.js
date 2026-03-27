@@ -7,7 +7,7 @@ const VoucherSchema = new Schema(
         scope: { type: String, enum: ["system", "shop"], required: true, index: true },
         shopId: { type: Schema.Types.ObjectId, ref: "Shop", default: null, index: true },
 
-        code: { type: String, required: true, unique: true, index: true, trim: true },
+        code: { type: String, required: true, index: true, trim: true },
         name: { type: String, required: true },
         description: { type: String, default: "" },
 
