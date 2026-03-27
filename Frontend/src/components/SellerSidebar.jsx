@@ -11,6 +11,7 @@ import {
   Bell,
   Image,
   Users,
+  TicketPercent,
 } from "lucide-react";
 
 const menu = [
@@ -25,6 +26,7 @@ const menu = [
   { label: "Products", to: "/seller/products", icon: Package },
   { label: "Followers", to: "/seller/followers", icon: Users },
   { label: "Banners", to: "/seller/banners", icon: Image },
+  { label: "Vouchers", to: "/seller/vouchers", icon: TicketPercent },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
   { label: "Returns", to: "/seller/returns", icon: RotateCcw },
