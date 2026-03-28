@@ -136,3 +136,34 @@ export const sendSellerRequestStatusEmail = async ({
     html,
   });
 };
+
+// ============================================
+// GENERIC EMAIL (ADMIN -> SELLER)
+// ============================================
+export const sendCustomEmail = async ({ to, subject, html, text }) => {
+  if (!to) {
+    throw new Error("No recipient email (to) provided for custom email");
+  }
+
+  const mailer = createTransport();
+
+  const from = `"${process.env.MAIL_FROM_NAME || "App"}" <${
+    process.env.MAIL_FROM_EMAIL || process.env.SMTP_USER
+  }>`;
+
+  const mailOptions = {
+    from,
+    to,
+    subject: subject || "",
+  };
+
+  if (html) {
+    mailOptions.html = html;
+  } else if (text) {
+    mailOptions.text = text;
+  } else {
+    mailOptions.text = "";
+  }
+
+  await mailer.sendMail(mailOptions);
+};

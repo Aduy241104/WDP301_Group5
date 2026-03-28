@@ -3,6 +3,7 @@ import express from "express";
 import {
   SellerReportListController,
   SellerReportDetailController,
+  SellerShopReportListController,
 } from "../controllers/sellerReportController.js";
 
 import {
@@ -17,6 +18,10 @@ router.use(authenticationMiddleware, sellerMiddleware);
 
 // routes
 router.get("/", SellerReportListController);
-router.get("/:reportId", SellerReportDetailController);
 
+// 👇 phải đặt trước
+router.get("/shop-reports", SellerShopReportListController);
+
+// 👇 để sau cùng
+router.get("/:reportId", SellerReportDetailController);
 export default router;

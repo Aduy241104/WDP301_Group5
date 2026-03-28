@@ -6,7 +6,12 @@ export const SellerReportListController = async (req, res) => {
   try {
     const sellerId = req.user.id;
 
-    const shops = await Shop.find({ ownerId: sellerId }).select("_id");
+    const shops = await Shop.find({ ownerId: sellerId }).select("_id name");
+
+    const shopMap = {};
+    shops.forEach((s) => {
+      shopMap[s._id.toString()] = s.name;
+    });
 
     const shopIds = shops.map((s) => s._id);
 
@@ -17,12 +22,27 @@ export const SellerReportListController = async (req, res) => {
       .sort({ createdAt: -1 })
       .select("category reason status targetSnapshot createdAt");
 
+    const formattedReports = reports.map((r) => ({
+      _id: r._id,
+      category: r.category,
+      reason: r.reason,
+      status: r.status,
+      createdAt: r.createdAt,
+
+      target: {
+        id: r.targetSnapshot?.shopId,
+        name:
+          r.targetSnapshot?.name || // product name
+          "—",
+      },
+    }));
+
     return res.status(200).json({
-      reports,
+      reports: formattedReports,
     });
+
   } catch (err) {
     console.error("SELLER_REPORT_LIST_ERROR:", err);
-
     return res.status(500).json({
       message: "Internal server error",
     });
@@ -38,8 +58,8 @@ export const SellerReportDetailController = async (req, res) => {
     console.log("reportId:", reportId);
     console.log("sellerId:", sellerId);
 
+    // ❌ validate id
     if (!mongoose.Types.ObjectId.isValid(reportId)) {
-      console.log("Invalid reportId format");
       return res.status(400).json({ message: "Invalid reportId" });
     }
 
@@ -48,48 +68,61 @@ export const SellerReportDetailController = async (req, res) => {
       isDeleted: false,
     }).lean();
 
-    console.log("report:", report);
-
     if (!report) {
-      console.log("Report not found");
-      return res.status(404).json({
-        message: "Report not found",
-      });
+      return res.status(404).json({ message: "Report not found" });
     }
 
-    // kiểm tra quyền seller
+    let shopName = null;
+
+    // ==============================
+    // 🔥 CHECK PERMISSION + GET NAME
+    // ==============================
+
     if (report.targetType === "product") {
       const shopId = report.targetSnapshot?.shopId;
 
-      console.log("SnapshotShopId:", shopId);
-
       if (!shopId) {
-        console.log("Snapshot shopId missing");
         return res.status(400).json({
           message: "Invalid report snapshot",
         });
       }
 
-      const shop = await Shop.findById(shopId);
-
-      console.log("Shop found:", shop);
-      console.log("Shop ownerId:", shop?.ownerId);
-      console.log("Current sellerId:", sellerId);
+      const shop = await Shop.findById(shopId).select("name ownerId");
 
       if (!shop) {
-        console.log("Shop not found");
         return res.status(403).json({
-          message: "Shop not found or no permission",
+          message: "Shop not found",
         });
       }
 
       if (shop.ownerId.toString() !== sellerId.toString()) {
-        console.log("Permission denied: seller is not shop owner");
         return res.status(403).json({
-          message: "You do not have permission to view this report",
+          message: "No permission",
         });
       }
+
+      shopName = shop.name;
+    } else if (report.targetType === "shop") {
+      const shop = await Shop.findById(report.targetId).select("name ownerId");
+
+      if (!shop) {
+        return res.status(403).json({
+          message: "Shop not found",
+        });
+      }
+
+      if (shop.ownerId.toString() !== sellerId.toString()) {
+        return res.status(403).json({
+          message: "No permission",
+        });
+      }
+
+      shopName = shop.name;
     }
+
+    // ==============================
+    // 🔥 RESPONSE CHUẨN HÓA
+    // ==============================
 
     const sellerReport = {
       _id: report._id,
@@ -100,16 +133,71 @@ export const SellerReportDetailController = async (req, res) => {
       images: report.images,
       status: report.status,
       createdAt: report.createdAt,
-      targetSnapshot: report.targetSnapshot,
-    };
 
-    console.log("Return report success");
+      // 👇 unify data cho FE
+      target: {
+        id: report.targetId || report.targetSnapshot?.shopId,
+        name:
+          report.targetSnapshot?.name || // product
+          shopName || // shop
+          report.targetSnapshot?.shopName ||
+          "—",
+      },
+    };
 
     return res.status(200).json({
       report: sellerReport,
     });
   } catch (err) {
     console.error("SELLER_REPORT_DETAIL_ERROR:", err);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+export const SellerShopReportListController = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+
+    const shops = await Shop.find({ ownerId: sellerId }).select("_id name");
+
+    const shopMap = {};
+    shops.forEach((s) => {
+      shopMap[s._id.toString()] = s.name;
+    });
+
+    const shopIds = shops.map((s) => s._id);
+
+    const reports = await Report.find({
+      targetType: "shop",
+      targetId: { $in: shopIds },
+      isDeleted: false,
+    })
+      .sort({ createdAt: -1 })
+      .select("category reason status createdAt targetId");
+
+    // 🔥 map thêm shopName
+    const formattedReports = reports.map((r) => ({
+      _id: r._id,
+      category: r.category,
+      reason: r.reason,
+      status: r.status,
+      createdAt: r.createdAt,
+
+      target: {
+        id: r.targetId,
+        name: shopMap[r.targetId.toString()] || "—",
+      },
+    }));
+
+    return res.status(200).json({
+      reports: formattedReports,
+    });
+
+  } catch (err) {
+    console.error("SELLER_SHOP_REPORT_LIST_ERROR:", err);
+
     return res.status(500).json({
       message: "Internal server error",
     });

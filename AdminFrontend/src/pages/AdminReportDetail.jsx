@@ -113,7 +113,7 @@ export default function AdminReportDetail() {
 
       await resolveReport(reportId, {
         result,
-        reason: adminNote,
+        adminNote,
       });
 
       await loadReport();
@@ -332,8 +332,9 @@ export default function AdminReportDetail() {
                       onChange={(e) => setResult(e.target.value)}
                       className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                     >
-                      <option value="accepted">Chấp nhận báo cáo</option>
+                      <option value="confirmed">Chấp nhận báo cáo</option>
                       <option value="rejected">Từ chối báo cáo</option>
+                      <option value="dismissed">Bỏ qua</option>
                     </select>
                   </div>
 

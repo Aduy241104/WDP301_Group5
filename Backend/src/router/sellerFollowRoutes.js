@@ -3,6 +3,8 @@ import { authenticationMiddleware } from "../middlewares/authenticationMiddlewar
 import {
   getMyShopFollowers,
   getMyShopFollowersCount,
+  getTopFollowersByNumberOfOrders,
+  getFollowerPurchaseConversionRate,
 } from "../controllers/sellerFollowController.js";
 
 const router = express.Router();
@@ -17,6 +19,18 @@ router.get(
   "/count",
   authenticationMiddleware,
   getMyShopFollowersCount
+);
+
+router.get(
+  "/top-by-orders",
+  authenticationMiddleware,
+  getTopFollowersByNumberOfOrders
+);
+
+router.get(
+  "/purchase-conversion-rate",
+  authenticationMiddleware,
+  getFollowerPurchaseConversionRate
 );
 
 export default router;

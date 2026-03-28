@@ -35,6 +35,13 @@ const ReportSchema = new Schema(
         images: [{ type: String, default: "" }],
 
         status: { type: String, enum: ["open", "closed", "reopened"], default: "open", index: true },
+        // kết luận xử lý của admin; dùng để unlock rule "report lại khi confirmed"
+        result: {
+            type: String,
+            enum: ["confirmed", "rejected", "dismissed", null],
+            default: null,
+            index: true,
+        },
         adminNote: { type: String, default: "" },
 
         timeline: { type: [TimelineSchema], default: [] },

@@ -1,9 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import { Report } from "../models/Report.js";
-import { createReportResultNotification } from "../services/notificationService.js";
+import {
+  createProductReportNotification,
+  createShopReportNotification,
+} from "../services/notificationService.js";
 import { Shop } from "../models/Shop.js";
+import { Product } from "../models/Product.js";
 
-// View Report List
+// ================= LIST =================
 export const AdminReportListController = async (req, res) => {
   try {
     const page = Math.max(1, Number(req.query.page ?? 1));
@@ -11,14 +15,11 @@ export const AdminReportListController = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = { isDeleted: false };
-    const status = String(req.query.status ?? "").trim();
-    if (status) query.status = status;
 
-    const targetType = String(req.query.targetType ?? "").trim();
-    if (targetType) query.targetType = targetType;
-
-    const category = String(req.query.category ?? "").trim();
-    if (category) query.category = category;
+    if (req.query.status) query.status = String(req.query.status).trim();
+    if (req.query.targetType)
+      query.targetType = String(req.query.targetType).trim();
+    if (req.query.category) query.category = String(req.query.category).trim();
 
     const [items, total] = await Promise.all([
       Report.find(query)
@@ -36,13 +37,11 @@ export const AdminReportListController = async (req, res) => {
     });
   } catch (err) {
     console.error("ADMIN_REPORT_LIST_ERROR:", err);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
-// View Report Detail
+// ================= DETAIL =================
 export const AdminReportDetailController = async (req, res) => {
   try {
     const { reportId } = req.params;
@@ -53,107 +52,49 @@ export const AdminReportDetailController = async (req, res) => {
       .lean();
 
     if (!report) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Report not found" });
+      return res.status(404).json({ message: "Report not found" });
     }
 
-    return res.status(StatusCodes.OK).json({
-      report,
-    });
+    return res.status(200).json({ report });
   } catch (err) {
     console.error("ADMIN_REPORT_DETAIL_ERROR:", err);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
-// Classify Report - Classify reports by shop, product, or user
+// ================= CLASSIFY =================
 export const AdminClassifyReportController = async (req, res) => {
   try {
     const { targetType } = req.query;
+
     const validTargetTypes = ["shop", "product", "user"];
     if (targetType && !validTargetTypes.includes(targetType)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(400).json({
         message: `Invalid targetType. Must be one of: ${validTargetTypes.join(", ")}`,
       });
     }
-    const query = { isDeleted: false };
-    if (targetType) {
-      query.targetType = targetType;
-    }
 
-    // Group by targetType and count
+    const query = { isDeleted: false };
+    if (targetType) query.targetType = targetType;
+
     const classification = await Report.aggregate([
       { $match: query },
       {
         $group: {
           _id: "$targetType",
           count: { $sum: 1 },
-          reports: {
-            $push: {
-              _id: "$_id",
-              reporterId: "$reporterId",
-              targetId: "$targetId",
-              category: "$category",
-              status: "$status",
-              createdAt: "$createdAt",
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          targetType: "$_id",
-          count: 1,
-          reports: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-    ]);
-
-    // Get total counts
-    const totalByType = await Report.aggregate([
-      { $match: { isDeleted: false } },
-      {
-        $group: {
-          _id: "$targetType",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          targetType: "$_id",
-          count: 1,
         },
       },
     ]);
 
-    const summary = {
-      total: await Report.countDocuments({ isDeleted: false }),
-      byType: totalByType.reduce((acc, item) => {
-        acc[item.targetType] = item.count;
-        return acc;
-      }, {}),
-    };
-
-    return res.status(StatusCodes.OK).json({
-      message: "Reports classified successfully",
-      summary,
-      classification: targetType ? classification : null,
-      details: targetType ? classification[0]?.reports || [] : null,
-    });
+    return res.json({ classification });
   } catch (err) {
     console.error("ADMIN_CLASSIFY_REPORT_ERROR:", err);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
+// ================= RESOLVE =================
 export const AdminResolveReportController = async (req, res) => {
   try {
     const { reportId } = req.params;
@@ -165,32 +106,17 @@ export const AdminResolveReportController = async (req, res) => {
       return res.status(404).json({ message: "Report not found" });
     }
 
-    let sellerId = null;
-
-    // Nếu report PRODUCT
-    if (report.targetType === "product" && report.targetSnapshot?.shopId) {
-      const shop = await Shop.findById(report.targetSnapshot.shopId).select(
-        "ownerId",
-      );
-
-      if (shop) {
-        sellerId = shop.ownerId;
-      }
+    const allowedResults = ["confirmed", "rejected", "dismissed"];
+    if (!allowedResults.includes(String(result || "").trim())) {
+      return res.status(400).json({
+        message: `Invalid result. Must be one of: ${allowedResults.join(", ")}`,
+      });
     }
 
-    // Nếu report SHOP
-    if (report.targetType === "shop") {
-      const shop = await Shop.findById(report.targetId).select("ownerId");
-
-      if (shop) {
-        sellerId = shop.ownerId;
-      }
-    }
-
-    // update report
+    // ================= UPDATE REPORT =================
     report.status = "closed";
-    report.result = result;
-    report.reason = reason;
+    report.result = String(result).trim();
+    report.adminNote = String(reason ?? "").trim();
 
     report.timeline.push({
       action: "closed",
@@ -201,25 +127,94 @@ export const AdminResolveReportController = async (req, res) => {
 
     await report.save();
 
-    // gửi notification cho seller
-    if (sellerId) {
-      await createReportResultNotification({
-        userId: sellerId,
-        reportId: report._id,
-        reportCode: report.code,
-        targetType: report.targetType,
-        targetName: report.targetSnapshot?.name,
-        reason: report.reason,
-        description: report.description,
-        targetRole: "seller",
+    // ================= AUTO HANDLE PRODUCT =================
+    if (report.result === "confirmed" && report.targetType === "product") {
+      const count = await Report.countDocuments({
+        targetType: "product",
+        targetId: report.targetId,
+        result: "confirmed",
+        isDeleted: false,
       });
+
+      const product = await Product.findById(report.targetId);
+
+      // 🔥 CHỈ disable, KHÔNG banned
+      if (product && count >= 3 && product.activeStatus !== "inactive") {
+        await Product.findByIdAndUpdate(report.targetId, {
+          activeStatus: "inactive",
+          inactiveBy: "admin",
+          inactiveReason: "Sản phẩm bị report >= 3 lần",
+          inactiveAt: new Date(),
+          inactiveActorId: req.user?._id,
+        });
+
+        console.log("PRODUCT DISABLED SUCCESSFULLY");
+      }
     }
 
-    res.json({
-      message: "Report resolved and notification sent",
+    // ================= HANDLE SHOP =================
+    if (report.result === "confirmed" && report.targetType === "shop") {
+      const count = await Report.countDocuments({
+        targetType: "shop",
+        targetId: report.targetId,
+        result: "confirmed",
+        isDeleted: false,
+      });
+
+      if (count >= 3) {
+        await Shop.findByIdAndUpdate(report.targetId, {
+          activeStatus: "inactive",
+          inactiveBy: "admin",
+          inactiveReason: "Shop bị report >= 3 lần",
+        });
+
+        console.log("SHOP DISABLED SUCCESSFULLY");
+      }
+    }
+
+    // ================= FIND SELLER =================
+    let sellerId = null;
+
+    if (report.targetType === "product" && report.targetSnapshot?.shopId) {
+      const shop = await Shop.findById(report.targetSnapshot.shopId).select("ownerId");
+      if (shop) sellerId = shop.ownerId;
+    }
+
+    if (report.targetType === "shop") {
+      const shop = await Shop.findById(report.targetId).select("ownerId");
+      if (shop) sellerId = shop.ownerId;
+    }
+
+    // ================= NOTIFICATION =================
+    if (sellerId) {
+      if (report.targetType === "product") {
+        await createProductReportNotification({
+          userId: sellerId,
+          reportId: report._id,
+          reportCode: report.code,
+          productName: report.targetSnapshot?.name,
+          reason: report.reason,
+          description: report.description,
+        });
+      }
+
+      if (report.targetType === "shop") {
+        await createShopReportNotification({
+          userId: sellerId,
+          reportId: report._id,
+          reportCode: report.code,
+          shopName: report.targetSnapshot?.name,
+          reason: report.reason,
+          description: report.description,
+        });
+      }
+    }
+
+    return res.json({
+      message: "Report resolved successfully",
     });
   } catch (err) {
     console.error("ADMIN_RESOLVE_REPORT_ERROR:", err);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

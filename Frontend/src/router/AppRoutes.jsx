@@ -36,8 +36,10 @@ import Notifications from "../pages/Seller/Notifications/Notifications";
 import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
 import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
+import SellerReports from "../pages/Seller/Report/SellerReports";
 import SearchResultPage from "../pages/Search/SearchResultPage";
-
+import ReportProductPage from "../pages/ProductDetail/ReportProductPage";
+import ReportShopPage from "../pages/ReportShopPage";
 export default function AppRoutes() {
   return (
     <Routes>
@@ -45,11 +47,13 @@ export default function AppRoutes() {
       <Route element={ <MainLayoutRoute /> }>
         <Route path="/" element={ <HomePage /> } />
         <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
+        <Route path="/report/product/:productId" element={ <ReportProductPage /> } />
         <Route path="/top-sale" element={ <TopSaleProduct /> } />
         <Route path="/order-success" element={ <OrderSuccess /> } />
         <Route path="/shops/:productId" element={ <ShopListPage /> } />
         <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
         <Route path="/search" element={ <SearchResultPage /> } />
+        <Route path="/report/shop/:shopId" element={ <ReportShopPage /> } />
       </Route>
 
       {/* Public-only (đã login thì không vào /login) */ }
@@ -108,8 +112,14 @@ export default function AppRoutes() {
           <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
           <Route path="orders/:id" element={ <OrderDetail /> } />
           <Route path="notifications" element={ <Notifications /> } />
+          <Route path="reports" element={ <SellerReports /> } />
           <Route path="reports/:reportId" element={ <SellerReportDetail /> } />
           <Route path="followers" element={ <SellerFollowers /> } />
+          <Route path="followers/top-by-orders" element={ <SellerFollowers /> } />
+          <Route
+            path="followers/purchase-conversion-rate"
+            element={ <SellerFollowers /> }
+          />
 
         </Route>
       </Route>
