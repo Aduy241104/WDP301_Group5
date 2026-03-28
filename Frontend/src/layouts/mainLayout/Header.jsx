@@ -61,7 +61,7 @@ export default function Header() {
                     {/* seller shop button (bên trái) */}
                     {isAuthenticated && role === "seller" && (
                         <button
-                            onClick={() => go("/seller/shop")}
+                            onClick={ () => go("/seller/") }
                             className="hidden md:inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-white border border-slate-200 shadow-sm hover:shadow transition"
                             title="Đi đến cửa hàng của bạn"
                         >
