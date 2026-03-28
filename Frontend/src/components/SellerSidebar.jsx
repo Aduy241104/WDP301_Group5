@@ -41,6 +41,7 @@ const menu = [
   { label: "Notifications", to: "/seller/notifications", icon: Bell },
   { label: "Reports", to: "/seller/reports", icon: FileText, end: false },
 
+  { label: "Back to Homepage", to: "/", icon: RotateCcw },
 ];
 
 export default function SellerSidebar() {

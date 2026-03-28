@@ -9,7 +9,7 @@ export default function Footer() {
                         <div className="flex items-center gap-2">
                             <div className="h-9 w-9 rounded-2xl bg-[rgb(119,226,242)] shadow-sm" />
                             <div className="text-lg font-extrabold">
-                                Uni<span className="text-[rgb(119,226,242)]">Trade</span>
+                                GR<span className="text-[rgb(119,226,242)]">5</span>
                             </div>
                         </div>
 
