@@ -32,6 +32,16 @@ export default function RegisterPage() {
     const onRequestOtp = async (values) => {
         setServerError("");
 
+        // Kiểm tra tuổi một lần nữa (Optionally)
+        const birthDate = new Date(values.dateOfBirth);
+        const minDate = new Date();
+        minDate.setFullYear(minDate.getFullYear() - 13);
+
+        if (birthDate > minDate) {
+            setServerError("Bạn phải trên 13 tuổi để đăng ký.");
+            return;
+        }
+
         const data = {
             ...values,
             email: values.email.trim(),
@@ -40,14 +50,11 @@ export default function RegisterPage() {
         };
 
         try {
-            await requestRegisterOtpAPI({ email: data.email }); // backend check email tồn tại ở đây
+            await requestRegisterOtpAPI({ email: data.email });
             setDraft(data);
             setStep("otp");
         } catch (err) {
-            const message =
-                err?.response?.data?.message ||
-                "Không thể gửi OTP.";
-            setServerError(message);
+            setServerError(err?.response?.data?.message || "Không thể gửi OTP.");
         }
     };
 
