@@ -114,9 +114,6 @@ export async function getRecommendedProductsService({ userId, limit = 8, page })
         categories = await getTopCategoriesForGuest(4);
     } else {
         categories = await getTopCategoriesForUser(userId, 3);
-
-       
-
     }
 
     //user không có event data => random toàn hệ thống
