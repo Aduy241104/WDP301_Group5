@@ -37,7 +37,6 @@ const menu = [
   { label: "Vouchers", to: "/seller/vouchers", icon: TicketPercent },
   { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
-  { label: "Returns", to: "/seller/returns", icon: RotateCcw },
   { label: "Reviews", to: "/seller/reviews", icon: Star },
   { label: "Notifications", to: "/seller/notifications", icon: Bell },
   { label: "Reports", to: "/seller/reports", icon: FileText, end: false },

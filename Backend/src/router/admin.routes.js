@@ -156,11 +156,9 @@ router.post("/products/:productId/reject", AdminRejectProductController);
 router.post("/products/:productId/activate", AdminActivateProductController);
 router.post("/products/:productId/inactivate", AdminInactivateProductController);
 
-<<<<<<< HEAD
 // Mail management (admin) - Seller emails
 router.post("/seller-emails/send", AdminSendSellerEmailController);
 router.get("/seller-emails", AdminSellerEmailListController);
-=======
 // System voucher management (admin)
 router.get("/vouchers", adminGetSystemVoucherList);
 router.post("/vouchers", adminCreateSystemVoucher);
@@ -168,7 +166,6 @@ router.get("/vouchers/:voucherId", adminGetSystemVoucherDetail);
 router.put("/vouchers/:voucherId", adminUpdateSystemVoucher);
 router.put("/vouchers/:voucherId/toggle", adminToggleSystemVoucher);
 router.delete("/vouchers/:voucherId", adminDeleteSystemVoucher);
->>>>>>> main
 
 
 export default router;
