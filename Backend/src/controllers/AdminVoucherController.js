@@ -1,57 +1,97 @@
 import { StatusCodes } from "http-status-codes";
 import { Voucher } from "../models/Voucher.js";
+import crypto from "crypto";
 
 const toDate = (value) => (value ? new Date(value) : null);
 const normalizeCode = (value) => String(value || "").trim().toUpperCase();
 
+// Hàm helper tạo mã ngẫu nhiên nếu không có code truyền vào
+const generateRandomCode = () => {
+    return `SV-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+};
+
 export const adminCreateSystemVoucher = async (req, res) => {
     try {
-        const { code, name, description, discountValue, maxDiscountValue, minOrderValue, usageLimitTotal, startAt, endAt } = req.body;
-        const normalizedCode = normalizeCode(code);
+        const {
+            code,
+            name,
+            description,
+            discountValue,
+            minOrderValue,
+            usageLimitTotal,    // Nhận từ FE
+            usageLimitPerUser,  // Nhận từ FE
+            startAt,
+            endAt
+        } = req.body;
 
-        if (!normalizedCode || !name || !startAt || !endAt) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Mã voucher, tên voucher và thời gian áp dụng là bắt buộc." });
-        }
+        // 1. Xử lý mã Voucher (Ưu tiên code từ FE, không có thì random)
+        let finalCode = code ? normalizeCode(code) : generateRandomCode();
 
-        const start = toDate(startAt);
-        const end = toDate(endAt);
-        if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Thời gian bắt đầu/kết thúc không hợp lệ." });
-        }
-
-        const existed = await Voucher.findOne({
-            scope: "system",
-            code: normalizedCode,
-            isDeleted: false,
-            endAt: { $gte: new Date() },
-        }).lean();
-        if (existed) {
-            return res.status(StatusCodes.CONFLICT).json({
-                message: "Mã voucher này đang tồn tại và còn hiệu lực. Vui lòng chọn mã khác hoặc chờ voucher cũ hết hạn.",
+        // 2. Validate cơ bản các trường bắt buộc
+        if (!name || !startAt || !endAt) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Tên voucher và thời gian áp dụng là bắt buộc."
             });
         }
 
+        // 3. Xử lý thời gian
+        const start = toDate(startAt);
+        const end = toDate(endAt);
+        if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Thời gian bắt đầu/kết thúc không hợp lệ hoặc ngày kết thúc phải sau ngày bắt đầu."
+            });
+        }
+
+        // 4. Kiểm tra trùng mã (chỉ check các voucher đang còn hiệu lực)
+        const existed = await Voucher.findOne({
+            scope: "system",
+            code: finalCode,
+            isDeleted: false,
+            endAt: { $gte: new Date() },
+        }).lean();
+
+        if (existed) {
+            return res.status(StatusCodes.CONFLICT).json({
+                message: "Mã voucher này đã tồn tại và đang có hiệu lực. Vui lòng chọn mã khác.",
+            });
+        }
+
+        // 5. Khởi tạo bản ghi Voucher mới
         const voucher = await Voucher.create({
             scope: "system",
-            shopId: null,
-            code: normalizedCode,
+            shopId: null, // Voucher hệ thống không thuộc shop nào
+            code: finalCode,
             name: String(name).trim(),
             description: String(description || "").trim(),
-            discountType: "ship",
+            discountType: "ship", // Loại giảm giá (theo logic ship bạn đã chọn)
+
             discountValue: Number(discountValue || 0),
-            maxDiscountValue: Number(maxDiscountValue || discountValue || 0),
+            // Mặc định maxDiscountValue bằng discountValue vì bạn đã bỏ trường này ở FE
+            maxDiscountValue: Number(discountValue || 0),
             minOrderValue: Number(minOrderValue || 0),
+
+            // Cập nhật giới hạn sử dụng theo ảnh Schema của bạn
+            usageLimitTotal: Number(usageLimitTotal || 0),      // 0 = không giới hạn tổng
+            usageLimitPerUser: Number(usageLimitPerUser || 1),  // Mặc định mỗi người 1 lần
+            usedCount: 0,                                       // Ban đầu chưa ai dùng
+
             startAt: start,
             endAt: end,
-            usageLimitTotal: Number(usageLimitTotal || 0),
             createdBy: req.user.id,
             createdByRole: "admin",
             isActive: true,
         });
 
-        return res.status(StatusCodes.CREATED).json({ message: "Tạo voucher hệ thống thành công.", data: voucher });
+        return res.status(StatusCodes.CREATED).json({
+            message: "Tạo voucher hệ thống thành công.",
+            data: voucher
+        });
     } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+        console.error("Error creating voucher:", error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Lỗi hệ thống: " + error.message
+        });
     }
 };
 
