@@ -47,12 +47,12 @@ export default function LoginPage() {
                     <div className="p-6 sm:p-8">
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-2 rounded-full bg-[rgb(119,226,242)]/15 px-3 py-1 text-xs font-semibold text-slate-700">
-                                UniTrade Admin
+                                GR5 Admin
                                 <span className="h-1 w-1 rounded-full bg-[rgb(119,226,242)]" />
                                 Đăng nhập
                             </div>
                             <h1 className="mt-3 text-2xl font-bold text-slate-900">Đăng nhập</h1>
-                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại UniTrade Admin.</p>
+                            <p className="text-slate-500 mt-1">Chào mừng bạn quay lại GR5 Admin.</p>
                         </div>
 
                         {isAuthenticated ? (
@@ -79,7 +79,7 @@ export default function LoginPage() {
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">Email</label>
                                     <input
-                                        placeholder="admin@unitrade.dev"
+                                        placeholder="admin@GR5.dev"
                                         autoComplete="email"
                                         className={[
                                             "mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none",
@@ -154,17 +154,6 @@ export default function LoginPage() {
                                         Đăng ký
                                     </a>
                                 </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setValue("email", "buyer@unitrade.dev", { shouldTouch: true });
-                                        setValue("password", "mysecret123", { shouldTouch: true });
-                                    }}
-                                    className="w-full text-sm rounded-xl py-2 border border-slate-200 hover:bg-slate-50 font-medium text-slate-700"
-                                >
-                                    Điền sẵn tài khoản test
-                                </button>
                             </form>
                         )}
                     </div>
