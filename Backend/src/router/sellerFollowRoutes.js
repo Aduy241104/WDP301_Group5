@@ -5,32 +5,27 @@ import {
   getMyShopFollowersCount,
   getTopFollowersByNumberOfOrders,
   getFollowerPurchaseConversionRate,
+  getFollowerDetail
 } from "../controllers/sellerFollowController.js";
 
 const router = express.Router();
 
-router.get(
-  "/",
-  authenticationMiddleware,
-  getMyShopFollowers
-);
+router.get("/", authenticationMiddleware, getMyShopFollowers);
 
-router.get(
-  "/count",
-  authenticationMiddleware,
-  getMyShopFollowersCount
-);
+router.get("/count", authenticationMiddleware, getMyShopFollowersCount);
 
 router.get(
   "/top-by-orders",
   authenticationMiddleware,
-  getTopFollowersByNumberOfOrders
+  getTopFollowersByNumberOfOrders,
 );
 
 router.get(
   "/purchase-conversion-rate",
   authenticationMiddleware,
-  getFollowerPurchaseConversionRate
+  getFollowerPurchaseConversionRate,
 );
+
+router.get("/:userId", authenticationMiddleware, getFollowerDetail);
 
 export default router;

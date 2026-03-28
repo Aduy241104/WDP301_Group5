@@ -28,9 +28,14 @@ export const getFollowerPurchaseConversionRate = async () => {
   return res.data;
 };
 
+export const getFollowerDetailAPI = (userId) => {
+  return axiosInstance.get(`/api/seller/followers/${userId}`);
+};
+
 export default {
   getShopFollowers,
   getFollowersCount,
   getTopFollowersByNumberOfOrders,
   getFollowerPurchaseConversionRate,
+  getFollowerDetailAPI
 };
