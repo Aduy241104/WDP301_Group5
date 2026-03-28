@@ -246,7 +246,7 @@ export const updateProduct = async (req, res) => {
         if (attributes) product.attributes = attributesMap;
 
         product.defaultPrice = Math.min(...variants.map(v => v.price));
-        product.status = "pending"; // update lại thì chờ duyệt lại
+        // product.status = "pending"; // update lại thì chờ duyệt lại
 
         await product.save();
 
@@ -331,7 +331,7 @@ export const updateProduct = async (req, res) => {
 
 /**
  * GET /seller/products/:productId
- * Seller xem chi tiết 1 sản phẩm của shop mình (kèm variants + stock)
+ * Seller xem chi tiết 1 sản phẩm của shop mình (kèm variants + stock + rejectReason)
  */
 export const getSellerProductDetail = async (req, res) => {
   try {
@@ -384,6 +384,7 @@ export const getSellerProductDetail = async (req, res) => {
       data: {
         ...product,
         variants: variantsWithStock,
+        rejectReason: product.rejectReason || "",
       },
     });
   } catch (error) {
@@ -472,6 +473,30 @@ export const updateProductActiveStatus = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         message: "Không tìm thấy sản phẩm hoặc không có quyền",
+      });
+    }
+
+    // Nếu admin đã inactive thì seller không được phép bật active lại
+    // và không được ghi đè metadata inactiveBy/inactiveActorId của admin.
+    if (product.inactiveBy === "admin" && product.activeStatus === "inactive") {
+      const adminReason = product.inactiveReason || "Không có lý do cụ thể";
+
+      if (activeStatus === "active") {
+        return res.status(403).json({
+          message: `Sản phẩm đang bị admin tạm ngưng. Lý do: ${adminReason}`,
+          data: {
+            activeStatus: product.activeStatus,
+            inactiveReason: product.inactiveReason || "",
+          },
+        });
+      }
+
+      return res.status(200).json({
+        message: `Sản phẩm đang bị admin tạm ngưng. Lý do: ${adminReason}`,
+        data: {
+          activeStatus: product.activeStatus,
+          inactiveReason: product.inactiveReason || "",
+        },
       });
     }
 

@@ -1,4 +1,3 @@
-// pages/ProductDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductDetailAPI } from "../../services/productDiscoveryService";
@@ -9,7 +8,10 @@ import ProductFeedbackSection from "./ProductFeedbackSection";
 import { useAuth } from "../../context/AuthContext";
 import { userTrackingAPI } from "../../services/userTrackingService";
 import SimilarShopList from "./SimilarShopList";
+
+// ✅ giữ cả 2
 import { checkReportedAPI } from "../../services/reportService";
+import { saveToRecentlyViewed } from "../../utils/recentlyViewed";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -20,25 +22,28 @@ export default function ProductDetail() {
   const [isReported, setIsReported] = useState(false);
   const navigate = useNavigate();
 
+  // 🔥 fetch product + recently viewed
   useEffect(() => {
     (async () => {
       try {
         const data = await getProductDetailAPI(productId);
         setProduct(data.item);
         setCurrentPrice(data?.item?.variants?.[0]?.price ?? 0);
+
+        // ✅ từ main
+        saveToRecentlyViewed(productId);
       } finally {
         setLoading(false);
       }
     })();
   }, [productId]);
 
+  // 🔥 tracking user
   useEffect(() => {
     if (isAuthenticated) {
       const handleTrackingUserEvent = async () => {
         try {
-          console.log("HÊLLOLOEO");
-
-          const response = await userTrackingAPI(productId, "view_detail");
+          await userTrackingAPI(productId, "view_detail");
         } catch (error) {
           console.log("ERROR WHEN TRACKING USER EVENT: ", error.message);
         }
@@ -46,10 +51,13 @@ export default function ProductDetail() {
 
       handleTrackingUserEvent();
     }
-  }, [productId]);
+  }, [productId, isAuthenticated]);
+
+  // 🔥 report product
   const handleReportProduct = () => {
     navigate(`/report/product/${product._id}`);
   };
+
   useEffect(() => {
     if (!product) return;
 
@@ -86,6 +94,8 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="lg:col-span-2">
             <ProductInfo currentPrice={currentPrice} product={product} />
+
+            {/* ✅ report button */}
             <button
               onClick={handleReportProduct}
               disabled={isReported}

@@ -5,7 +5,7 @@ import {
   toggleSellerProductActiveAPI,
 } from "../../../services/sellerManageProduct.service";
 
-export default function SellerProductList({ onAdd, onEdit }) {
+export default function SellerProductList({ onAdd, onEdit, onView }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -184,47 +184,66 @@ export default function SellerProductList({ onAdd, onEdit }) {
                         <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                       </label>
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => onEdit?.(p._id)}
-                        className="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (
-                            window.confirm(
-                              "Bạn có chắc muốn xoá sản phẩm này?"
-                            )
-                          ) {
-                            try {
-                              setError("");
-                              setLoading(true);
-                              await deleteSellerProductAPI(p._id);
-                              setProducts((prev) =>
-                                prev.filter((x) => x._id !== p._id)
-                              );
-                              setPagination((pg) => ({
-                                ...pg,
-                                total: pg.total > 0 ? pg.total - 1 : 0,
-                              }));
-                            } catch (e) {
-                              setError(
-                                e?.response?.data?.message ||
-                                  "Không thể xoá sản phẩm"
-                              );
-                            } finally {
-                              setLoading(false);
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          type="button"
+                          onClick={() => onView?.(p._id)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                          title="Chi tiết"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onEdit?.(p._id)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-50"
+                          title="Sửa"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (
+                              window.confirm(
+                                "Bạn có chắc muốn xoá sản phẩm này?"
+                              )
+                            ) {
+                              try {
+                                setError("");
+                                setLoading(true);
+                                await deleteSellerProductAPI(p._id);
+                                setProducts((prev) =>
+                                  prev.filter((x) => x._id !== p._id)
+                                );
+                                setPagination((pg) => ({
+                                  ...pg,
+                                  total: pg.total > 0 ? pg.total - 1 : 0,
+                                }));
+                              } catch (e) {
+                                setError(
+                                  e?.response?.data?.message ||
+                                    "Không thể xoá sản phẩm"
+                                );
+                              } finally {
+                                setLoading(false);
+                              }
                             }
-                          }
-                        }}
-                        className="ml-2 px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm"
-                      >
-                        Xoá
-                      </button>
+                          }}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                          title="Xoá"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

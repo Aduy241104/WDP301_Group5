@@ -79,7 +79,7 @@ export const checkAddToCartAvailability = async (req, res, next) => {
 
         if (nextQty > stock) {
             return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "Quantity exceeds available stock.",
+                message: "Sản phẩm trong giỏ hàng đã vượt quá số lượng cho phép",
                 stock,
                 currentQty,
                 addQty,

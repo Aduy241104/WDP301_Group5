@@ -4,7 +4,8 @@ import {
   getPopupBanner,
   createBanner,
   updateBanner,
-  deleteBanner
+  deleteBanner,
+  getHomeBanners
 } from "../controllers/bannerController.js";
 
 import {
@@ -14,6 +15,7 @@ import {
 
 const router = express.Router();
 
+router.get("/system-banners", getHomeBanners);
 
 router.get("/popup/banner", authenticationMiddleware, adminMiddleware, getPopupBanner);
 
@@ -24,5 +26,6 @@ router.post("/", authenticationMiddleware, adminMiddleware, createBanner);
 router.put("/:id", authenticationMiddleware, adminMiddleware, updateBanner);
 
 router.delete("/:id", authenticationMiddleware, adminMiddleware, deleteBanner);
+
 
 export default router;

@@ -7,7 +7,7 @@ const VoucherSchema = new Schema(
         scope: { type: String, enum: ["system", "shop"], required: true, index: true },
         shopId: { type: Schema.Types.ObjectId, ref: "Shop", default: null, index: true },
 
-        code: { type: String, required: true, unique: true, index: true, trim: true },
+        code: { type: String, required: true, index: true, trim: true },
         name: { type: String, required: true },
         description: { type: String, default: "" },
 
@@ -23,6 +23,7 @@ const VoucherSchema = new Schema(
         usageLimitTotal: { type: Number, default: 0, min: 0 },
         usedCount: { type: Number, default: 0, min: 0 },
         usageLimitPerUser: { type: Number, default: 0, min: 0 },
+        isActive: { type: Boolean, default: true, index: true },
 
         createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
         createdByRole: { type: String, enum: ["admin", "seller"], required: true },

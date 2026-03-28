@@ -23,7 +23,7 @@ import voucherRoutes from "./voucher.routes.js";
 import sellerManageCategoryRoutes from "./sellerManageCategoryRoutes.js";
 import shopFollowRoutes from "./shopFollow.routes.js";
 import adminBrandRoutes from "./adminBrand.routes.js"
-import getAdminCategories from "./adminCategory.routes.js";
+import adminCategoryRoutes from "./adminCategory.routes.js";
 import adminUserAnalyticsRoutes from "./adminUserAnalytics.routes.js";
 import adminCategoryAnalyticsRoutes from "./adminCategoryAnalytics.routes.js"
 import reviewRoutes from "./review.routes.js";
@@ -35,6 +35,7 @@ import notificationRoutes from "./notification.routes.js";
 import reportRouter from "./reportRouter.js";
 import sellerReportRouter from "./sellerReport.routes.js";
 import SellerFollowers from "./sellerFollowRoutes.js";
+import sellerVoucherRoutes from "./sellerVoucher.routes.js";
 
 function route(app) {
     app.use("/api/auth", authenticationRoute);
@@ -70,12 +71,13 @@ function route(app) {
     app.use("/api/cart", cartRoutes);
     app.use("/api/shops", shopRoutes);
     app.use("/api/admin/brands", adminBrandRoutes); 
-    app.use("/api/admin/Category", getAdminCategories); 
+    app.use("/api/admin/Category", adminCategoryRoutes); 
     app.use("/api/admin/users", adminUserAnalyticsRoutes);
     app.use("/api/admin/revenue", adminCategoryAnalyticsRoutes); 
     app.use("/api/report", reportRouter);
     app.use("/api/seller/reports", sellerReportRouter);
     app.use("/api/seller/followers", SellerFollowers);
+    app.use("/api/seller/vouchers", sellerVoucherRoutes);
 
 }
 

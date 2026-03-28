@@ -7,6 +7,10 @@ import {
     activateProduct,
     inactivateProduct,
 } from "../services/adminProductServices";
+import {
+    fetchAdminProductReviews,
+    deleteAdminReview,
+} from "../services/adminReviewServices";
 
 function StatusPill({ status }) {
     const map = {
@@ -45,6 +49,12 @@ export default function AdminProductDetail() {
     const [submitting, setSubmitting] = useState(false);
     const [data, setData] = useState(null);
     const [error, setError] = useState("");
+    const [deleteReviewOpen, setDeleteReviewOpen] = useState(false);
+    const [deleteReviewId, setDeleteReviewId] = useState(null);
+    const [deleteReviewError, setDeleteReviewError] = useState("");
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [reviewsTotal, setReviewsTotal] = useState(0);
 
     const loadDetail = async () => {
         try {
@@ -63,8 +73,25 @@ export default function AdminProductDetail() {
         }
     };
 
+    const loadReviews = async () => {
+        try {
+            setReviewsLoading(true);
+            const res = await fetchAdminProductReviews(productId, { page: 1, limit: 50 });
+            setReviews(res?.items ?? []);
+            setReviewsTotal(res?.paging?.total ?? 0);
+        } catch (err) {
+            // Keep product detail usable even if reviews fail.
+            console.error("LOAD_ADMIN_PRODUCT_REVIEWS_ERROR:", err);
+            setReviews([]);
+            setReviewsTotal(0);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
+
     useEffect(() => {
         loadDetail();
+        loadReviews();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productId]);
 
@@ -122,6 +149,32 @@ export default function AdminProductDetail() {
             await loadDetail();
         } catch (err) {
             alert(err?.response?.data?.message || err?.message || "Thao tác thất bại.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDeleteReview = (reviewId) => {
+        if (!reviewId) return;
+        setDeleteReviewError("");
+        setDeleteReviewId(reviewId);
+        setDeleteReviewOpen(true);
+    };
+
+    const confirmDeleteReview = async () => {
+        if (!deleteReviewId) return;
+        try {
+            setSubmitting(true);
+            setDeleteReviewError("");
+            await deleteAdminReview(deleteReviewId);
+            await loadReviews();
+            await loadDetail();
+            setDeleteReviewOpen(false);
+            setDeleteReviewId(null);
+        } catch (err) {
+            setDeleteReviewError(
+                err?.response?.data?.message || err?.message || "Xóa review thất bại."
+            );
         } finally {
             setSubmitting(false);
         }
@@ -192,20 +245,33 @@ export default function AdminProductDetail() {
                                     </button>
                                 </>
                             )}
-                            <button
-                                onClick={handleActiveToggle}
-                                disabled={submitting}
-                                className={[
-                                    "inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60",
-                                    product.activeStatus === "active"
-                                        ? "bg-rose-600 hover:bg-rose-500"
-                                        : "bg-emerald-600 hover:bg-emerald-500",
-                                ].join(" ")}
-                            >
-                                {product.activeStatus === "active"
-                                    ? "Ẩn sản phẩm"
-                                    : "Kích hoạt sản phẩm"}
-                            </button>
+                            {product.status === "rejected" && (
+                                <button
+                                    onClick={handleApprove}
+                                    disabled={submitting}
+                                    className="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition disabled:opacity-60"
+                                >
+                                    Chấp nhận lại
+                                </button>
+                            )}
+
+                            {/* Nếu sản phẩm đã bị từ chối thì ẩn nút kích hoạt/ẩn */}
+                            {product.status !== "rejected" && (
+                                <button
+                                    onClick={handleActiveToggle}
+                                    disabled={submitting}
+                                    className={[
+                                        "inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60",
+                                        product.activeStatus === "active"
+                                            ? "bg-rose-600 hover:bg-rose-500"
+                                            : "bg-emerald-600 hover:bg-emerald-500",
+                                    ].join(" ")}
+                                >
+                                    {product.activeStatus === "active"
+                                        ? "Ẩn sản phẩm"
+                                        : "Kích hoạt sản phẩm"}
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
@@ -425,7 +491,129 @@ export default function AdminProductDetail() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                        <div className="p-5 sm:p-6">
+                            <div className="flex items-center justify-between gap-3 mb-4">
+                                <h2 className="text-lg font-bold text-slate-900">
+                                    Đánh giá sản phẩm
+                                </h2>
+                                <div className="text-sm text-slate-500">
+                                    Tổng: {reviewsTotal}
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                {reviewsLoading ? (
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500 text-sm">
+                                        Đang tải đánh giá...
+                                    </div>
+                                ) : reviews.length === 0 ? (
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500 text-sm">
+                                        Sản phẩm này chưa có đánh giá.
+                                    </div>
+                                ) : (
+                                    reviews.map((r) => (
+                                        <div
+                                            key={r._id}
+                                            className="rounded-xl border border-slate-200 bg-white p-4"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                                <div className="space-y-1">
+                                                    <div className="font-semibold text-slate-900">
+                                                        {r?.userId?.fullName || "Ẩn danh"}{" "}
+                                                        <span className="text-amber-500">
+                                                            {"★".repeat(Number(r.rating || 0))}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">
+                                                        {r?.userId?.email || "—"}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">
+                                                        {r?.createdAt
+                                                            ? new Date(r.createdAt).toLocaleString(
+                                                                  "vi-VN"
+                                                              )
+                                                            : "—"}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteReview(r._id)}
+                                                    disabled={submitting}
+                                                    className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 disabled:opacity-60"
+                                                >
+                                                    Xóa review
+                                                </button>
+                                            </div>
+                                            <div className="mt-3 text-sm text-slate-700 whitespace-pre-wrap">
+                                                {r.comment || "Không có nội dung."}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </>
+            )}
+
+            {/* Soft delete confirmation modal (no window.alert/confirm) */}
+            {deleteReviewOpen && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-xl p-6">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <div className="text-lg font-bold text-slate-900">
+                                    Xóa review?
+                                </div>
+                                <div className="text-sm text-slate-600 mt-1">
+                                    Bạn có chắc muốn xóa review này?
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setDeleteReviewOpen(false);
+                                    setDeleteReviewId(null);
+                                    setDeleteReviewError("");
+                                }}
+                                className="text-slate-400 hover:text-slate-600"
+                                aria-label="Close"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {deleteReviewError && (
+                            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
+                                {deleteReviewError}
+                            </div>
+                        )}
+
+                        <div className="mt-5 flex gap-3 justify-end">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setDeleteReviewOpen(false);
+                                    setDeleteReviewId(null);
+                                    setDeleteReviewError("");
+                                }}
+                                disabled={submitting}
+                                className="rounded-xl px-4 py-2 bg-white border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmDeleteReview}
+                                disabled={submitting}
+                                className="rounded-xl px-4 py-2 bg-rose-600 text-white text-sm font-semibold hover:bg-rose-500 disabled:opacity-60"
+                            >
+                                {submitting ? "Đang xóa..." : "Xóa"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

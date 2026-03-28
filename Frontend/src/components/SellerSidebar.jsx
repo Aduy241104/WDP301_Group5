@@ -12,6 +12,7 @@ import {
   Image,
   Users,
   FileText,
+  TicketPercent,
 } from "lucide-react";
 
 const menu = [
@@ -28,15 +29,19 @@ const menu = [
     icon: Store,
     end: true,
   },
-  { label: "Categories", to: "/seller/categories", icon: Boxes, end: true },
-  { label: "Products", to: "/seller/products", icon: Package, end: true },
-  { label: "Followers", to: "/seller/followers", icon: Users, end: false },
-  { label: "Banners", to: "/seller/banners", icon: Image, end: true },
-  { label: "Inventory", to: "/seller/inventory", icon: Warehouse, end: true },
-  { label: "Orders", to: "/seller/orders", icon: ShoppingCart, end: false },
-  { label: "Reviews", to: "/seller/reviews", icon: Star, end: true },
-  { label: "Notifications", to: "/seller/notifications", icon: Bell, end: true },
+
+  { label: "Categories", to: "/seller/categories", icon: Boxes },
+  { label: "Products", to: "/seller/products", icon: Package },
+  { label: "Followers", to: "/seller/followers", icon: Users },
+  { label: "Banners", to: "/seller/banners", icon: Image },
+  { label: "Vouchers", to: "/seller/vouchers", icon: TicketPercent },
+  { label: "Inventory", to: "/seller/inventory", icon: Warehouse },
+  { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
+  { label: "Returns", to: "/seller/returns", icon: RotateCcw },
+  { label: "Reviews", to: "/seller/reviews", icon: Star },
+  { label: "Notifications", to: "/seller/notifications", icon: Bell },
   { label: "Reports", to: "/seller/reports", icon: FileText, end: false },
+
 ];
 
 export default function SellerSidebar() {

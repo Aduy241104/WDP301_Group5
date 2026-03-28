@@ -15,6 +15,15 @@ export const updateProfileAPI = async (data) => {
   return res.data.data; // hoặc res.data tùy backend
 };
 
+export const uploadImageAPI = async (formData) => {
+  const res = await axiosInstance.post("/api/profile/upload-avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+
+  return res.data;
+};
 
 export const changePasswordAPI = async (data) => {
   return axiosInstance.put("/api/profile/change-password", data);

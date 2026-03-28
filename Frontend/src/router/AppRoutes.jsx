@@ -1,131 +1,155 @@
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute, PrivateRoute, SellerRoute } from "./guards";
+
 import HomePage from "../pages/Homepage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import AddressPage from "../pages/AddressPage";
-import SellerDashboard from "../pages/Seller/SellerDashboard";
 import NotFound from "../pages/NotFound";
 import RegisterPage from "../pages/RegisterPage";
+
 import MainLayoutRoute from "./MainLayoutRoute";
+
 import ForgotPasswordPage from "../pages/ResetPassword/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/ResetPassword/ResetPasswordPage";
+
+import ProductDetail from "../pages/ProductDetail/ProductDetail";
+import TopSaleProduct from "../pages/TopSaleProduct";
+import ShopListPage from "../pages/ShopListPage";
+import ShopDetailPage from "../pages/ShopDetailPage";
+import SearchResultPage from "../pages/Search/SearchResultPage";
+
+import CartPage from "../pages/CartPage";
+import WishlistPage from "../pages/WishlistPage";
+
+import OrderSummary from "../pages/OrderCustomer/OrderSummary";
+import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
+import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
+import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
+import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
+
+import RecentlyViewedPage from "../pages/recentlyViewed";
+
+import SellerLayout from "../layouts/sellerLayout/SellerLayout";
+import SellerDashboard from "../pages/Seller/SellerDashboard";
+import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
+
+import SellerProducts from "../pages/Seller/Products/SellerProducts";
+import SellerCategories from "../pages/Seller/Categories/SellerCategories";
+import SellerBanners from "../pages/Seller/Banners/SellerBanners";
+import SellerInventory from "../pages/Seller/Inventory/SellerInventory";
+
 import OrderList from "../pages/Seller/OrderList";
 import OrderDetail from "../pages/Seller/OrderDetail";
 import SellerCancelledOrders from "../pages/Seller/SellerCancelledOrders";
-import SellerLayout from "../layouts/sellerLayout/SellerLayout";
-import SellerManageStore from "../pages/Seller/SellerManageStore/SellerManageStore";
+
 import SellerReviews from "../pages/Seller/SellerReviews";
-import ProductDetail from "../pages/ProductDetail/ProductDetail";
-import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
-import SellerStoreInformation from "../pages/Seller/StoreInformation/SellerStoreInformation";
-import CartPage from "../pages/CartPage";
-import SellerProducts from "../pages/Seller/Products/SellerProducts";
-import SellerBanners from "../pages/Seller/Banners/SellerBanners";
-import SellerInventory from "../pages/Seller/Inventory/SellerInventory";
-import TopSaleProduct from "../pages/TopSaleProduct";
-import OrderSummary from "../pages/OrderCustomer/OrderSummary";
-import OrderSuccess from "../pages/OrderCustomer/OrderSuccess";
-import SellerCategories from "../pages/Seller/Categories/SellerCategories";
-import ShopListPage from "../pages/ShopListPage";
-import ShopDetailPage from "../pages/ShopDetailPage";
-import OrderListPage from "../pages/OrderCustomer/OrderList/OrderListPage";
-import OrderDetailPage from "../pages/OrderCustomer/OrderList/OrderDetialPage";
-import WishlistPage from "../pages/WishlistPage";
 import Notifications from "../pages/Seller/Notifications/Notifications";
-import ReportPage from "../pages/OrderCustomer/OrderList/ReportPage";
-import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
+
 import SellerFollowers from "../pages/Seller/Followers/SellerFollowers";
+
+// ✅ REPORT
 import SellerReports from "../pages/Seller/Report/SellerReports";
-import SearchResultPage from "../pages/Search/SearchResultPage";
+import SellerReportDetail from "../pages/Seller/Report/SellerReportDetail";
 import ReportProductPage from "../pages/ProductDetail/ReportProductPage";
 import ReportShopPage from "../pages/ReportShopPage";
+
+// ✅ VOUCHER
+import SellerVoucherList from "../pages/Seller/Vouchers/SellerVoucherList";
+import SellerVoucherAdd from "../pages/Seller/Vouchers/SellerVoucherAdd";
+import SellerVoucherEdit from "../pages/Seller/Vouchers/SellerVoucherEdit";
+
+import SellerRegisterPage from "../pages/SellerRequest/SellerRegisterPage";
+
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public pages */ }
-      <Route element={ <MainLayoutRoute /> }>
-        <Route path="/" element={ <HomePage /> } />
-        <Route path="/products-detail/:productId" element={ <ProductDetail /> } />
-        <Route path="/report/product/:productId" element={ <ReportProductPage /> } />
-        <Route path="/top-sale" element={ <TopSaleProduct /> } />
-        <Route path="/order-success" element={ <OrderSuccess /> } />
-        <Route path="/shops/:productId" element={ <ShopListPage /> } />
-        <Route path="/shop/:shopId" element={ <ShopDetailPage /> } />
-        <Route path="/search" element={ <SearchResultPage /> } />
-        <Route path="/report/shop/:shopId" element={ <ReportShopPage /> } />
+      {/* PUBLIC */}
+      <Route element={<MainLayoutRoute />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products-detail/:productId" element={<ProductDetail />} />
+        <Route path="/report/product/:productId" element={<ReportProductPage />} />
+        <Route path="/report/shop/:shopId" element={<ReportShopPage />} />
+        <Route path="/top-sale" element={<TopSaleProduct />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/shops/:productId" element={<ShopListPage />} />
+        <Route path="/shop/:shopId" element={<ShopDetailPage />} />
+        <Route path="/search" element={<SearchResultPage />} />
       </Route>
 
-      {/* Public-only (đã login thì không vào /login) */ }
-      <Route element={ <PublicRoute /> }>
-        <Route path="/login" element={ <LoginPage /> } />
-        <Route path="/register" element={ <RegisterPage /> } />
-        <Route path="/forgot-password" element={ <ForgotPasswordPage /> } />
-        <Route path="/reset-password" element={ <ResetPasswordPage /> } />
+      {/* PUBLIC ONLY */}
+      <Route element={<PublicRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
-      {/* Private routes */ }
-      <Route element={ <MainLayoutRoute /> }>
-        <Route element={ <PrivateRoute /> }>
-          <Route path="/profile" element={ <ProfilePage /> } />
-          <Route path="/addresses" element={ <AddressPage /> } />
-          <Route path="/my-cart" element={ <CartPage /> } />
-          <Route path="/place-order" element={ <OrderSummary /> } />
-          <Route path="/my-order-list" element={ <OrderListPage /> } />
-          <Route path="/order-detail/:orderId" element={ <OrderDetailPage /> } />
-          <Route path="/wishlist" element={ <WishlistPage /> } />
-          <Route path="/report/:orderId" element={ <ReportPage /> } />
+      {/* PRIVATE */}
+      <Route element={<MainLayoutRoute />}>
+        <Route element={<PrivateRoute />}>
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/addresses" element={<AddressPage />} />
+          <Route path="/my-cart" element={<CartPage />} />
+          <Route path="/place-order" element={<OrderSummary />} />
+          <Route path="/my-order-list" element={<OrderListPage />} />
+          <Route path="/order-detail/:orderId" element={<OrderDetailPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/report/:orderId" element={<ReportPage />} />
+          <Route path="/recently-viewed" element={<RecentlyViewedPage />} />
         </Route>
       </Route>
 
-      <Route element={ <MainLayoutRoute /> }>
-        <Route element={ <PrivateRoute /> }>
-          <Route path="/request-seller" element={ <SellerRegisterPage /> } />
+      {/* SELLER REQUEST */}
+      <Route element={<MainLayoutRoute />}>
+        <Route element={<PrivateRoute />}>
+          <Route path="/request-seller" element={<SellerRegisterPage />} />
         </Route>
       </Route>
 
-      {/* Seller routes */ }
-      <Route element={ <SellerRoute /> }>
-        <Route path="/seller" element={ <SellerLayout /> }>
-          {/* ROUTE MẶC ĐỊNH */ }
-          <Route index element={ <SellerDashboard /> } />
+      {/* SELLER */}
+      <Route element={<SellerRoute />}>
+        <Route path="/seller" element={<SellerLayout />}>
+          <Route index element={<SellerDashboard />} />
 
-          {/* ROUTE RÕ RÀNG */ }
-          <Route path="dashboard" element={ <SellerDashboard /> } />
-          <Route path="store" element={ <SellerManageStore /> } />
-          <Route path="reviews" element={ <SellerReviews /> } />
-          <Route path="orders" element={ <OrderList /> } />
-          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
-          <Route path="orders/:id" element={ <OrderDetail /> } />
-          {/* ROUTE RÕ RÀNG */ }
-          <Route path="dashboard" element={ <SellerDashboard /> } />
-          <Route
-            path="store-information"
-            element={ <SellerStoreInformation /> }
-          />
-          <Route path="pickup-addresses" element={ <SellerManageStore /> } />
-          <Route path="products" element={ <SellerProducts /> } />
-          <Route path="categories" element={ <SellerCategories /> } />
-          <Route path="banners" element={ <SellerBanners /> } />
-          <Route path="inventory" element={ <SellerInventory /> } />
-          <Route path="orders" element={ <OrderList /> } />
-          <Route path="orders/cancelled" element={ <SellerCancelledOrders /> } />
-          <Route path="orders/:id" element={ <OrderDetail /> } />
-          <Route path="notifications" element={ <Notifications /> } />
-          <Route path="reports" element={ <SellerReports /> } />
-          <Route path="reports/:reportId" element={ <SellerReportDetail /> } />
-          <Route path="followers" element={ <SellerFollowers /> } />
-          <Route path="followers/top-by-orders" element={ <SellerFollowers /> } />
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="store-information" element={<SellerStoreInformation />} />
+          <Route path="pickup-addresses" element={<SellerManageStore />} />
+
+          <Route path="products" element={<SellerProducts />} />
+          <Route path="categories" element={<SellerCategories />} />
+          <Route path="banners" element={<SellerBanners />} />
+          <Route path="inventory" element={<SellerInventory />} />
+
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/cancelled" element={<SellerCancelledOrders />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+
+          <Route path="reviews" element={<SellerReviews />} />
+          <Route path="notifications" element={<Notifications />} />
+
+          {/* REPORT */}
+          <Route path="reports" element={<SellerReports />} />
+          <Route path="reports/:reportId" element={<SellerReportDetail />} />
+
+          {/* FOLLOWERS */}
+          <Route path="followers" element={<SellerFollowers />} />
+          <Route path="followers/top-by-orders" element={<SellerFollowers />} />
           <Route
             path="followers/purchase-conversion-rate"
-            element={ <SellerFollowers /> }
+            element={<SellerFollowers />}
           />
 
+          {/* VOUCHERS */}
+          <Route path="vouchers" element={<SellerVoucherList />} />
+          <Route path="vouchers/new" element={<SellerVoucherAdd />} />
+          <Route path="vouchers/:voucherId/edit" element={<SellerVoucherEdit />} />
         </Route>
       </Route>
 
-      {/* 404 */ }
-      <Route path="*" element={ <NotFound /> } />
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

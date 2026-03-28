@@ -4,7 +4,8 @@ import {
     getProductDetailById,
     getProductDiscovery,
     getRecommendedProducts,
-    getSearchedProducts
+    getSearchedProducts,
+    getProductsByIds
 } from "../controllers/productDiscoveryController.js";
 
 import { optionalAuthenticationMiddleware } from "../middlewares/authenticationMiddlewares.js";
@@ -21,5 +22,7 @@ router.get("/product-detail/:id", getProductDetailById);
 router.get("/recomment", optionalAuthenticationMiddleware, getRecommendedProducts);
 
 router.post("/search", validateSearchProduct, getSearchedProducts);
+
+router.post("/by-ids", getProductsByIds);
 
 export default router;

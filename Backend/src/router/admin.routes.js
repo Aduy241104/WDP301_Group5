@@ -56,6 +56,27 @@ import {
     AdminActivateProductController,
     AdminInactivateProductController,
 } from "../controllers/AdminProductController.js";
+import {
+    adminCreateSystemVoucher,
+    adminGetSystemVoucherDetail,
+    adminDeleteSystemVoucher,
+    adminGetSystemVoucherList,
+    adminToggleSystemVoucher,
+    adminUpdateSystemVoucher,
+} from "../controllers/AdminVoucherController.js";
+
+import {
+    AdminNotifySellerReportResultController,
+    AdminBroadcastSellersNotificationController,
+    AdminNotifySelectedSellersController,
+    AdminSellerNotifyCandidatesController,
+} from "../controllers/AdminNotificationController.js";
+
+import {
+    AdminReviewListController,
+    AdminProductReviewsController,
+    AdminDeleteReviewController,
+} from "../controllers/AdminReviewController.js";
 
 const router = express.Router();
 
@@ -70,6 +91,8 @@ router.get("/seller-registrations/by-status", AdminFilterSellerByStatusControlle
 
 // View list of sellers (approved sellers)
 router.get("/sellers", AdminSellerListController);
+// Seller active — chọn gửi thông báo (phải đặt trước /sellers/:userId/...)
+router.get("/sellers/notify-candidates", AdminSellerNotifyCandidatesController);
 
 // View detailed seller profile
 router.get("/sellers/:userId/profile", AdminViewSellerProfileController);
@@ -104,9 +127,19 @@ router.delete("/banners/:bannerId", AdminDeleteBannerController);
 
 // Report management
 router.get("/reports", AdminReportListController);
-router.get("/reports/:reportId", AdminReportDetailController);
 router.get("/reports/classify", AdminClassifyReportController);
+router.get("/reports/:reportId", AdminReportDetailController);
 router.post("/reports/:reportId/resolve", AdminResolveReportController);
+router.post("/reports/:reportId/notify-seller", AdminNotifySellerReportResultController);
+
+// System notifications (admin → sellers)
+router.post("/notifications/broadcast-sellers", AdminBroadcastSellersNotificationController);
+router.post("/notifications/selected-sellers", AdminNotifySelectedSellersController);
+
+// Review management (admin)
+router.get("/reviews", AdminReviewListController);
+router.delete("/reviews/:reviewId", AdminDeleteReviewController);
+router.get("/products/:productId/reviews", AdminProductReviewsController);
 
 // Revenue Analytics
 router.get("/revenue/gmv-statistics", AdminGMVStatisticsController);
@@ -123,9 +156,19 @@ router.post("/products/:productId/reject", AdminRejectProductController);
 router.post("/products/:productId/activate", AdminActivateProductController);
 router.post("/products/:productId/inactivate", AdminInactivateProductController);
 
+<<<<<<< HEAD
 // Mail management (admin) - Seller emails
 router.post("/seller-emails/send", AdminSendSellerEmailController);
 router.get("/seller-emails", AdminSellerEmailListController);
+=======
+// System voucher management (admin)
+router.get("/vouchers", adminGetSystemVoucherList);
+router.post("/vouchers", adminCreateSystemVoucher);
+router.get("/vouchers/:voucherId", adminGetSystemVoucherDetail);
+router.put("/vouchers/:voucherId", adminUpdateSystemVoucher);
+router.put("/vouchers/:voucherId/toggle", adminToggleSystemVoucher);
+router.delete("/vouchers/:voucherId", adminDeleteSystemVoucher);
+>>>>>>> main
 
 
 export default router;
