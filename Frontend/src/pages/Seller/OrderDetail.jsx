@@ -49,7 +49,6 @@ export default function OrderDetail() {
   const [selectedPickupId, setSelectedPickupId] = useState("");
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [trackingCode, setTrackingCode] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -86,7 +85,6 @@ export default function OrderDetail() {
         await updateSellerOrderStatusAPI({
           id,
           status,
-          trackingCode: status === "shipped" ? trackingCode : undefined,
           pickupAddressId: status === "shipped" ? selectedPickupId : undefined,
         });
       }
@@ -110,12 +108,10 @@ export default function OrderDetail() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
 
-      {/* BACK */}
       <Link to="/seller/orders" className="text-blue-600 underline">
         ← Back to orders
       </Link>
 
-      {/* ORDER INFO */}
       <Section title={`Order ${order.orderCode}`}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 
@@ -144,20 +140,13 @@ export default function OrderDetail() {
         </div>
       </Section>
 
-      {/* ITEMS */}
       <Section title="Order Items">
-
         <div className="space-y-4">
 
           {order.items.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between border rounded-xl p-4 hover:bg-gray-50"
-            >
+            <div key={i} className="flex items-center justify-between border rounded-xl p-4 hover:bg-gray-50">
 
               <div className="flex items-center gap-4">
-
-                {/* IMAGE */}
                 <div className="w-20 h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0">
                   {item.productId?.images?.[0] ? (
                     <img
@@ -172,7 +161,6 @@ export default function OrderDetail() {
                   )}
                 </div>
 
-                {/* PRODUCT INFO */}
                 <div>
                   <div className="font-semibold text-gray-800">
                     {item.productName}
@@ -188,65 +176,24 @@ export default function OrderDetail() {
                     Quantity: {item.quantity}
                   </div>
                 </div>
-
               </div>
 
-              {/* PRICE */}
               <div className="text-right">
-
                 <div className="text-sm text-gray-500">
                   {item.price.toLocaleString()}đ
                 </div>
-
                 <div className="font-semibold text-lg text-indigo-600">
                   {(item.price * item.quantity).toLocaleString()}đ
                 </div>
-
               </div>
 
             </div>
           ))}
 
         </div>
-
       </Section>
 
-      {/* ORDER SUMMARY */}
-      <Section title="Order Summary">
-
-        <div className="space-y-2 text-sm">
-
-          <div className="flex justify-between">
-            <span className="text-gray-500">Subtotal</span>
-            <span>{order.subtotal.toLocaleString()}đ</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-gray-500">Shipping Fee</span>
-            <span>{order.shippingFee.toLocaleString()}đ</span>
-          </div>
-
-          {order.voucher && (
-            <div className="flex justify-between text-green-600">
-              <span>Voucher ({order.voucher.code})</span>
-              <span>-{order.voucher.appliedDiscountAmount.toLocaleString()}đ</span>
-            </div>
-          )}
-
-          <div className="border-t pt-2 flex justify-between font-semibold text-lg">
-            <span>Total</span>
-            <span className="text-indigo-600">
-              {order.totalAmount.toLocaleString()}đ
-            </span>
-          </div>
-
-        </div>
-
-      </Section>
-
-      {/* SHIPPING INFO */}
       <Section title="Shipping Information">
-
         <div className="grid grid-cols-2 gap-4 text-sm">
 
           <div>
@@ -264,10 +211,8 @@ export default function OrderDetail() {
           </div>
 
         </div>
-
       </Section>
 
-      {/* CONFIRM / CANCEL */}
       {order.orderStatus === "created" && (
         <Section title="Order Actions">
 
@@ -285,6 +230,7 @@ export default function OrderDetail() {
                   {addr.fullAddress}
                 </option>
               ))}
+
             </select>
 
             <div className="flex gap-3">
@@ -312,22 +258,14 @@ export default function OrderDetail() {
         </Section>
       )}
 
-      {/* SHIPPING */}
       {order.orderStatus === "confirmed" && (
         <Section title="Shipping">
 
           <div className="space-y-3">
 
-            <input
-              placeholder="Tracking code"
-              className="w-full px-3 py-2 border rounded-lg"
-              value={trackingCode}
-              onChange={(e) => setTrackingCode(e.target.value)}
-            />
-
             <button
               onClick={() => updateStatus("shipped")}
-              disabled={!trackingCode || updating}
+              disabled={updating}
               className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
             >
               Mark as Shipped
@@ -338,7 +276,6 @@ export default function OrderDetail() {
         </Section>
       )}
 
-      {/* DELIVERY */}
       {order.orderStatus === "shipped" && (
         <Section title="Delivery Confirmation">
 
@@ -353,25 +290,19 @@ export default function OrderDetail() {
         </Section>
       )}
 
-      {/* STATUS HISTORY */}
       <Section title="Status History">
-
         <ul className="space-y-2 text-sm">
 
           {order.statusHistory.map((h, i) => (
             <li key={i} className="flex justify-between">
-
               <StatusBadge status={h.status} />
-
               <span className="text-gray-500">
                 {new Date(h.changedAt).toLocaleString()}
               </span>
-
             </li>
           ))}
 
         </ul>
-
       </Section>
 
     </div>

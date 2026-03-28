@@ -29,7 +29,7 @@ export const getMyShopFollowers = async (req, res, next) => {
         .limit(limit)
         .populate({
           path: "userId",
-          select: "_id fullname email avatar",
+          select: "_id fullName email avatar",
         })
         .lean(),
     ]);
@@ -139,7 +139,7 @@ export const getTopFollowersByNumberOfOrders = async (req, res, next) => {
 
     const orderedUserIds = orderCounts.map((r) => r._id);
     const users = await User.find({ _id: { $in: orderedUserIds } })
-      .select("_id fullname email avatar")
+      .select("_id fullName email avatar")
       .lean();
 
     const userMap = Object.fromEntries(
@@ -221,5 +221,61 @@ export const getFollowerPurchaseConversionRate = async (req, res, next) => {
     });
   } catch (err) {
     return next(err);
+  }
+};
+
+export const getFollowerDetail = async (req, res, next) => {
+  try {
+    const sellerId = req.user.id;
+    const { userId } = req.params;
+
+    const shop = await Shop.findOne({ ownerId: sellerId });
+    if (!shop) {
+      return res.status(404).json({
+        message: "Seller does not have a shop",
+      });
+    }
+
+    // check user có follow shop không
+    const follower = await ShopFollower.findOne({
+      shopId: shop._id,
+      userId,
+    });
+
+    if (!follower) {
+      return res.status(404).json({
+        message: "User is not a follower",
+      });
+    }
+
+    // lấy user info
+    const user = await User.findById(userId)
+      .select("_id fullName email avatar phone createdAt")
+      .lean();
+
+    // tổng đơn hàng user với shop
+    const totalOrders = await Order.countDocuments({
+      shop: shop._id,
+      userId,
+    });
+
+    // số đơn delivered
+    const deliveredOrders = await Order.countDocuments({
+      shop: shop._id,
+      userId,
+      orderStatus: "delivered",
+    });
+
+    return res.status(200).json({
+      message: "Get follower detail success",
+      data: {
+        user,
+        followedAt: follower.createdAt,
+        totalOrders,
+        deliveredOrders,
+      },
+    });
+  } catch (err) {
+    next(err);
   }
 };

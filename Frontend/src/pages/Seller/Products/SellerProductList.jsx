@@ -12,6 +12,8 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 6,
@@ -25,8 +27,12 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
         setError("");
         setLoading(true);
         const params = { page, limit: pagination.limit };
-        if (statusFilter && statusFilter !== "all") params.status = statusFilter;
-        if (activeFilter && activeFilter !== "all") params.activeStatus = activeFilter;
+        if (search) params.keyword = search;
+        if (categoryFilter) params.category = categoryFilter;
+        if (statusFilter && statusFilter !== "all")
+          params.status = statusFilter;
+        if (activeFilter && activeFilter !== "all")
+          params.activeStatus = activeFilter;
 
         const res = await getSellerProductsAPI(params);
         setProducts(res?.data || []);
@@ -34,19 +40,46 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
           setPagination(res.pagination);
         }
       } catch (e) {
-        setError(e?.response?.data?.message || "Không thể tải danh sách sản phẩm");
+        setError(
+          e?.response?.data?.message || "Không thể tải danh sách sản phẩm",
+        );
       } finally {
         setLoading(false);
       }
     };
     fetch();
-  }, [statusFilter, activeFilter, page, pagination.limit]);
+  }, [statusFilter, activeFilter, page, pagination.limit, search, categoryFilter]);
 
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Danh sách sản phẩm</h2>
-        <div className="flex items-center gap-3">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Danh sách sản phẩm
+        </h2>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* SEARCH */}
+          <input
+            type="text"
+            placeholder="Search name / SKU..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="px-3 py-2 border rounded-lg w-56"
+          />
+
+          {/* CATEGORY */}
+          <input
+            type="text"
+            placeholder="Category..."
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-3 py-2 border rounded-lg w-40"
+          />
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Status</label>
             <select
@@ -92,26 +125,47 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
       {loading ? (
         <div className="py-12 text-center text-gray-500">Đang tải...</div>
       ) : products.length === 0 ? (
-        <div className="py-12 text-center text-gray-500">Chưa có sản phẩm. Bấm "Add Product" để thêm.</div>
+        <div className="py-12 text-center text-gray-500">
+          Chưa có sản phẩm. Bấm "Add Product" để thêm.
+        </div>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Ảnh</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Tên</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">SKU</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Brand</th>
-                  <th className="text-right px-4 py-3 font-semibold text-gray-700">Giá</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Active</th>
-                  <th className="text-right px-4 py-3 font-semibold text-gray-700">Thao tác</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    Ảnh
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    Tên
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    SKU
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    Brand
+                  </th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-700">
+                    Giá
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    Status
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700">
+                    Active
+                  </th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-700">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((p) => (
-                  <tr key={p._id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr
+                    key={p._id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
                     <td className="px-4 py-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center bg-gray-100">
                         {p.images?.[0] ? (
@@ -121,11 +175,17 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.target.style.display = "none";
-                              e.target.nextElementSibling?.classList.remove("hidden");
+                              e.target.nextElementSibling?.classList.remove(
+                                "hidden",
+                              );
                             }}
                           />
                         ) : null}
-                        <span className={`text-xs text-gray-500 ${p.images?.[0] ? "hidden" : ""}`}>—</span>
+                        <span
+                          className={`text-xs text-gray-500 ${p.images?.[0] ? "hidden" : ""}`}
+                        >
+                          —
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">{p.name}</td>
@@ -134,7 +194,9 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                     </td>
                     <td className="px-4 py-3">{p.brandId?.name || "—"}</td>
                     <td className="px-4 py-3 text-right font-medium">
-                      {typeof p.defaultPrice === "number" ? p.defaultPrice.toLocaleString() : "—"}
+                      {typeof p.defaultPrice === "number"
+                        ? p.defaultPrice.toLocaleString()
+                        : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -142,8 +204,8 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                           p.status === "approved"
                             ? "bg-green-100 text-green-800"
                             : p.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
                         }`}
                       >
                         {p.status || "—"}
@@ -162,19 +224,24 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                               setError("");
                               setLoading(true);
                               const newStatus =
-                                p.activeStatus === "active" ? "inactive" : "active";
-                              await toggleSellerProductActiveAPI(p._id, newStatus);
+                                p.activeStatus === "active"
+                                  ? "inactive"
+                                  : "active";
+                              await toggleSellerProductActiveAPI(
+                                p._id,
+                                newStatus,
+                              );
                               setProducts((prev) =>
                                 prev.map((x) =>
                                   x._id === p._id
                                     ? { ...x, activeStatus: newStatus }
-                                    : x
-                                )
+                                    : x,
+                                ),
                               );
                             } catch (e) {
                               setError(
                                 e?.response?.data?.message ||
-                                  "Không thể thay đổi trạng thái active"
+                                  "Không thể thay đổi trạng thái active",
                               );
                             } finally {
                               setLoading(false);
@@ -192,9 +259,24 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                           className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-indigo-300 text-indigo-600 hover:bg-indigo-50"
                           title="Chi tiết"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
                           </svg>
                         </button>
                         <button
@@ -203,8 +285,18 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                           className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-50"
                           title="Sửa"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
                           </svg>
                         </button>
                         <button
@@ -212,7 +304,7 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                           onClick={async () => {
                             if (
                               window.confirm(
-                                "Bạn có chắc muốn xoá sản phẩm này?"
+                                "Bạn có chắc muốn xoá sản phẩm này?",
                               )
                             ) {
                               try {
@@ -220,7 +312,7 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                                 setLoading(true);
                                 await deleteSellerProductAPI(p._id);
                                 setProducts((prev) =>
-                                  prev.filter((x) => x._id !== p._id)
+                                  prev.filter((x) => x._id !== p._id),
                                 );
                                 setPagination((pg) => ({
                                   ...pg,
@@ -229,7 +321,7 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                               } catch (e) {
                                 setError(
                                   e?.response?.data?.message ||
-                                    "Không thể xoá sản phẩm"
+                                    "Không thể xoá sản phẩm",
                                 );
                               } finally {
                                 setLoading(false);
@@ -239,8 +331,18 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                           className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
                           title="Xoá"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -269,7 +371,9 @@ export default function SellerProductList({ onAdd, onEdit, onView }) {
                 type="button"
                 onClick={() =>
                   setPage((p) =>
-                    pagination.totalPages ? Math.min(pagination.totalPages, p + 1) : p + 1
+                    pagination.totalPages
+                      ? Math.min(pagination.totalPages, p + 1)
+                      : p + 1,
                   )
                 }
                 disabled={pagination.page >= pagination.totalPages}
