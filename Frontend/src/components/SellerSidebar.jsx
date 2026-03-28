@@ -11,17 +11,25 @@ import {
   Bell,
   Image,
   Users,
+  FileText,
   TicketPercent,
 } from "lucide-react";
 
 const menu = [
-  { label: "Dashboard", to: "/seller", icon: LayoutDashboard },
-  { label: "Store Information", to: "/seller/store-information", icon: Store },
+  { label: "Dashboard", to: "/seller", icon: LayoutDashboard, end: true },
+  {
+    label: "Store Information",
+    to: "/seller/store-information",
+    icon: Store,
+    end: true,
+  },
   {
     label: "Manage Pickup Address",
     to: "/seller/pickup-addresses",
     icon: Store,
+    end: true,
   },
+
   { label: "Categories", to: "/seller/categories", icon: Boxes },
   { label: "Products", to: "/seller/products", icon: Package },
   { label: "Followers", to: "/seller/followers", icon: Users },
@@ -31,6 +39,8 @@ const menu = [
   { label: "Orders", to: "/seller/orders", icon: ShoppingCart },
   { label: "Reviews", to: "/seller/reviews", icon: Star },
   { label: "Notifications", to: "/seller/notifications", icon: Bell },
+  { label: "Reports", to: "/seller/reports", icon: FileText, end: false },
+
   { label: "Back to Homepage", to: "/", icon: RotateCcw },
 ];
 
@@ -48,7 +58,7 @@ export default function SellerSidebar() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/seller"}
+            end={item.end ?? false}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2 rounded-lg transition ${
                 isActive

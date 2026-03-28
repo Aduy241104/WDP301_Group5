@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getShopDetail, getShopProducts, getShopCategoriesAPI, getShopProductsByCategory, } from "../services/shopService";
+import {
+  getShopDetail,
+  getShopProducts,
+  getShopCategoriesAPI,
+  getShopProductsByCategory,
+} from "../services/shopService";
 import ShopProductCard from "../components/shop/ShopProductCard";
 import "../App.css";
 import ShopFollowButton from "../components/shop/ShopFollow";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStore, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import ShopBanner from "../components/shop/ShopBanner";
-
+import { useNavigate } from "react-router-dom";
+import { checkReportedAPI } from "../services/reportService";
 
 export default function ShopDetailPage() {
   const { shopId } = useParams();
@@ -26,8 +32,31 @@ export default function ShopDetailPage() {
   const [limit] = useState(10);
   const [pagination, setPagination] = useState(null);
 
+  const [isReported, setIsReported] = useState(false);
+  const navigate = useNavigate();
 
+  const handleReportShop = () => {
+    navigate(`/report/shop/${shop._id}`);
+  };
 
+  useEffect(() => {
+    if (!shop) return;
+
+    const check = async () => {
+      try {
+        const res = await checkReportedAPI({
+          targetType: "shop",
+          targetId: shop._id,
+        });
+
+        setIsReported(res.reported);
+      } catch (err) {
+        console.log("Check report error:", err);
+      }
+    };
+
+    check();
+  }, [shop]);
   // ================= FETCH SHOP =================
   const fetchShop = async () => {
     try {
@@ -72,7 +101,6 @@ export default function ShopDetailPage() {
     }
   };
 
-
   const fetchCategories = async () => {
     try {
       const data = await getShopCategoriesAPI(shopId);
@@ -108,7 +136,6 @@ export default function ShopDetailPage() {
     <div style={{ padding: 10, margin: "0 auto" }}>
       {/* ================= SHOP INFO ================= */}
       <div className="flex items-center justify-between gap-8 rounded-xl border border-slate-200 bg-white p-6 mt-5 shadow-sm">
-
         {/* Left */}
         <div className="flex items-center gap-5">
           <img
@@ -126,7 +153,10 @@ export default function ShopDetailPage() {
 
               {shop.shopAddress && (
                 <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <FontAwesomeIcon icon={faLocationDot} className="text-red-500" />
+                  <FontAwesomeIcon
+                    icon={faLocationDot}
+                    className="text-red-500"
+                  />
                   {shop.shopAddress.fullAddress}
                 </div>
               )}
@@ -134,22 +164,30 @@ export default function ShopDetailPage() {
 
             <div className="mt-3">
               <ShopFollowButton shopId={shopId} />
+              <button
+                onClick={handleReportShop}
+                disabled={isReported}
+                className={`px-3 py-2 rounded-lg text-white ${
+                  isReported
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
+              >
+                {isReported ? "✅ Đã báo cáo" : "🚨 Report Shop"}
+              </button>
             </div>
           </div>
         </div>
 
         {/* Right (để trống nếu sau này thêm stats) */}
-        <div className="flex items-center gap-6 text-sm text-slate-600">
-
-        </div>
+        <div className="flex items-center gap-6 text-sm text-slate-600"></div>
       </div>
 
       {/* ================= CATEGORY FILTER ================= */}
       <div className="category-filter">
-
         <button
-          className={ `filter-btn ${isDiscovery ? "active" : ""}` }
-          onClick={ () => setDiscovery(true) }
+          className={`filter-btn ${isDiscovery ? "active" : ""}`}
+          onClick={() => setDiscovery(true)}
         >
           Dạo
         </button>
@@ -189,111 +227,105 @@ export default function ShopDetailPage() {
       </div>
 
       {/* ================= PRODUCT LIST ================= */}
-      {!isDiscovery && <div className="mt-6 rounded-xl bg-slate-50 p-5">
-        <h2 className="text-lg font-semibold mb-3">Sản phẩm của shop</h2>
+      {!isDiscovery && (
+        <div className="mt-6 rounded-xl bg-slate-50 p-5">
+          <h2 className="text-lg font-semibold mb-3">Sản phẩm của shop</h2>
 
-        {loadingProducts ? (
-          <div>Loading products...</div>
-        ) : products.length === 0 ? (
-          <div>Shop chưa có sản phẩm</div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {products.map((product) => (
-              <ShopProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        )}
+          {loadingProducts ? (
+            <div>Loading products...</div>
+          ) : products.length === 0 ? (
+            <div>Shop chưa có sản phẩm</div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {products.map((product) => (
+                <ShopProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
 
-
-        {pagination && pagination.totalPages > 1 && (
-          <div
-            style={{
-              marginTop: 30,
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+          {pagination && pagination.totalPages > 1 && (
             <div
               style={{
+                marginTop: 30,
                 display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 12px",
-                border: "1px solid #ddd",
-                borderRadius: 10,
-                background: "#fff",
+                justifyContent: "center",
               }}
             >
-              {/* Nút Prev */}
-              <button
-                disabled={page === 1}
-                onClick={() => fetchProducts(activeCategory, page - 1)}
+              <div
                 style={{
-                  padding: "6px 10px",
-                  borderRadius: 6,
-                  border: "1px solid #ccc",
-                  background: page === 1 ? "#f5f5f5" : "#fff",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 12px",
+                  border: "1px solid #ddd",
+                  borderRadius: 10,
+                  background: "#fff",
                 }}
               >
-                {"<"}
-              </button>
+                {/* Nút Prev */}
+                <button
+                  disabled={page === 1}
+                  onClick={() => fetchProducts(activeCategory, page - 1)}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    background: page === 1 ? "#f5f5f5" : "#fff",
+                    cursor: page === 1 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {"<"}
+                </button>
 
-              {/* Số trang */}
-              {Array.from({ length: pagination.totalPages }, (_, index) => {
-                const pageNumber = index + 1;
+                {/* Số trang */}
+                {Array.from({ length: pagination.totalPages }, (_, index) => {
+                  const pageNumber = index + 1;
 
-                return (
-                  <button
-                    key={pageNumber}
-                    onClick={() =>
-                      fetchProducts(activeCategory, pageNumber)
-                    }
-                    style={{
-                      padding: "6px 10px",
-                      borderRadius: 6,
-                      border:
-                        page === pageNumber
-                          ? "1px solid #000"
-                          : "1px solid #ccc",
-                      background:
-                        page === pageNumber ? "#77E2F2" : "#fff",
-                      color:
-                        page === pageNumber ? "#000" : "#000",
-                      fontWeight:
-                        page === pageNumber ? "700" : "normal",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => fetchProducts(activeCategory, pageNumber)}
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: 6,
+                        border:
+                          page === pageNumber
+                            ? "1px solid #000"
+                            : "1px solid #ccc",
+                        background: page === pageNumber ? "#77E2F2" : "#fff",
+                        color: page === pageNumber ? "#000" : "#000",
+                        fontWeight: page === pageNumber ? "700" : "normal",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
 
-              {/* Nút Next */}
-              <button
-                disabled={page === pagination.totalPages}
-                onClick={() => fetchProducts(activeCategory, page + 1)}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: 6,
-                  border: "1px solid #ccc",
-                  background:
-                    page === pagination.totalPages
-                      ? "#f5f5f5"
-                      : "#fff",
-                  cursor:
-                    page === pagination.totalPages
-                      ? "not-allowed"
-                      : "pointer",
-                }}
-              >
-                {">"}
-              </button>
+                {/* Nút Next */}
+                <button
+                  disabled={page === pagination.totalPages}
+                  onClick={() => fetchProducts(activeCategory, page + 1)}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    background:
+                      page === pagination.totalPages ? "#f5f5f5" : "#fff",
+                    cursor:
+                      page === pagination.totalPages
+                        ? "not-allowed"
+                        : "pointer",
+                  }}
+                >
+                  {">"}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>}
+          )}
+        </div>
+      )}
 
       {isDiscovery && <ShopBanner shopId={shopId} />}
     </div>

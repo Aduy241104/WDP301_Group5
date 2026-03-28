@@ -11,6 +11,10 @@ export default function Notifications() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("orders");
 
+  // 🔥 pagination
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
   const prevCount = useRef(0);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,15 +47,10 @@ export default function Notifications() {
     return () => clearInterval(interval);
   }, []);
 
-  // Nếu không có order notifications thì mặc định mở tab Reports
+  // reset page khi đổi tab
   useEffect(() => {
-    if (loading) return;
-    const orderCount = notifications.filter((n) => n.type?.startsWith("order")).length;
-    const nonOrderCount = notifications.filter((n) => !n.type?.startsWith("order")).length;
-    if (orderCount === 0 && nonOrderCount > 0) {
-      setActiveTab("reports");
-    }
-  }, [loading, notifications]);
+    setPage(1);
+  }, [activeTab]);
 
   const handleClick = async (n) => {
     try {
@@ -73,128 +72,104 @@ export default function Notifications() {
     }
   };
 
-  // ===== Filter Notifications =====
-
+  // ===== Filter =====
   const orderNotifications = notifications.filter((n) =>
     n.type?.startsWith("order")
   );
 
-  // Reports tab hiển thị tất cả notification không phải order_status
-  // để tránh trường hợp type không khớp bộ lọc cũ khiến danh sách trống.
-  const reportNotifications = notifications.filter(
-    (n) => !n.type?.startsWith("order")
+  const reportNotifications = notifications.filter((n) =>
+    n.type?.includes("report")
   );
 
   const currentList =
     activeTab === "orders" ? orderNotifications : reportNotifications;
 
-  // ===== Render =====
+  // ===== Pagination =====
+  const totalPages = Math.ceil(currentList.length / limit);
+
+  const paginatedList = currentList.slice(
+    (page - 1) * limit,
+    page * limit
+  );
 
   return (
     <div className="space-y-6">
-
       <h2 className="text-2xl font-semibold">Notifications</h2>
 
-      {/* ===== Tabs ===== */}
-
+      {/* Tabs */}
       <div className="flex gap-4">
-
         <button
           onClick={() => setActiveTab("orders")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
+          className={`px-4 py-2 rounded-lg ${
             activeTab === "orders"
               ? "bg-indigo-600 text-white"
-              : "bg-white border hover:bg-slate-50"
+              : "bg-white border"
           }`}
         >
-          🛒 Orders
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full ${
-              activeTab === "orders"
-                ? "bg-white text-indigo-600"
-                : "bg-slate-200"
-            }`}
-          >
-            {orderNotifications.length}
-          </span>
+          Orders ({orderNotifications.length})
         </button>
 
         <button
           onClick={() => setActiveTab("reports")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
+          className={`px-4 py-2 rounded-lg ${
             activeTab === "reports"
               ? "bg-indigo-600 text-white"
-              : "bg-white border hover:bg-slate-50"
+              : "bg-white border"
           }`}
         >
-          🚨 Reports
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full ${
-              activeTab === "reports"
-                ? "bg-white text-indigo-600"
-                : "bg-slate-200"
-            }`}
-          >
-            {reportNotifications.length}
-          </span>
+          Reports ({reportNotifications.length})
         </button>
-
       </div>
 
-      {/* ===== Loading ===== */}
-
-      {loading && (
-        <div className="text-slate-500">
-          Loading notifications...
-        </div>
-      )}
-
-      {/* ===== Notification List ===== */}
-
-      {!loading && currentList.length === 0 && (
-        <div className="bg-white rounded-xl shadow p-6 text-slate-500">
-          No notifications
-        </div>
-      )}
-
-      {!loading && currentList.length > 0 && (
-        <div className="space-y-4">
-
-          {currentList.map((n) => (
-            <div
-              key={n._id}
-              onClick={() => handleClick(n)}
-              className={`bg-white rounded-xl shadow p-5 flex justify-between items-center hover:shadow-md transition cursor-pointer ${
-                !n.isRead ? "border-l-4 border-indigo-500" : ""
-              }`}
-            >
-
-              <div>
-                <div className="font-semibold">
-                  {n.title}
-                </div>
-
-                <div className="text-sm text-slate-600">
-                  {n.message}
-                </div>
-
-                <div className="text-xs text-slate-400 mt-1">
+      {/* Content */}
+      {loading ? (
+        <div>Loading...</div>
+      ) : paginatedList.length === 0 ? (
+        <div>No notifications</div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {paginatedList.map((n) => (
+              <div
+                key={n._id}
+                onClick={() => handleClick(n)}
+                className={`p-4 bg-white rounded shadow cursor-pointer ${
+                  !n.isRead ? "border-l-4 border-indigo-500" : ""
+                }`}
+              >
+                <div className="font-semibold">{n.title}</div>
+                <div className="text-sm">{n.message}</div>
+                <div className="text-xs text-gray-400">
                   {new Date(n.createdAt).toLocaleString()}
                 </div>
               </div>
+            ))}
+          </div>
 
-              {!n.isRead && (
-                <div className="text-xs text-indigo-600 font-medium">
-                  New
-                </div>
-              )}
+          {/* Pagination */}
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Prev
+            </button>
 
-            </div>
-          ))}
+            <span>
+              Page {page} / {totalPages || 1}
+            </span>
 
-        </div>
+            <button
+              onClick={() =>
+                setPage((p) => (p < totalPages ? p + 1 : p))
+              }
+              disabled={page >= totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
-
     </div>
   );
 }

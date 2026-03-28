@@ -55,7 +55,13 @@ function ReportPage() {
       alert("Gửi khiếu nại thành công");
       navigate("/my-order-list");
     } catch (err) {
-      alert(err?.response?.data?.message || "Gửi report thất bại");
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || "Gửi report thất bại";
+      if (status === 409) {
+        alert(msg);
+        return;
+      }
+      alert(msg);
     }
   };
 

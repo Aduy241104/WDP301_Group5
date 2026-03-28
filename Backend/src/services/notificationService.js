@@ -26,7 +26,9 @@ export const createOrderStatusNotification = async ({
       userId,
       type: "order_status",
       title: "Bạn có đơn hàng mới",
-      message: statusMessages[status] || `Trạng thái đơn ${orderCode} đã được cập nhật`,
+      message:
+        statusMessages[status] ||
+        `Trạng thái đơn ${orderCode} đã được cập nhật`,
 
       orderId,
       targetRole,
@@ -49,15 +51,13 @@ export const createOrderStatusNotification = async ({
 | Khi admin xử lý report → gửi thông báo cho user/seller
 */
 
-export const createReportResultNotification = async ({
+export const createProductReportNotification = async ({
   userId,
   reportId,
   reportCode,
-  targetType,
-  targetName,
+  productName,
   reason,
   description,
-  targetRole,
 }) => {
   try {
     await Notification.create({
@@ -65,23 +65,22 @@ export const createReportResultNotification = async ({
       type: "report_result",
       title: "Sản phẩm của bạn bị báo cáo",
 
-      message: `${targetType === "product" ? "Sản phẩm" : "Shop"} "${targetName}" đã bị người dùng báo cáo`,
+      message: `Sản phẩm "${productName}" đã bị người dùng báo cáo`,
 
       reportId,
-      targetRole,
+      targetRole: "seller",
 
       data: {
         reportCode,
-        targetType,
-        targetName,
+        targetType: "product",
+        targetName: productName,
         reason,
         description,
-
-         url: `/seller/reports/${reportId}`,
+        url: `/seller/reports/${reportId}`,
       },
     });
   } catch (err) {
-    console.error("CREATE_REPORT_NOTIFICATION_ERROR:", err);
+    console.error("CREATE_PRODUCT_REPORT_NOTIFICATION_ERROR:", err);
   }
 };
 /*
@@ -140,5 +139,38 @@ export const createSystemBroadcastNotification = async ({
     await Notification.insertMany(notifications);
   } catch (err) {
     console.error("SYSTEM_BROADCAST_NOTIFICATION_ERROR:", err);
+  }
+};
+
+export const createShopReportNotification = async ({
+  userId,
+  reportId,
+  reportCode,
+  shopName,
+  reason,
+  description,
+}) => {
+  try {
+    await Notification.create({
+      userId,
+      type: "report_result",
+      title: "Shop của bạn bị báo cáo",
+
+      message: `Shop đã bị người dùng báo cáo`,
+
+      reportId,
+      targetRole: "seller",
+
+      data: {
+        reportCode,
+        targetType: "shop",
+        targetName: shopName,
+        reason,
+        description,
+        url: `/seller/reports/${reportId}`,
+      },
+    });
+  } catch (err) {
+    console.error("CREATE_SHOP_REPORT_NOTIFICATION_ERROR:", err);
   }
 };

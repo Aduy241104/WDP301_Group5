@@ -10,6 +10,7 @@ const OrderItemSchema = new Schema(
         productName: { type: String, required: true },
         variantLabel: { type: String, default: "" },
 
+        isReviewed: { type: Boolean, default: false },
         price: { type: Number, required: true, min: 0 },
         quantity: { type: Number, required: true, min: 1 },
     },

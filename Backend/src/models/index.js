@@ -18,3 +18,4 @@ export { Banner } from "./Banner.js";
 export { Report } from "./Report.js";
 export { OtpCode } from "./OtpCode.js";
 export { OrderAddressSnapshot } from "./OrderAddressSnapshot.js";
+export { SellerEmailLog } from "./SellerEmailLog.js";
