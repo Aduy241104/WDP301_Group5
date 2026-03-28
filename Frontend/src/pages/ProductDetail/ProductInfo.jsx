@@ -209,6 +209,14 @@ export default function ProductInfo({ product, currentPrice }) {
 
                 {/* Tabs Details */ }
                 <div className="mt-10 grid grid-cols-1 gap-8 border-t border-slate-100 pt-8">
+
+                    <div>
+                        <div className="space-y-1">
+                            <span>
+                                <span className="font-bold">Danh mục sản phẩm:</span> { product.category[0].name }
+                            </span>
+                        </div>
+                    </div>
                     <div>
                         <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
                             <span className="w-1 h-6 bg-blue-600 rounded-full"></span>
