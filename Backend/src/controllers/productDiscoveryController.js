@@ -327,3 +327,111 @@ export const getSearchedProducts = async (req, res) => {
         return res.status(500).json({ success: false, message: "Lỗi Server nội bộ" });
     }
 };
+export const getProductsByIds = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                message: "ids must be a non-empty array"
+            });
+        }
+
+        const objectIds = ids
+            .filter(id => mongoose.Types.ObjectId.isValid(id))
+            .map(id => new mongoose.Types.ObjectId(id));
+
+        const pipeline = [
+            {
+                $match: {
+                    _id: { $in: objectIds },
+                    status: "approved",
+                    activeStatus: "active",
+                    isDeleted: false,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "shops",
+                    localField: "shopId",
+                    foreignField: "_id",
+                    as: "shop",
+                    pipeline: [
+                        {
+                            $match: {
+                                status: "approved",
+                                isBlockedByAdmin: false,
+                                isDeleted: false,
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                name: 1,
+                                avatar: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            { $unwind: "$shop" },
+
+            {
+                $lookup: {
+                    from: "categoryschemas",
+                    localField: "categorySchemaId",
+                    foreignField: "_id",
+                    as: "productCategory",
+                    pipeline: [
+                        {
+                            $project: {
+                                _id: 1,
+                                name: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+
+            // 🔥 giữ đúng thứ tự recently viewed
+            {
+                $addFields: {
+                    order: { $indexOfArray: [objectIds, "$_id"] },
+                },
+            },
+            { $sort: { order: 1 } },
+
+            {
+                $facet: {
+                    items: [
+                        {
+                            $project: {
+                                _id: 1,
+                                name: 1,
+                                slug: 1,
+                                images: 1,
+                                defaultPrice: 1,
+                                ratingAvg: 1,
+                                totalSale: 1,
+                                shop: 1,
+                                productCategory: 1,
+                            },
+                        },
+                    ],
+                    totalCount: [{ $count: "count" }],
+                },
+            },
+        ];
+
+        const [result] = await Product.aggregate(pipeline);
+
+        res.json(result);
+
+    } catch (error) {
+        console.error("GET PRODUCTS BY IDS ERROR:", error);
+        res.status(500).json({
+            message: "Server error"
+        });
+    }
+};

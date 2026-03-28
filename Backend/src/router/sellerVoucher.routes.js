@@ -4,6 +4,7 @@ import {
     createShopVoucher,
     deleteShopVoucher,
     getShopVoucherList,
+    getShopVoucherDetail,
     updateShopVoucher,
 } from "../controllers/sellerVoucherController.js";
 
@@ -13,6 +14,7 @@ router.use(authenticationMiddleware, sellerMiddleware);
 
 router.get("/", getShopVoucherList);
 router.post("/", createShopVoucher);
+router.get("/:voucherId", getShopVoucherDetail);
 router.put("/:voucherId", updateShopVoucher);
 router.delete("/:voucherId", deleteShopVoucher);
 

@@ -761,7 +761,7 @@ async function seed() {
         updatedAt: now(),
     });
 
-    // Voucher
+    // Voucher (shop - percent)
     const voucher = await Voucher.create({
         scope: "shop",
         shopId: shop._id,
@@ -772,13 +772,54 @@ async function seed() {
         discountValue: 10,
         minOrderValue: 50000,
         maxDiscountValue: 30000,
-        startAt: daysFromNow(-1),
+        startAt: now(),
         endAt: daysFromNow(7),
         usageLimitTotal: 1000,
         usedCount: 0,
         usageLimitPerUser: 3,
         createdBy: seller._id,
         createdByRole: "seller",
+    });
+
+    // Voucher (shop - fixed)
+    await Voucher.create({
+        scope: "shop",
+        shopId: shop._id,
+        code: "FIX20K",
+        name: "Giảm 20.000đ",
+        description: "Voucher fixed demo",
+        discountType: "fixed",
+        discountValue: 20000,
+        minOrderValue: 60000, // discountValue < minOrderValue
+        maxDiscountValue: 0,
+        startAt: now(),
+        endAt: daysFromNow(7),
+        usageLimitTotal: 200,
+        usedCount: 0,
+        usageLimitPerUser: 1,
+        createdBy: seller._id,
+        createdByRole: "seller",
+    });
+
+    // Voucher (system - ship)
+    await Voucher.create({
+        scope: "system",
+        shopId: null,
+        code: "FREESHIP30",
+        name: "Freeship 30.000đ",
+        description: "System ship voucher demo",
+        discountType: "ship",
+        discountValue: 30000,
+        minOrderValue: 100000,
+        maxDiscountValue: 30000,
+        startAt: now(),
+        endAt: daysFromNow(10),
+        usageLimitTotal: 1000,
+        usedCount: 0,
+        usageLimitPerUser: 1,
+        createdBy: admin._id,
+        createdByRole: "admin",
+        isActive: true,
     });
 
     // Order + Snapshots

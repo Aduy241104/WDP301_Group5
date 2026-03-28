@@ -104,3 +104,34 @@ export const deleteBanner = async (req, res) => {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error." });
   }
 };
+
+export const getHomeBanners = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Định nghĩa các vị trí banner muốn lấy cho trang Home
+    const positions = ["home_top", "home_mid", "home_popup"];
+
+    const banners = await Banner.find({
+      shopId: null,                   // Chỉ lấy banner hệ thống
+      isDeleted: false,               // Chưa bị xóa
+      position: { $in: positions },   // Nằm trong danh sách các vị trí Home
+      startAt: { $lte: now },         // Đã đến giờ hiển thị
+      endAt: { $gte: now }            // Chưa hết hạn
+    })
+      .sort({ priority: -1, createdAt: -1 }) // Ưu tiên priority cao nhất
+      .select("-isDeleted -deletedAt -deletedBy -updatedBy -createdBy")
+      .lean();
+
+    return res.status(StatusCodes.OK).json({
+      message: "Get all home banners success",
+      count: banners.length,
+      banners // Tất cả nằm chung trong 1 mảng này
+    });
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Server error",
+      error: err?.message || null,
+    });
+  }
+};

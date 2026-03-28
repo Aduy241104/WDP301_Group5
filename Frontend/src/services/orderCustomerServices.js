@@ -47,10 +47,13 @@ export const placeOrderAPI = async (data) => {
     return response.data;
 }
 
-export const getMyOrderListAPI = async (page, limit, status) => {
+export const getMyOrderListAPI = async (page, limit, status, q = "") => {
     const response = await axiosInstance.get("/api/order/my-orders", {
         params: {
-            page, limit, status
+            page,
+            limit,
+            status,
+            q: q.trim() // Thêm tham số tìm kiếm vào đây
         }
     });
     return response.data;

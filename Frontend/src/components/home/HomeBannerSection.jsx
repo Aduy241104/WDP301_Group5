@@ -1,96 +1,122 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+// Import Swiper React components và styles
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
 
-export default function HomeBannerSection({ banners = [] }) {
+// Import API service (Đảm bảo bạn đã export hàm này ở file service)
+import { getAllHomeBannersAPI } from "../../services/bannerService";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+
+export default function HomeBannerSection() {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Gọi API trực tiếp trong component
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        setLoading(true);
+        const res = await getAllHomeBannersAPI();
+        // Giả sử API trả về { banners: [...] }
+        setBanners(res.banners || []);
+      } catch (error) {
+        console.error("Lỗi khi lấy banner:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+  // 1. Trạng thái đang tải (Skeleton)
+  if (loading) {
+    return (
+      <section className="mt-4">
+        <div className="h-[200px] sm:h-[350px] lg:h-[400px] w-full rounded-3xl bg-slate-200 animate-pulse flex items-center justify-center text-slate-400">
+          <span className="text-sm font-medium">Đang tải ưu đãi...</span>
+        </div>
+      </section>
+    );
+  }
+
+  // 2. Trạng thái không có dữ liệu
+  if (banners.length === 0) {
+    return null; // Hoặc hiển thị một banner mặc định (static)
+  }
+
   return (
-    <section className="mt-4">
-      {banners.length === 0 ? (
-        <div className="rounded-3xl bg-white border border-slate-100 shadow-sm p-6 sm:p-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-xs font-semibold">
-                UniTrade • Discovery
-              </p>
-              <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900">
-                
-              </h1>
-              <p className="mt-2 text-slate-500 max-w-xl">
-                Khám phá sản phẩm bán chạy, ưu đãi, và gợi ý dành riêng cho bạn.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <button className="px-5 py-3 rounded-2xl bg-[rgb(119,226,242)] text-slate-900 font-bold hover:opacity-90 transition">
-                  Khám phá ngay
-                </button>
-                <button className="px-5 py-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition font-semibold">
-                  Tìm voucher
-                </button>
-              </div>
-            </div>
-
-            <div className="w-full sm:w-[320px]">
-              <div className="rounded-3xl border border-slate-100 bg-sky-50 p-6">
-                <div className="text-sm font-semibold text-slate-800">
-                  Ưu tiên hôm nay
-                </div>
-                <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                  <li>🔥 Top sale cập nhật liên tục</li>
-                  <li>⭐ Đánh giá & shop uy tín</li>
-                  <li>📦 Mua nhanh, theo dõi đơn dễ</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Cột trái: Banner LỚN (chiếm 2/3) */}
-          {banners[0] && (
-            <div className="lg:col-span-2 rounded-3xl overflow-hidden bg-white border shadow-sm h-[300px]">
+    <section className="mt-4 group relative">
+      <Swiper
+        spaceBetween={ 15 }
+        slidesPerView={ 1 }
+        loop={ banners.length > 1 }
+        autoplay={ {
+          delay: 4000,
+          disableOnInteraction: false,
+        } }
+        pagination={ {
+          clickable: true,
+          dynamicBullets: true,
+        } }
+        navigation={ true }
+        modules={ [Autoplay, Pagination, Navigation] }
+        className="rounded-3xl border border-slate-100 shadow-sm h-[200px] sm:h-[350px] lg:h-[400px] bg-white"
+      >
+        { banners.map((banner) => (
+          <SwiperSlide key={ banner._id }>
+            <a
+              href={ banner.linkUrl || "#" }
+              className="block w-full h-full relative overflow-hidden"
+            >
               <img
-                src={
-                  banners[0]?.image ||
-                  "https://via.placeholder.com/1200x500?text=Banner Lớn"
-                }
-                alt={banners[0]?.title || "Banner Lớn"}
-                className="w-full h-full object-cover"
+                src={ banner.imageUrl }
+                alt={ banner.title }
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
-              <div className="p-4">
-                <p className="font-bold text-slate-900 text-lg">
-                  {banners[0]?.title || "Banner Lớn"}
-                </p>
-                <p className="text-sm text-slate-500 mt-1 line-clamp-2">
-                  {banners[0]?.subtitle || ""}
-                </p>
-              </div>
-            </div>
-          )}
 
-          {/* Cột phải: 2 banner nhỏ xếp dọc */}
-          <div className="flex flex-col gap-4">
-            {banners.slice(1, 3).map((b, idx) => (
-              <div
-                key={b?._id || idx}
-                className="rounded-3xl overflow-hidden bg-white border shadow-sm h-[140px]"
-              >
-                <img
-                  src={
-                    b?.image ||
-                    "https://via.placeholder.com/600x300?text=Banner Nhỏ"
-                  }
-                  alt={b?.title || "Banner Nhỏ"}
-                  className="w-full h-full object-cover"
-                />
-                <div className="p-3">
-                  <p className="font-semibold text-slate-800 text-sm">
-                    {b?.title || "Banner Nhỏ"}
-                  </p>
-                </div>
+              {/* Overlay tiêu đề */ }
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 sm:p-10">
+                <h3 className="text-white text-lg sm:text-2xl font-bold drop-shadow-md transform transition-all duration-500 translate-y-0 group-hover:-translate-y-2">
+                  { banner.title }
+                </h3>
+                <p className="text-white/80 text-xs sm:text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  Nhấn để xem chi tiết
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </a>
+          </SwiperSlide>
+        )) }
+      </Swiper>
+
+      {/* Tùy chỉnh CSS cho các nút Navigation thông qua class "group" */ }
+      <style jsx global>{ `
+        .swiper-button-next, .swiper-button-prev {
+          color: white !important;
+          background: rgba(0, 0, 0, 0.2);
+          width: 40px !important;
+          height: 40px !important;
+          border-radius: 50%;
+          opacity: 0;
+          transition: all 0.3s ease;
+        }
+        .swiper-button-next:after, .swiper-button-prev:after {
+          font-size: 16px !important;
+        }
+        .group:hover .swiper-button-next,
+        .group:hover .swiper-button-prev {
+          opacity: 1;
+        }
+        .swiper-pagination-bullet-active {
+          background: #77e2f2 !important;
+          width: 20px !important;
+          border-radius: 4px !important;
+        }
+      `}</style>
     </section>
   );
-
-
 }
